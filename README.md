@@ -1,15 +1,21 @@
-# DsoFramer ActiveX Control
-Exact from DsoFramer_KB311765_x86.exe, and re-format the source codes for more easily and clearly to read.
+# DSOFramer ActiveX Control
 
-# 中文说明
-## DsoFramer ActiveX 控件
-从 DsoFramer_KB311765_x86.exe 里解压出来的，我把源代码格式化了一下，以便阅读和修改。
+This is slight code quality and compatibility rework of Microsoft's Office-embedding sample component "DSOFramer" (KB311765) based on [shines77](https://github.com/shines77/DsoFramer)'s work.
 
-DsoFramer_KB311765_x86.exe 是 DSOFramer 控件的最新版（截止到2014年3月），网上没有比这个更新的了。微软官方开源的代码，已经不再更新了，下载连接也移除了，实际的最后更新时间大约是在2005年左右，所以相对来说，比较老。内嵌很方便，基本上能满足大部分需求，可以打开office 2007的各种文档，好像Office 2010也可以，但是我没试过。
+Project and sources are tested and compilable with Visual Studio 2022 (folder `Sources_VC2022`). Recommendations of VC2022 and Copilot have been followed to get rid of code quality warnings as possible. Also, further formatting for better readibility is done. Slight refactoring steps have begun like replacing `wsprintf()` with secure `StringCbPrintf()`. I aspire to attempt a full Unicode conversion.
 
-## 其他说明
+The original DSOFramer has since been deprecated and retired by Microsoft and is no longer available for download. Take a look at the `Microsoft` folder what could have been recovered/preserved from original sources.
 
-1.  原来的源码里Tab和空格都用了，所以我统一把tab字符转换为空格了（也是无奈）。因为有一些格式化是手工完成的，用VC自带的或其他软件格式化都有可能会有问题。
-2.  .\Source_2008 目录下的是格式化后的 VS 2008 的工程，已经编译通过，你也可以转换为更高的VS版本，原来的工程好像是 VS 2005 的。
-3.  .\Source 目录是原始的代码和工程，你可以跟 .\Source_2008 对比一下，看看格式化都变动了什么。
-4.  Enjoy it!
+It is still, and most interestingly, despite all shortcomings there may be, working with Microsoft Office 365 (including Office LTSC 2024) - but **be aware** that your embedding application has to be **DPI-aware** lest Office applications display in a separate window:
+
+* <https://stackoverflow.com/questions/72477616/office-365-word-cant-be-embed-in-place-inside-windows-native-application>
+* <https://learn.microsoft.com/en-us/windows/win32/hidpi/setting-the-default-dpi-awareness-for-a-process>
+
+For a quick fix/proof-of-concept you can use [Resource Hacker](https://www.angusj.com/resourcehacker) to edit your executable's manifest resource according to the Microsoft sample.
+
+## Instructions
+
+* See `Sources_VC2022` for the updated/work-in-progress sources.
+* See `Sources` for the original Microsoft sources for comparison.
+* See `Microsoft` for original binaries recovered before they were removed from the original pages.
+* See `eula.txt` about what Microsoft originally said about licensing and liabilities.
