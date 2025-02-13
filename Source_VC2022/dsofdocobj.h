@@ -17,8 +17,7 @@
 *
 ***************************************************************************/
 
-#ifndef DS_DSOFDOCOBJ_H
-#define DS_DSOFDOCOBJ_H
+#pragma once
 
 ////////////////////////////////////////////////////////////////////
 // Declarations for Interfaces used in DocObject Containment
@@ -353,5 +352,3 @@ private:
     unsigned int         m_fAttemptPptPreview:1;
     unsigned int         m_fInPptSlideShow:1;
 };
-
-#endif // DS_DSOFDOCOBJ_H

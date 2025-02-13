@@ -17,8 +17,7 @@
  *
  ***************************************************************************/
 
-#ifndef DS_UTILITIES_H
-#define DS_UTILITIES_H
+#pragma once
 
 #include <commdlg.h>
 #include <oledlg.h>
@@ -238,5 +237,3 @@ friend class X##localClass;
         METHOD_PROLOGUE(theClass, localClass) \
         return pThis->QueryInterface(iid, ppvObj); \
     }
-
-#endif // DS_UTILITIES_H

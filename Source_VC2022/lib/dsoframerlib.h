@@ -3,25 +3,24 @@
 /* this ALWAYS GENERATED file contains the definitions for the interfaces */
 
 
- /* File created by MIDL compiler version 7.00.0500 */
-/* at Fri Dec 09 15:51:58 2016
+ /* File created by MIDL compiler version 8.01.0628 */
+/* at Tue Jan 19 04:14:07 2038
  */
-/* Compiler settings for .\lib\dsoframer.idl:
-    Oicf, W1, Zp8, env=Win32 (32b run)
+/* Compiler settings for lib\dsoframer.idl:
+    Oicf, W1, Zp8, env=Win32 (32b run), target_arch=X86 8.01.0628 
     protocol : dce , ms_ext, c_ext, robust
     error checks: allocation ref bounds_check enum stub_data 
     VC __declspec() decoration level: 
          __declspec(uuid()), __declspec(selectany), __declspec(novtable)
          DECLSPEC_UUID(), MIDL_INTERFACE()
 */
-//@@MIDL_FILE_HEADING(  )
+/* @@MIDL_FILE_HEADING(  ) */
 
-#pragma warning( disable: 4049 )  /* more than 64k source lines */
 
 
 /* verify that the <rpcndr.h> version is high enough to compile this file*/
 #ifndef __REQUIRED_RPCNDR_H_VERSION__
-#define __REQUIRED_RPCNDR_H_VERSION__ 475
+#define __REQUIRED_RPCNDR_H_VERSION__ 500
 #endif
 
 #include "rpc.h"
@@ -29,7 +28,7 @@
 
 #ifndef __RPCNDR_H_VERSION__
 #error this stub requires an updated version of <rpcndr.h>
-#endif // __RPCNDR_H_VERSION__
+#endif /* __RPCNDR_H_VERSION__ */
 
 
 #ifndef __dsoframerlib_h__
@@ -39,17 +38,27 @@
 #pragma once
 #endif
 
+#ifndef DECLSPEC_XFGVIRT
+#if defined(_CONTROL_FLOW_GUARD_XFG)
+#define DECLSPEC_XFGVIRT(base, func) __declspec(xfg_virtual(base, func))
+#else
+#define DECLSPEC_XFGVIRT(base, func)
+#endif
+#endif
+
 /* Forward Declarations */ 
 
 #ifndef ___FramerControl_FWD_DEFINED__
 #define ___FramerControl_FWD_DEFINED__
 typedef interface _FramerControl _FramerControl;
+
 #endif 	/* ___FramerControl_FWD_DEFINED__ */
 
 
 #ifndef ___DFramerCtlEvents_FWD_DEFINED__
 #define ___DFramerCtlEvents_FWD_DEFINED__
 typedef interface _DFramerCtlEvents _DFramerCtlEvents;
+
 #endif 	/* ___DFramerCtlEvents_FWD_DEFINED__ */
 
 
@@ -79,50 +88,55 @@ extern "C"{
 
 typedef 
 enum dsoBorderStyle
-    {	dsoBorderNone	= 0,
-	dsoBorderFlat	= ( dsoBorderNone + 1 ) ,
-	dsoBorder3D	= ( dsoBorderFlat + 1 ) ,
-	dsoBorder3DThin	= ( dsoBorder3D + 1 ) 
+    {
+        dsoBorderNone	= 0,
+        dsoBorderFlat	= ( dsoBorderNone + 1 ) ,
+        dsoBorder3D	= ( dsoBorderFlat + 1 ) ,
+        dsoBorder3DThin	= ( dsoBorder3D + 1 ) 
     } 	dsoBorderStyle;
 
 typedef 
 enum dsoShowDialogType
-    {	dsoDialogNew	= 0,
-	dsoDialogOpen	= ( dsoDialogNew + 1 ) ,
-	dsoDialogSave	= ( dsoDialogOpen + 1 ) ,
-	dsoDialogSaveCopy	= ( dsoDialogSave + 1 ) ,
-	dsoDialogPrint	= ( dsoDialogSaveCopy + 1 ) ,
-	dsoDialogPageSetup	= ( dsoDialogPrint + 1 ) ,
-	dsoDialogProperties	= ( dsoDialogPageSetup + 1 ) 
+    {
+        dsoDialogNew	= 0,
+        dsoDialogOpen	= ( dsoDialogNew + 1 ) ,
+        dsoDialogSave	= ( dsoDialogOpen + 1 ) ,
+        dsoDialogSaveCopy	= ( dsoDialogSave + 1 ) ,
+        dsoDialogPrint	= ( dsoDialogSaveCopy + 1 ) ,
+        dsoDialogPageSetup	= ( dsoDialogPrint + 1 ) ,
+        dsoDialogProperties	= ( dsoDialogPageSetup + 1 ) 
     } 	dsoShowDialogType;
 
 typedef 
 enum dsoFileCommandType
-    {	dsoFileNew	= 0,
-	dsoFileOpen	= ( dsoFileNew + 1 ) ,
-	dsoFileClose	= ( dsoFileOpen + 1 ) ,
-	dsoFileSave	= ( dsoFileClose + 1 ) ,
-	dsoFileSaveAs	= ( dsoFileSave + 1 ) ,
-	dsoFilePrint	= ( dsoFileSaveAs + 1 ) ,
-	dsoFilePageSetup	= ( dsoFilePrint + 1 ) ,
-	dsoFileProperties	= ( dsoFilePageSetup + 1 ) ,
-	dsoFilePrintPreview	= ( dsoFileProperties + 1 ) 
+    {
+        dsoFileNew	= 0,
+        dsoFileOpen	= ( dsoFileNew + 1 ) ,
+        dsoFileClose	= ( dsoFileOpen + 1 ) ,
+        dsoFileSave	= ( dsoFileClose + 1 ) ,
+        dsoFileSaveAs	= ( dsoFileSave + 1 ) ,
+        dsoFilePrint	= ( dsoFileSaveAs + 1 ) ,
+        dsoFilePageSetup	= ( dsoFilePrint + 1 ) ,
+        dsoFileProperties	= ( dsoFilePageSetup + 1 ) ,
+        dsoFilePrintPreview	= ( dsoFileProperties + 1 ) 
     } 	dsoFileCommandType;
 
 typedef 
 enum dsoFrameHookPolicy
-    {	dsoNormalBehavior	= 0,
-	dsoSetOnFirstOpen	= ( dsoNormalBehavior + 1 ) ,
-	dsoResetNow	= ( dsoSetOnFirstOpen + 1 ) ,
-	dsoDisableHook	= 0xffffffff
+    {
+        dsoNormalBehavior	= 0,
+        dsoSetOnFirstOpen	= ( dsoNormalBehavior + 1 ) ,
+        dsoResetNow	= ( dsoSetOnFirstOpen + 1 ) ,
+        dsoDisableHook	= 0xffffffff
     } 	dsoFrameHookPolicy;
 
 typedef 
 enum dsoActivationPolicy
-    {	dsoDefaultBehavior	= 0,
-	dsoKeepUIActiveOnAppDeactive	= 0x1,
-	dsoCompDeactivateOnLostFocus	= 0x2,
-	dsoIPDeactivateOnCompDeactive	= 0x4
+    {
+        dsoDefaultBehavior	= 0,
+        dsoKeepUIActiveOnAppDeactive	= 0x1,
+        dsoCompDeactivateOnLostFocus	= 0x2,
+        dsoIPDeactivateOnCompDeactive	= 0x4
     } 	dsoActivationPolicy;
 
 
@@ -322,34 +336,41 @@ DEFINE_GUID(IID__FramerControl,0x00460181,0x9E5E,0x11d5,0xB7,0xC8,0xB8,0x26,0x90
         
     };
     
+    
 #else 	/* C style interface */
 
     typedef struct _FramerControlVtbl
     {
         BEGIN_INTERFACE
         
+        DECLSPEC_XFGVIRT(IUnknown, QueryInterface)
         HRESULT ( STDMETHODCALLTYPE *QueryInterface )( 
             _FramerControl * This,
             /* [in] */ REFIID riid,
-            /* [iid_is][out] */ 
-            __RPC__deref_out  void **ppvObject);
+            /* [annotation][iid_is][out] */ 
+            _COM_Outptr_  void **ppvObject);
         
+        DECLSPEC_XFGVIRT(IUnknown, AddRef)
         ULONG ( STDMETHODCALLTYPE *AddRef )( 
             _FramerControl * This);
         
+        DECLSPEC_XFGVIRT(IUnknown, Release)
         ULONG ( STDMETHODCALLTYPE *Release )( 
             _FramerControl * This);
         
+        DECLSPEC_XFGVIRT(IDispatch, GetTypeInfoCount)
         HRESULT ( STDMETHODCALLTYPE *GetTypeInfoCount )( 
             _FramerControl * This,
             /* [out] */ UINT *pctinfo);
         
+        DECLSPEC_XFGVIRT(IDispatch, GetTypeInfo)
         HRESULT ( STDMETHODCALLTYPE *GetTypeInfo )( 
             _FramerControl * This,
             /* [in] */ UINT iTInfo,
             /* [in] */ LCID lcid,
             /* [out] */ ITypeInfo **ppTInfo);
         
+        DECLSPEC_XFGVIRT(IDispatch, GetIDsOfNames)
         HRESULT ( STDMETHODCALLTYPE *GetIDsOfNames )( 
             _FramerControl * This,
             /* [in] */ REFIID riid,
@@ -358,28 +379,41 @@ DEFINE_GUID(IID__FramerControl,0x00460181,0x9E5E,0x11d5,0xB7,0xC8,0xB8,0x26,0x90
             /* [in] */ LCID lcid,
             /* [size_is][out] */ DISPID *rgDispId);
         
+        DECLSPEC_XFGVIRT(IDispatch, Invoke)
         /* [local] */ HRESULT ( STDMETHODCALLTYPE *Invoke )( 
             _FramerControl * This,
-            /* [in] */ DISPID dispIdMember,
-            /* [in] */ REFIID riid,
-            /* [in] */ LCID lcid,
-            /* [in] */ WORD wFlags,
-            /* [out][in] */ DISPPARAMS *pDispParams,
-            /* [out] */ VARIANT *pVarResult,
-            /* [out] */ EXCEPINFO *pExcepInfo,
-            /* [out] */ UINT *puArgErr);
+            /* [annotation][in] */ 
+            _In_  DISPID dispIdMember,
+            /* [annotation][in] */ 
+            _In_  REFIID riid,
+            /* [annotation][in] */ 
+            _In_  LCID lcid,
+            /* [annotation][in] */ 
+            _In_  WORD wFlags,
+            /* [annotation][out][in] */ 
+            _In_  DISPPARAMS *pDispParams,
+            /* [annotation][out] */ 
+            _Out_opt_  VARIANT *pVarResult,
+            /* [annotation][out] */ 
+            _Out_opt_  EXCEPINFO *pExcepInfo,
+            /* [annotation][out] */ 
+            _Out_opt_  UINT *puArgErr);
         
+        DECLSPEC_XFGVIRT(_FramerControl, Activate)
         /* [helpstring][id] */ HRESULT ( STDMETHODCALLTYPE *Activate )( 
             _FramerControl * This);
         
+        DECLSPEC_XFGVIRT(_FramerControl, get_ActiveDocument)
         /* [helpstring][id][propget] */ HRESULT ( STDMETHODCALLTYPE *get_ActiveDocument )( 
             _FramerControl * This,
             /* [retval][out] */ IDispatch **ppdisp);
         
+        DECLSPEC_XFGVIRT(_FramerControl, CreateNew)
         /* [helpstring][id] */ HRESULT ( STDMETHODCALLTYPE *CreateNew )( 
             _FramerControl * This,
             /* [in] */ BSTR ProgIdOrTemplate);
         
+        DECLSPEC_XFGVIRT(_FramerControl, Open)
         /* [helpstring][id] */ HRESULT ( STDMETHODCALLTYPE *Open )( 
             _FramerControl * This,
             /* [in] */ VARIANT Document,
@@ -388,6 +422,7 @@ DEFINE_GUID(IID__FramerControl,0x00460181,0x9E5E,0x11d5,0xB7,0xC8,0xB8,0x26,0x90
             /* [optional][in] */ VARIANT WebUsername,
             /* [optional][in] */ VARIANT WebPassword);
         
+        DECLSPEC_XFGVIRT(_FramerControl, Save)
         /* [helpstring][id] */ HRESULT ( STDMETHODCALLTYPE *Save )( 
             _FramerControl * This,
             /* [optional][in] */ VARIANT SaveAsDocument,
@@ -395,107 +430,133 @@ DEFINE_GUID(IID__FramerControl,0x00460181,0x9E5E,0x11d5,0xB7,0xC8,0xB8,0x26,0x90
             /* [optional][in] */ VARIANT WebUsername,
             /* [optional][in] */ VARIANT WebPassword);
         
+        DECLSPEC_XFGVIRT(_FramerControl, _PrintOutOld)
         /* [hidden][id] */ HRESULT ( STDMETHODCALLTYPE *_PrintOutOld )( 
             _FramerControl * This,
             /* [optional][in] */ VARIANT PromptToSelectPrinter);
         
+        DECLSPEC_XFGVIRT(_FramerControl, Close)
         /* [helpstring][id] */ HRESULT ( STDMETHODCALLTYPE *Close )( 
             _FramerControl * This);
         
+        DECLSPEC_XFGVIRT(_FramerControl, put_Caption)
         /* [helpstring][id][propput] */ HRESULT ( STDMETHODCALLTYPE *put_Caption )( 
             _FramerControl * This,
             /* [in] */ BSTR bstr);
         
+        DECLSPEC_XFGVIRT(_FramerControl, get_Caption)
         /* [id][propget] */ HRESULT ( STDMETHODCALLTYPE *get_Caption )( 
             _FramerControl * This,
             /* [retval][out] */ BSTR *pbstr);
         
+        DECLSPEC_XFGVIRT(_FramerControl, put_Titlebar)
         /* [helpstring][id][propput] */ HRESULT ( STDMETHODCALLTYPE *put_Titlebar )( 
             _FramerControl * This,
             /* [in] */ VARIANT_BOOL vbool);
         
+        DECLSPEC_XFGVIRT(_FramerControl, get_Titlebar)
         /* [id][propget] */ HRESULT ( STDMETHODCALLTYPE *get_Titlebar )( 
             _FramerControl * This,
             /* [retval][out] */ VARIANT_BOOL *pbool);
         
+        DECLSPEC_XFGVIRT(_FramerControl, put_Toolbars)
         /* [helpstring][id][propput] */ HRESULT ( STDMETHODCALLTYPE *put_Toolbars )( 
             _FramerControl * This,
             /* [in] */ VARIANT_BOOL vbool);
         
+        DECLSPEC_XFGVIRT(_FramerControl, get_Toolbars)
         /* [id][propget] */ HRESULT ( STDMETHODCALLTYPE *get_Toolbars )( 
             _FramerControl * This,
             /* [retval][out] */ VARIANT_BOOL *pbool);
         
+        DECLSPEC_XFGVIRT(_FramerControl, put_ModalState)
         /* [helpstring][id][nonbrowsable][propput] */ HRESULT ( STDMETHODCALLTYPE *put_ModalState )( 
             _FramerControl * This,
             /* [in] */ VARIANT_BOOL vbool);
         
+        DECLSPEC_XFGVIRT(_FramerControl, get_ModalState)
         /* [id][nonbrowsable][propget] */ HRESULT ( STDMETHODCALLTYPE *get_ModalState )( 
             _FramerControl * This,
             /* [retval][out] */ VARIANT_BOOL *pbool);
         
+        DECLSPEC_XFGVIRT(_FramerControl, ShowDialog)
         /* [helpstring][id] */ HRESULT ( STDMETHODCALLTYPE *ShowDialog )( 
             _FramerControl * This,
             /* [in] */ dsoShowDialogType DlgType);
         
+        DECLSPEC_XFGVIRT(_FramerControl, put_EnableFileCommand)
         /* [helpstring][id][propput] */ HRESULT ( STDMETHODCALLTYPE *put_EnableFileCommand )( 
             _FramerControl * This,
             /* [in] */ dsoFileCommandType Item,
             /* [in] */ VARIANT_BOOL vbool);
         
+        DECLSPEC_XFGVIRT(_FramerControl, get_EnableFileCommand)
         /* [id][propget] */ HRESULT ( STDMETHODCALLTYPE *get_EnableFileCommand )( 
             _FramerControl * This,
             /* [in] */ dsoFileCommandType Item,
             /* [retval][out] */ VARIANT_BOOL *pbool);
         
+        DECLSPEC_XFGVIRT(_FramerControl, put_BorderStyle)
         /* [helpstring][id][propput] */ HRESULT ( STDMETHODCALLTYPE *put_BorderStyle )( 
             _FramerControl * This,
             /* [in] */ dsoBorderStyle style);
         
+        DECLSPEC_XFGVIRT(_FramerControl, get_BorderStyle)
         /* [id][propget] */ HRESULT ( STDMETHODCALLTYPE *get_BorderStyle )( 
             _FramerControl * This,
             /* [retval][out] */ dsoBorderStyle *pstyle);
         
+        DECLSPEC_XFGVIRT(_FramerControl, put_BorderColor)
         /* [helpstring][id][propput] */ HRESULT ( STDMETHODCALLTYPE *put_BorderColor )( 
             _FramerControl * This,
             /* [in] */ /* external definition not present */ OLE_COLOR clr);
         
+        DECLSPEC_XFGVIRT(_FramerControl, get_BorderColor)
         /* [id][propget] */ HRESULT ( STDMETHODCALLTYPE *get_BorderColor )( 
             _FramerControl * This,
             /* [retval][out] */ /* external definition not present */ OLE_COLOR *pclr);
         
+        DECLSPEC_XFGVIRT(_FramerControl, put_BackColor)
         /* [helpstring][id][propput] */ HRESULT ( STDMETHODCALLTYPE *put_BackColor )( 
             _FramerControl * This,
             /* [in] */ /* external definition not present */ OLE_COLOR clr);
         
+        DECLSPEC_XFGVIRT(_FramerControl, get_BackColor)
         /* [id][propget] */ HRESULT ( STDMETHODCALLTYPE *get_BackColor )( 
             _FramerControl * This,
             /* [retval][out] */ /* external definition not present */ OLE_COLOR *pclr);
         
+        DECLSPEC_XFGVIRT(_FramerControl, put_ForeColor)
         /* [helpstring][id][propput] */ HRESULT ( STDMETHODCALLTYPE *put_ForeColor )( 
             _FramerControl * This,
             /* [in] */ /* external definition not present */ OLE_COLOR clr);
         
+        DECLSPEC_XFGVIRT(_FramerControl, get_ForeColor)
         /* [id][propget] */ HRESULT ( STDMETHODCALLTYPE *get_ForeColor )( 
             _FramerControl * This,
             /* [retval][out] */ /* external definition not present */ OLE_COLOR *pclr);
         
+        DECLSPEC_XFGVIRT(_FramerControl, put_TitlebarColor)
         /* [helpstring][id][propput] */ HRESULT ( STDMETHODCALLTYPE *put_TitlebarColor )( 
             _FramerControl * This,
             /* [in] */ /* external definition not present */ OLE_COLOR clr);
         
+        DECLSPEC_XFGVIRT(_FramerControl, get_TitlebarColor)
         /* [id][propget] */ HRESULT ( STDMETHODCALLTYPE *get_TitlebarColor )( 
             _FramerControl * This,
             /* [retval][out] */ /* external definition not present */ OLE_COLOR *pclr);
         
+        DECLSPEC_XFGVIRT(_FramerControl, put_TitlebarTextColor)
         /* [helpstring][id][propput] */ HRESULT ( STDMETHODCALLTYPE *put_TitlebarTextColor )( 
             _FramerControl * This,
             /* [in] */ /* external definition not present */ OLE_COLOR clr);
         
+        DECLSPEC_XFGVIRT(_FramerControl, get_TitlebarTextColor)
         /* [id][propget] */ HRESULT ( STDMETHODCALLTYPE *get_TitlebarTextColor )( 
             _FramerControl * This,
             /* [retval][out] */ /* external definition not present */ OLE_COLOR *pclr);
         
+        DECLSPEC_XFGVIRT(_FramerControl, ExecOleCommand)
         /* [helpstring][id] */ HRESULT ( STDMETHODCALLTYPE *ExecOleCommand )( 
             _FramerControl * This,
             /* [in] */ LONG OLECMDID,
@@ -503,26 +564,32 @@ DEFINE_GUID(IID__FramerControl,0x00460181,0x9E5E,0x11d5,0xB7,0xC8,0xB8,0x26,0x90
             /* [optional][in] */ VARIANT *vInParam,
             /* [optional][out][in] */ VARIANT *vInOutParam);
         
+        DECLSPEC_XFGVIRT(_FramerControl, put_Menubar)
         /* [helpstring][id][propput] */ HRESULT ( STDMETHODCALLTYPE *put_Menubar )( 
             _FramerControl * This,
             /* [in] */ VARIANT_BOOL vbool);
         
+        DECLSPEC_XFGVIRT(_FramerControl, get_Menubar)
         /* [id][propget] */ HRESULT ( STDMETHODCALLTYPE *get_Menubar )( 
             _FramerControl * This,
             /* [retval][out] */ VARIANT_BOOL *pbool);
         
+        DECLSPEC_XFGVIRT(_FramerControl, put_HostName)
         /* [helpstring][id][propput] */ HRESULT ( STDMETHODCALLTYPE *put_HostName )( 
             _FramerControl * This,
             /* [in] */ BSTR bstr);
         
+        DECLSPEC_XFGVIRT(_FramerControl, get_HostName)
         /* [id][propget] */ HRESULT ( STDMETHODCALLTYPE *get_HostName )( 
             _FramerControl * This,
             /* [retval][out] */ BSTR *pbstr);
         
+        DECLSPEC_XFGVIRT(_FramerControl, get_DocumentFullName)
         /* [helpstring][id][propget] */ HRESULT ( STDMETHODCALLTYPE *get_DocumentFullName )( 
             _FramerControl * This,
             /* [retval][out] */ BSTR *pbstr);
         
+        DECLSPEC_XFGVIRT(_FramerControl, PrintOut)
         /* [helpstring][id] */ HRESULT ( STDMETHODCALLTYPE *PrintOut )( 
             _FramerControl * This,
             /* [optional][in] */ VARIANT PromptUser,
@@ -532,70 +599,87 @@ DEFINE_GUID(IID__FramerControl,0x00460181,0x9E5E,0x11d5,0xB7,0xC8,0xB8,0x26,0x90
             /* [optional][in] */ VARIANT ToPage,
             /* [optional][in] */ VARIANT OutputFile);
         
+        DECLSPEC_XFGVIRT(_FramerControl, PrintPreview)
         /* [helpstring][id] */ HRESULT ( STDMETHODCALLTYPE *PrintPreview )( 
             _FramerControl * This);
         
+        DECLSPEC_XFGVIRT(_FramerControl, PrintPreviewExit)
         /* [helpstring][id] */ HRESULT ( STDMETHODCALLTYPE *PrintPreviewExit )( 
             _FramerControl * This);
         
+        DECLSPEC_XFGVIRT(_FramerControl, get_IsReadOnly)
         /* [helpstring][id][propget] */ HRESULT ( STDMETHODCALLTYPE *get_IsReadOnly )( 
             _FramerControl * This,
             /* [retval][out] */ VARIANT_BOOL *pbool);
         
+        DECLSPEC_XFGVIRT(_FramerControl, get_IsDirty)
         /* [helpstring][id][propget] */ HRESULT ( STDMETHODCALLTYPE *get_IsDirty )( 
             _FramerControl * This,
             /* [retval][out] */ VARIANT_BOOL *pbool);
         
+        DECLSPEC_XFGVIRT(_FramerControl, put_LockServer)
         /* [helpstring][id][propput] */ HRESULT ( STDMETHODCALLTYPE *put_LockServer )( 
             _FramerControl * This,
             /* [in] */ VARIANT_BOOL vbool);
         
+        DECLSPEC_XFGVIRT(_FramerControl, get_LockServer)
         /* [id][propget] */ HRESULT ( STDMETHODCALLTYPE *get_LockServer )( 
             _FramerControl * This,
             /* [retval][out] */ VARIANT_BOOL *pvbool);
         
+        DECLSPEC_XFGVIRT(_FramerControl, GetDataObjectContent)
         /* [helpstring][nonbrowsable][id] */ HRESULT ( STDMETHODCALLTYPE *GetDataObjectContent )( 
             _FramerControl * This,
             /* [in] */ VARIANT ClipFormatNameOrNumber,
             /* [retval][out] */ VARIANT *pvResults);
         
+        DECLSPEC_XFGVIRT(_FramerControl, SetDataObjectContent)
         /* [helpstring][nonbrowsable][id] */ HRESULT ( STDMETHODCALLTYPE *SetDataObjectContent )( 
             _FramerControl * This,
             /* [in] */ VARIANT ClipFormatNameOrNumber,
             /* [in] */ VARIANT DataByteArray);
         
+        DECLSPEC_XFGVIRT(_FramerControl, put_ActivationPolicy)
         /* [helpstring][id][propput] */ HRESULT ( STDMETHODCALLTYPE *put_ActivationPolicy )( 
             _FramerControl * This,
             /* [in] */ enum dsoActivationPolicy lPolicy);
         
+        DECLSPEC_XFGVIRT(_FramerControl, get_ActivationPolicy)
         /* [id][propget] */ HRESULT ( STDMETHODCALLTYPE *get_ActivationPolicy )( 
             _FramerControl * This,
             /* [retval][out] */ enum dsoActivationPolicy *plPolicy);
         
+        DECLSPEC_XFGVIRT(_FramerControl, put_FrameHookPolicy)
         /* [helpstring][id][propput] */ HRESULT ( STDMETHODCALLTYPE *put_FrameHookPolicy )( 
             _FramerControl * This,
             /* [in] */ enum dsoFrameHookPolicy lPolicy);
         
+        DECLSPEC_XFGVIRT(_FramerControl, get_FrameHookPolicy)
         /* [id][propget] */ HRESULT ( STDMETHODCALLTYPE *get_FrameHookPolicy )( 
             _FramerControl * This,
             /* [retval][out] */ enum dsoFrameHookPolicy *plPolicy);
         
+        DECLSPEC_XFGVIRT(_FramerControl, put_MenuAccelerators)
         /* [helpstring][id][propput] */ HRESULT ( STDMETHODCALLTYPE *put_MenuAccelerators )( 
             _FramerControl * This,
             /* [in] */ VARIANT_BOOL vbool);
         
+        DECLSPEC_XFGVIRT(_FramerControl, get_MenuAccelerators)
         /* [id][propget] */ HRESULT ( STDMETHODCALLTYPE *get_MenuAccelerators )( 
             _FramerControl * This,
             /* [retval][out] */ VARIANT_BOOL *pvbool);
         
+        DECLSPEC_XFGVIRT(_FramerControl, put_EventsEnabled)
         /* [helpstring][id][nonbrowsable][propput] */ HRESULT ( STDMETHODCALLTYPE *put_EventsEnabled )( 
             _FramerControl * This,
             /* [in] */ VARIANT_BOOL vbool);
         
+        DECLSPEC_XFGVIRT(_FramerControl, get_EventsEnabled)
         /* [id][nonbrowsable][propget] */ HRESULT ( STDMETHODCALLTYPE *get_EventsEnabled )( 
             _FramerControl * This,
             /* [retval][out] */ VARIANT_BOOL *pvbool);
         
+        DECLSPEC_XFGVIRT(_FramerControl, get_DocumentName)
         /* [helpstring][id][propget] */ HRESULT ( STDMETHODCALLTYPE *get_DocumentName )( 
             _FramerControl * This,
             /* [retval][out] */ BSTR *pbstr);
@@ -831,28 +915,34 @@ DEFINE_GUID(DIID__DFramerCtlEvents,0x00460185,0x9E5E,0x11d5,0xB7,0xC8,0xB8,0x26,
     {
         BEGIN_INTERFACE
         
+        DECLSPEC_XFGVIRT(IUnknown, QueryInterface)
         HRESULT ( STDMETHODCALLTYPE *QueryInterface )( 
             _DFramerCtlEvents * This,
             /* [in] */ REFIID riid,
-            /* [iid_is][out] */ 
-            __RPC__deref_out  void **ppvObject);
+            /* [annotation][iid_is][out] */ 
+            _COM_Outptr_  void **ppvObject);
         
+        DECLSPEC_XFGVIRT(IUnknown, AddRef)
         ULONG ( STDMETHODCALLTYPE *AddRef )( 
             _DFramerCtlEvents * This);
         
+        DECLSPEC_XFGVIRT(IUnknown, Release)
         ULONG ( STDMETHODCALLTYPE *Release )( 
             _DFramerCtlEvents * This);
         
+        DECLSPEC_XFGVIRT(IDispatch, GetTypeInfoCount)
         HRESULT ( STDMETHODCALLTYPE *GetTypeInfoCount )( 
             _DFramerCtlEvents * This,
             /* [out] */ UINT *pctinfo);
         
+        DECLSPEC_XFGVIRT(IDispatch, GetTypeInfo)
         HRESULT ( STDMETHODCALLTYPE *GetTypeInfo )( 
             _DFramerCtlEvents * This,
             /* [in] */ UINT iTInfo,
             /* [in] */ LCID lcid,
             /* [out] */ ITypeInfo **ppTInfo);
         
+        DECLSPEC_XFGVIRT(IDispatch, GetIDsOfNames)
         HRESULT ( STDMETHODCALLTYPE *GetIDsOfNames )( 
             _DFramerCtlEvents * This,
             /* [in] */ REFIID riid,
@@ -861,16 +951,25 @@ DEFINE_GUID(DIID__DFramerCtlEvents,0x00460185,0x9E5E,0x11d5,0xB7,0xC8,0xB8,0x26,
             /* [in] */ LCID lcid,
             /* [size_is][out] */ DISPID *rgDispId);
         
+        DECLSPEC_XFGVIRT(IDispatch, Invoke)
         /* [local] */ HRESULT ( STDMETHODCALLTYPE *Invoke )( 
             _DFramerCtlEvents * This,
-            /* [in] */ DISPID dispIdMember,
-            /* [in] */ REFIID riid,
-            /* [in] */ LCID lcid,
-            /* [in] */ WORD wFlags,
-            /* [out][in] */ DISPPARAMS *pDispParams,
-            /* [out] */ VARIANT *pVarResult,
-            /* [out] */ EXCEPINFO *pExcepInfo,
-            /* [out] */ UINT *puArgErr);
+            /* [annotation][in] */ 
+            _In_  DISPID dispIdMember,
+            /* [annotation][in] */ 
+            _In_  REFIID riid,
+            /* [annotation][in] */ 
+            _In_  LCID lcid,
+            /* [annotation][in] */ 
+            _In_  WORD wFlags,
+            /* [annotation][out][in] */ 
+            _In_  DISPPARAMS *pDispParams,
+            /* [annotation][out] */ 
+            _Out_opt_  VARIANT *pVarResult,
+            /* [annotation][out] */ 
+            _Out_opt_  EXCEPINFO *pExcepInfo,
+            /* [annotation][out] */ 
+            _Out_opt_  UINT *puArgErr);
         
         END_INTERFACE
     } _DFramerCtlEventsVtbl;

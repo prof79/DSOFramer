@@ -25,8 +25,7 @@
  *
  ***************************************************************************/
 
-#ifndef DS_DSOFRAMER_H
-#define DS_DSOFRAMER_H
+#pragma once
 
 ////////////////////////////////////////////////////////////////////
 // We compile at level 4 and disable some unnecessary warnings...
@@ -52,6 +51,7 @@
 #include <olectl.h>
 #include <oleidl.h>
 #include <objsafe.h>
+#include <strsafe.h>
 
 #include "version.h"
 #include "utilities.h"
@@ -72,59 +72,59 @@ extern BOOL             v_fWindows2KPlus;
 ////////////////////////////////////////////////////////////////////
 // Custom Errors - we support a very limited set of custom error messages
 //
-#define DSO_E_ERR_BASE              0x80041100
-#define DSO_E_UNKNOWN               0x80041101   // "An unknown problem has occurred."
-#define DSO_E_INVALIDPROGID         0x80041102   // "The ProgID/Template could not be found or is not associated with a COM server."
-#define DSO_E_INVALIDSERVER         0x80041103   // "The associated COM server does not support ActiveX Document embedding."
-#define DSO_E_COMMANDNOTSUPPORTED   0x80041104   // "The command is not supported by the document server."
-#define DSO_E_DOCUMENTREADONLY      0x80041105   // "Unable to perform action because document was opened in read-only mode."
-#define DSO_E_REQUIRESMSDAIPP       0x80041106   // "The Microsoft Internet Publishing Provider is not installed, so the URL document cannot be open for write access."
-#define DSO_E_DOCUMENTNOTOPEN       0x80041107   // "No document is open to perform the operation requested."
-#define DSO_E_INMODALSTATE          0x80041108   // "Cannot access document when in modal condition."
-#define DSO_E_NOTBEENSAVED          0x80041109   // "Cannot Save file without a file path."
-#define DSO_E_FRAMEHOOKFAILED       0x8004110A   // "Unable to set frame hook for the parent window."
-#define DSO_E_ERR_MAX               0x8004110B
+constexpr auto DSO_E_ERR_BASE               = 0x80041100;
+constexpr auto DSO_E_UNKNOWN                = 0x80041101;   // "An unknown problem has occurred."
+constexpr auto DSO_E_INVALIDPROGID          = 0x80041102;   // "The ProgID/Template could not be found or is not associated with a COM server."
+constexpr auto DSO_E_INVALIDSERVER          = 0x80041103;   // "The associated COM server does not support ActiveX Document embedding."
+constexpr auto DSO_E_COMMANDNOTSUPPORTED    = 0x80041104;   // "The command is not supported by the document server."
+constexpr auto DSO_E_DOCUMENTREADONLY       = 0x80041105;   // "Unable to perform action because document was opened in read-only mode."
+constexpr auto DSO_E_REQUIRESMSDAIPP        = 0x80041106;   // "The Microsoft Internet Publishing Provider is not installed, so the URL document cannot be open for write access."
+constexpr auto DSO_E_DOCUMENTNOTOPEN        = 0x80041107;   // "No document is open to perform the operation requested."
+constexpr auto DSO_E_INMODALSTATE           = 0x80041108;   // "Cannot access document when in modal condition."
+constexpr auto DSO_E_NOTBEENSAVED           = 0x80041109;   // "Cannot Save file without a file path."
+constexpr auto DSO_E_FRAMEHOOKFAILED        = 0x8004110A;   // "Unable to set frame hook for the parent window."
+constexpr auto DSO_E_ERR_MAX                = 0x8004110B;
 
 ////////////////////////////////////////////////////////////////////
 // Custom OLE Command IDs - we use for special tasks
 //
-#define OLECMDID_GETDATAFORMAT      0x7001  // 28673
-#define OLECMDID_SETDATAFORMAT      0x7002  // 28674
-#define OLECMDID_LOCKSERVER         0x7003  // 28675
-#define OLECMDID_RESETFRAMEHOOK     0x7009  // 28681
-#define OLECMDID_NOTIFYACTIVE       0x700A  // 28682
+constexpr auto OLECMDID_GETDATAFORMAT   = 0x7001;  // 28673
+constexpr auto OLECMDID_SETDATAFORMAT   = 0x7002;  // 28674
+constexpr auto OLECMDID_LOCKSERVER      = 0x7003;  // 28675
+constexpr auto OLECMDID_RESETFRAMEHOOK  = 0x7009;  // 28681
+constexpr auto OLECMDID_NOTIFYACTIVE    = 0x700A;  // 28682
 
 ////////////////////////////////////////////////////////////////////
 // Custom Window Messages (only apply to CDsoFramerControl window proc)
 //
-#define DSO_WM_ASYNCH_OLECOMMAND         (WM_USER + 300)
-#define DSO_WM_ASYNCH_STATECHANGE        (WM_USER + 301)
+constexpr auto DSO_WM_ASYNCH_OLECOMMAND         = (WM_USER + 300);
+constexpr auto DSO_WM_ASYNCH_STATECHANGE        = (WM_USER + 301);
 
-#define DSO_WM_HOOK_NOTIFY_COMPACTIVE    (WM_USER + 400)
-#define DSO_WM_HOOK_NOTIFY_APPACTIVATE   (WM_USER + 401)
-#define DSO_WM_HOOK_NOTIFY_FOCUSCHANGE   (WM_USER + 402)
-#define DSO_WM_HOOK_NOTIFY_SYNCPAINT     (WM_USER + 403)
-#define DSO_WM_HOOK_NOTIFY_PALETTECHANGE (WM_USER + 404)
+constexpr auto DSO_WM_HOOK_NOTIFY_COMPACTIVE    = (WM_USER + 400);
+constexpr auto DSO_WM_HOOK_NOTIFY_APPACTIVATE   = (WM_USER + 401);
+constexpr auto DSO_WM_HOOK_NOTIFY_FOCUSCHANGE   = (WM_USER + 402);
+constexpr auto DSO_WM_HOOK_NOTIFY_SYNCPAINT     = (WM_USER + 403);
+constexpr auto DSO_WM_HOOK_NOTIFY_PALETTECHANGE = (WM_USER + 404);
 
 // State Flags for DSO_WM_ASYNCH_STATECHANGE:
-#define DSO_STATE_MODAL            1
-#define DSO_STATE_ACTIVATION       2
-#define DSO_STATE_INTERACTIVE      3
-#define DSO_STATE_RETURNFROMMODAL  4
+constexpr auto DSO_STATE_MODAL = 1;
+constexpr auto DSO_STATE_ACTIVATION = 2;
+constexpr auto DSO_STATE_INTERACTIVE = 3;
+constexpr auto DSO_STATE_RETURNFROMMODAL = 4;
 
 
 ////////////////////////////////////////////////////////////////////
 // Menu Bar Items
 //
-#define DSO_MAX_MENUITEMS         16
-#define DSO_MAX_MENUNAME_LENGTH   32
+constexpr auto DSO_MAX_MENUITEMS = 16;
+constexpr auto DSO_MAX_MENUNAME_LENGTH = 32;
 
 #ifndef DT_HIDEPREFIX
 #define DT_HIDEPREFIX             0x00100000
 #define DT_PREFIXONLY             0x00200000
 #endif
 
-#define SYNCPAINT_TIMER_ID        4
+constexpr auto SYNCPAINT_TIMER_ID = 4;
 
 ////////////////////////////////////////////////////////////////////
 // Control Class Factory
@@ -147,7 +147,6 @@ public:
 private:
     // Reference count
     ULONG m_cRef;
-
 };
 
 ////////////////////////////////////////////////////////////////////
@@ -548,7 +547,7 @@ private:
 
     HWND                    m_hwnd;                // our window
     HWND                    m_hwndParent;          // immediate parent window
-    SIZEL                   m_Size;                // the size of this control
+    SIZEL                   m_Size{};                // the size of this control
     RECT                    m_rcLocation;          // where we at
 
     IOleClientSite         *m_pClientSite;         // active client site of host containter
@@ -566,11 +565,11 @@ private:
     CDsoDocObject          *m_pDocObjFrame;        // The Embedding Class
     CDsoDocObject          *m_pServerLock;         // Optional Server Lock for out-of-proc DocObject
 
-    OLE_COLOR               m_clrBorderColor;      // Control Colors
-    OLE_COLOR               m_clrBackColor;        // "
-    OLE_COLOR               m_clrForeColor;        // "
-    OLE_COLOR               m_clrTBarColor;        // "
-    OLE_COLOR               m_clrTBarTextColor;    // "
+    OLE_COLOR               m_clrBorderColor = 0;   // Control Colors
+    OLE_COLOR               m_clrBackColor = 0;     // "
+    OLE_COLOR               m_clrForeColor = 0;     // "
+    OLE_COLOR               m_clrTBarColor = 0;     // "
+    OLE_COLOR               m_clrTBarTextColor = 0; // "
 
     BSTR                    m_bstrCustomCaption;   // A custom caption (if provided)
     HMENU                   m_hmenuFilePopup;      // The File menu popup
@@ -585,7 +584,7 @@ private:
     LONG                    m_lHookPolicy;         // Policy on how to use frame hook for this host.
     LONG                    m_lActivationPolicy;   // Policy on activation behavior for comp focus
     HBITMAP                 m_hbmDeactive;         // Bitmap used for IPDeactiveOnXXX policies
-    UINT                    m_uiSyncPaint;         // Sync paint counter for draw issues with UIDeactivateOnXXX
+    ULONGLONG               m_uiSyncPaint;         // Sync paint counter for draw issues with UIDeactivateOnXXX
 
     unsigned int        m_fDirty:1;                // does the control need to be resaved?
     unsigned int        m_fInPlaceActive:1;        // are we in place active or not?
@@ -678,10 +677,12 @@ public:
     CDsoFrameHookManager()
     {
         ODS("CDsoFrameHookManager created\n");
+
         m_fAppActive = TRUE;
         m_idxActive = DSOF_MAX_CONTROLS;
         m_cComponents = 0;
     }
+
     ~CDsoFrameHookManager()
     {
         ODS("CDsoFrameHookManager deleted\n");
@@ -709,10 +710,9 @@ protected:
         HWND hwndControl;
         CDsoFrameWindowHook *phookFrame;
     };
+
     BOOL                    m_fAppActive;
     DWORD                   m_idxActive;
     DWORD                   m_cComponents;
-    FHOOK_COMPONENTS        m_pComponents[DSOF_MAX_CONTROLS];
+    FHOOK_COMPONENTS        m_pComponents[DSOF_MAX_CONTROLS]{};
 };
-
-#endif // DS_DSOFRAMER_H

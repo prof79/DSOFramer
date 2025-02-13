@@ -26,16 +26,20 @@
 // Heap Allocation (Private Heap)
 //
 extern HANDLE v_hPrivateHeap;
+
 STDAPI_(LPVOID) DsoMemAlloc(DWORD cbSize)
 {
     CHECK_NULL_RETURN(v_hPrivateHeap, NULL);
+
     return HeapAlloc(v_hPrivateHeap, HEAP_ZERO_MEMORY, cbSize);
 }
 
 STDAPI_(void) DsoMemFree(LPVOID ptr)
 {
     if ((v_hPrivateHeap) && (ptr))
+    {
         HeapFree(v_hPrivateHeap, 0, ptr);
+    }
 }
 
 void * _cdecl operator new(size_t size)
@@ -51,6 +55,7 @@ void _cdecl operator delete(void *ptr)
 int __cdecl _purecall()
 {
     __asm{int 3};
+
     return 0;
 }
 
@@ -66,9 +71,12 @@ STDAPI DsoConvertToUnicodeEx(LPCSTR pszMbcsString, DWORD cbMbcsLen, LPWSTR pwszU
     UINT iCode = CP_ACP;
 
     if (IsValidCodePage(uiCodePage))
+    {
         iCode = uiCodePage;
+    }
 
     CHECK_NULL_RETURN(pwszUnicode,    E_POINTER);
+
     pwszUnicode[0] = L'\0';
 
     CHECK_NULL_RETURN(pszMbcsString,  E_POINTER);
@@ -76,10 +84,14 @@ STDAPI DsoConvertToUnicodeEx(LPCSTR pszMbcsString, DWORD cbMbcsLen, LPWSTR pwszU
     CHECK_NULL_RETURN(cbUniLen,       E_INVALIDARG);
 
     cbRet = MultiByteToWideChar(iCode, 0, pszMbcsString, cbMbcsLen, pwszUnicode, cbUniLen);
+
     if (cbRet == 0)
+    {
         return E_WIN32_LASTERROR;
+    }
 
     pwszUnicode[cbRet] = L'\0';
+
     return S_OK;
 }
 
@@ -92,9 +104,12 @@ STDAPI DsoConvertToMBCSEx(LPCWSTR pwszUnicodeString, DWORD cbUniLen, LPSTR pszMb
     UINT iCode = CP_ACP;
 
     if (IsValidCodePage(uiCodePage))
+    {
         iCode = uiCodePage;
+    }
 
     CHECK_NULL_RETURN(pszMbcsString,     E_POINTER);
+
     pszMbcsString[0] = L'\0';
 
     CHECK_NULL_RETURN(pwszUnicodeString, E_POINTER);
@@ -102,10 +117,14 @@ STDAPI DsoConvertToMBCSEx(LPCWSTR pwszUnicodeString, DWORD cbUniLen, LPSTR pszMb
     CHECK_NULL_RETURN(cbUniLen,          E_INVALIDARG);
 
     cbRet = WideCharToMultiByte(iCode, 0, pwszUnicodeString, -1, pszMbcsString, cbMbcsLen, NULL, NULL);
+
     if (cbRet == 0)
+    {
         return E_WIN32_LASTERROR;
+    }
 
     pszMbcsString[cbRet] = '\0';
+
     return S_OK;
 }
 
@@ -123,11 +142,13 @@ STDAPI_(LPWSTR) DsoConvertToLPWSTR(LPCSTR pszMbcsString)
         ((cblen = lstrlen(pszMbcsString)) > 0))
     {
         cbnew = ((cblen + 1) * sizeof(WCHAR));
+
         if ((pwsz = (LPWSTR)DsoMemAlloc(cbnew)) != NULL)
         {
             if (FAILED(DsoConvertToUnicodeEx(pszMbcsString, cblen, pwsz, cbnew, GetACP())))
             {
                 DsoMemFree(pwsz);
+
                 pwsz = NULL;
             }
         }
@@ -149,11 +170,14 @@ STDAPI_(LPSTR) DsoConvertToMBCS(LPCWSTR pwszUnicodeString)
         ((cblen = lstrlenW(pwszUnicodeString)) > 0))
     {
         cbnew = ((cblen + 1) * sizeof(WCHAR));
+
         if ((psz = (LPSTR)DsoMemAlloc(cbnew)) != NULL)
         {
             if (FAILED(DsoConvertToMBCSEx(pwszUnicodeString, cblen, psz, cbnew, GetACP())))
             {
-                DsoMemFree(psz); psz = NULL;
+                DsoMemFree(psz);
+                
+                psz = NULL;
             }
         }
     }
@@ -170,12 +194,16 @@ STDAPI_(LPSTR) DsoConvertToMBCS(LPCWSTR pwszUnicodeString)
 STDAPI_(BSTR) DsoConvertToBSTR(LPCSTR pszMbcsString)
 {
     BSTR bstr = NULL;
+
     LPWSTR pwsz = DsoConvertToLPWSTR(pszMbcsString);
+
     if (pwsz)
     {
         bstr = SysAllocString(pwsz);
+
         DsoMemFree(pwsz);
     }
+
     return bstr;
 }
 
@@ -190,12 +218,15 @@ STDAPI_(LPWSTR) DsoConvertToLPOLESTR(LPCWSTR pwszUnicodeString)
     UINT cblen;
 
     CHECK_NULL_RETURN(pwszUnicodeString, NULL);
+
     cblen = lstrlenW(pwszUnicodeString);
 
     pwsz = (LPWSTR)CoTaskMemAlloc((cblen * sizeof(WCHAR)) + 2);
+    
     if (pwsz)
     {
         memcpy(pwsz, pwszUnicodeString, (cblen * sizeof(WCHAR)));
+
         pwsz[cblen] = L'\0'; // Make sure it is NULL terminated.
     }
 
@@ -213,12 +244,15 @@ STDAPI_(LPWSTR) DsoCopyString(LPCWSTR pwszString)
     UINT cblen;
 
     CHECK_NULL_RETURN(pwszString, NULL);
+
     cblen = lstrlenW(pwszString);
 
-    pwsz = (LPWSTR)DsoMemAlloc((cblen * sizeof(WCHAR)) + 2);
+    pwsz = (LPWSTR) DsoMemAlloc((cblen * sizeof(WCHAR)) + 2);
+
     if (pwsz)
     {
         memcpy(pwsz, pwszString, (cblen * sizeof(WCHAR)));
+
         pwsz[cblen] = L'\0'; // Make sure it is NULL terminated.
     }
 
@@ -248,16 +282,21 @@ STDAPI_(LPWSTR) DsoCopyStringCatEx(LPCWSTR pwszBaseString, UINT cStrs, LPCWSTR *
     // We assume you have a base string to start with. If not, we return NULL...
     if ((pwszBaseString == NULL) ||
         ((cblenb = lstrlenW(pwszBaseString)) < 1))
+    {
         return NULL;
+    }
 
     // If we have nothing to append, just do a plain copy...
     if ((cStrs == 0) || (ppwszStrs == NULL))
+    {
         return DsoCopyString(pwszBaseString);
+    }
 
     // Determine the size of the final string by finding the lengths
     // of each. We create an array of sizes to use later on...
     cblent = cblenb;
     pcblens = new UINT[cStrs];
+
     CHECK_NULL_RETURN(pcblens,  NULL);
 
     for (i = 0; i < cStrs; i++)
@@ -272,14 +311,17 @@ STDAPI_(LPWSTR) DsoCopyStringCatEx(LPCWSTR pwszBaseString, UINT cStrs, LPCWSTR *
     if (cblent > cblenb)
     {
         pwsz = (LPWSTR)DsoMemAlloc(((cblent + 1) * sizeof(WCHAR)));
+
         CHECK_NULL_RETURN(pwsz,   NULL);
 
         memcpy(pwsz, pwszBaseString, (cblenb * sizeof(WCHAR)));
+        
         cblent = cblenb;
 
         for (i = 0; i < cStrs; i++)
         {
             memcpy((pwsz + cblent), ppwszStrs[i], (pcblens[i] * sizeof(WCHAR)));
+
             cblent += pcblens[i];
         }
     }
@@ -289,6 +331,7 @@ STDAPI_(LPWSTR) DsoCopyStringCatEx(LPCWSTR pwszBaseString, UINT cStrs, LPCWSTR *
     }
 
     delete [] pcblens;
+    
     return pwsz;
 }
 
@@ -299,11 +342,14 @@ STDAPI_(LPSTR) DsoCLSIDtoLPSTR(REFCLSID clsid)
 {
     LPSTR psz = NULL;
     LPWSTR pwsz;
+
     if (SUCCEEDED(StringFromCLSID(clsid, &pwsz)))
     {
         psz = DsoConvertToMBCS(pwsz);
+
         CoTaskMemFree(pwsz);
     }
+
     return psz;
 }
 
@@ -323,11 +369,15 @@ STDAPI_(UINT) DsoCompareStringsEx(LPCWSTR pwsz1, INT cch1, LPCWSTR pwsz2, INT cc
     // Check that valid parameters are passed and then contain somethimg...
     if ((pwsz1 == NULL) || (cch1 == 0) ||
         ((cblen1 = ((cch1 > 0) ? cch1 : lstrlenW(pwsz1))) == 0))
+    {
         return CSTR_LESS_THAN;
+    }
 
     if ((pwsz2 == NULL) || (cch2 == 0) ||
         ((cblen2 = ((cch2 > 0) ? cch2 : lstrlenW(pwsz2))) == 0))
+    {
         return CSTR_GREATER_THAN;
+    }
 
     // If the string is of the same size, then we do quick compare to test for
     // equality (this is slightly faster than calling the API, but only if we
@@ -337,15 +387,21 @@ STDAPI_(UINT) DsoCompareStringsEx(LPCWSTR pwsz1, INT cch1, LPCWSTR pwsz2, INT cc
         for (iret = 0; iret < cblen1; iret++)
         {
             if (pwsz1[iret] == pwsz2[iret])
+            {
                 continue;
+            }
 
             if (((pwsz1[iret] >= 'A') && (pwsz1[iret] <= 'Z')) &&
                 ((pwsz1[iret] + ('a' - 'A')) == pwsz2[iret]))
+            {
                 continue;
+            }
 
             if (((pwsz2[iret] >= 'A') && (pwsz2[iret] <= 'Z')) &&
                 ((pwsz2[iret] + ('a' - 'A')) == pwsz1[iret]))
+            {
                 continue;
+            }
 
             // don't continue if we can't quickly match...
             break;
@@ -353,7 +409,9 @@ STDAPI_(UINT) DsoCompareStringsEx(LPCWSTR pwsz1, INT cch1, LPCWSTR pwsz2, INT cc
 
         // If we made it all the way, then they are equal...
         if (iret == cblen1)
+        {
             return CSTR_EQUAL;
+        }
     }
 
     // Now ask the OS to check the strings and give us its read. (We prefer checking
@@ -368,7 +426,9 @@ STDAPI_(UINT) DsoCompareStringsEx(LPCWSTR pwsz1, INT cch1, LPCWSTR pwsz2, INT cc
         // If we are on Win9x, we don't have much of choice (thunk the call)...
         LPSTR psz1 = DsoConvertToMBCS(pwsz1);
         LPSTR psz2 = DsoConvertToMBCS(pwsz2);
+
         iret = CompareStringA(lcid, NORM_IGNORECASE, psz1, -1, psz2, -1);
+        
         DsoMemFree(psz2);
         DsoMemFree(psz1);
     }
@@ -422,35 +482,57 @@ STDAPI_(BOOL) GetTempPathForURLDownload(WCHAR* pwszURL, WCHAR** ppwszLocalFile)
     // Do a little parameter checking and find length of the URL...
     if (!(pwszURL) || ((dw = lstrlenW(pwszURL)) < 6) ||
         !(LooksLikeHTTP(pwszURL)) || !(ppwszLocalFile))
+    {
         return FALSE;
+    }
 
     *ppwszLocalFile = NULL;
 
     if (GetTempPath(MAX_PATH, szTmpPath))
     {
         DWORD dwtlen = lstrlen(szTmpPath);
-        if (dwtlen > 0 && szTmpPath[dwtlen-1] != '\\')
+
+        if (dwtlen > 0 && szTmpPath[dwtlen - 1] != '\\')
+        {
             lstrcat(szTmpPath, "\\");
+        }
 
         lstrcat(szTmpPath, "DsoFramer");
 
-        if (CreateDirectory(szTmpPath, NULL) || GetLastError() == ERROR_ALREADY_EXISTS)
+        if (CreateDirectory(szTmpPath, NULL)
+            || GetLastError() == ERROR_ALREADY_EXISTS)
         {
             lstrcat(szTmpPath, "\\");
+
             pwszTPath = DsoConvertToLPWSTR(szTmpPath);
         }
     }
 
     if (pwszTPath)
     {
-        if (pwszTFile = DsoCopyString(pwszURL))
+        pwszTFile = DsoCopyString(pwszURL);
+
+        if (pwszTFile)
         {
             LPWSTR pwszT = pwszTFile;
+
             while (*(++pwszT))
-                if (*pwszT == L'?'){*pwszT = L'\0'; break;}
+            {
+                if (*pwszT == L'?')
+                {
+                    *pwszT = L'\0';
+                    break;
+                }
+            }
 
             while (*(--pwszT))
-                if (*pwszT == L'/'){++pwszT; break;}
+            {
+                if (*pwszT == L'/')
+                {
+                    ++pwszT;
+                    break;
+                }
+            }
 
             *ppwszLocalFile = DsoCopyStringCat(pwszTPath, pwszT);
 
@@ -472,17 +554,25 @@ STDAPI_(BOOL) GetTempPathForURLDownload(WCHAR* pwszURL, WCHAR** ppwszLocalFile)
 STDAPI URLDownloadFile(LPUNKNOWN punk, WCHAR* pwszURL, WCHAR* pwszLocalFile)
 {
     typedef HRESULT (WINAPI *PFN_URLDTFW)(LPUNKNOWN, LPCWSTR, LPCWSTR, DWORD, LPUNKNOWN);
+
     static PFN_URLDTFW pfnURLDownloadToFileW = NULL;
+
     HMODULE hUrlmon;
 
     if (pfnURLDownloadToFileW == NULL)
     {
-        if (hUrlmon = LoadLibrary("URLMON.DLL"))
+        hUrlmon = LoadLibrary("URLMON.DLL");
+
+        if (hUrlmon)
+        {
             pfnURLDownloadToFileW = (PFN_URLDTFW)GetProcAddress(hUrlmon, "URLDownloadToFileW");
+        }
     }
 
     if (pfnURLDownloadToFileW == NULL)
+    {
         return E_UNEXPECTED;
+    }
 
     return pfnURLDownloadToFileW(punk, pwszURL, pwszLocalFile, 0, NULL);
 }
@@ -490,8 +580,8 @@ STDAPI URLDownloadFile(LPUNKNOWN punk, WCHAR* pwszURL, WCHAR* pwszLocalFile)
 ////////////////////////////////////////////////////////////////////////
 // OLE Conversion Functions
 //
-#define HIMETRIC_PER_INCH   2540    // number HIMETRIC units per inch
-#define PTS_PER_INCH        72      // number points (font size) per inch
+constexpr auto HIMETRIC_PER_INCH = 2540;    // number HIMETRIC units per inch
+constexpr auto PTS_PER_INCH      = 72;      // number points (font size) per inch
 
 #define MAP_PIX_TO_LOGHIM(x,ppli)   MulDiv(HIMETRIC_PER_INCH, (x), (ppli))
 #define MAP_LOGHIM_TO_PIX(x,ppli)   MulDiv((ppli), (x), HIMETRIC_PER_INCH)
@@ -502,10 +592,17 @@ STDAPI URLDownloadFile(LPUNKNOWN punk, WCHAR* pwszURL, WCHAR* pwszLocalFile)
 STDAPI_(void) DsoHimetricToPixels(LONG* px, LONG* py)
 {
     HDC hdc = GetDC(NULL);
+
     if (px)
+    {
         *px = MAP_LOGHIM_TO_PIX(*px, GetDeviceCaps(hdc, LOGPIXELSX));
+    }
+
     if (py)
+    {
         *py = MAP_LOGHIM_TO_PIX(*py, GetDeviceCaps(hdc, LOGPIXELSY));
+    }
+
     ReleaseDC(NULL, hdc);
 }
 
@@ -515,10 +612,17 @@ STDAPI_(void) DsoHimetricToPixels(LONG* px, LONG* py)
 STDAPI_(void) DsoPixelsToHimetric(LONG* px, LONG* py)
 {
     HDC hdc = GetDC(NULL);
+
     if (px)
+    {
         *px = MAP_PIX_TO_LOGHIM(*px, GetDeviceCaps(hdc, LOGPIXELSX));
+    }
+
     if (py)
+    {
         *py = MAP_PIX_TO_LOGHIM(*py, GetDeviceCaps(hdc, LOGPIXELSY));
+    }
+
     ReleaseDC(NULL, hdc);
 }
 
@@ -533,14 +637,23 @@ STDAPI_(HBITMAP) DsoGetBitmapFromWindow(HWND hwnd)
     INT x, y;
 
     if (!GetWindowRect(hwnd, &rc))
+    {
         return NULL;
+    }
 
     x = (rc.right - rc.left);
+
     if (x < 0)
+    {
         x = 1;
+    }
+
     y = (rc.bottom - rc.top);
+    
     if (y < 0)
+    {
         y = 1;
+    }
 
     hdcWin = GetDC(hwnd);
     hdcMem = CreateCompatibleDC(hdcWin);
@@ -565,20 +678,30 @@ STDAPI_(BOOL) IsWindowChild(HWND hwndParent, HWND hwndChild)
     HWND hwnd;
 
     if ((hwndChild == NULL) || !IsWindow(hwndChild))
+    {
         return FALSE;
+    }
 
     if (hwndParent == NULL)
+    {
         return TRUE;
+    }
 
     if (!IsWindow(hwndParent))
+    {
         return FALSE;
+    }
 
-    hwnd = hwndChild;
+    hwnd = GetParent(hwndChild);
 
-    while (hwnd = GetParent(hwnd))
+    while (hwnd)
     {
         if (hwnd == hwndParent)
+        {
             return TRUE;
+        }
+
+        hwnd = GetParent(hwnd);
     }
 
     return FALSE;
@@ -597,6 +720,7 @@ STDAPI DsoGetTypeInfoEx(REFGUID rlibid, LCID lcid, WORD wVerMaj, WORD wVerMin, H
     ITypeLib   *ptlib;
 
     CHECK_NULL_RETURN(ppti, E_POINTER);
+
     *ppti = NULL;
 
     // Try to pull information from the registry...
@@ -607,6 +731,7 @@ STDAPI DsoGetTypeInfoEx(REFGUID rlibid, LCID lcid, WORD wVerMaj, WORD wVerMin, H
     if (FAILED(hr) && (hResource))
     {
         LPWSTR pwszPath;
+
         if (FGetModuleFileName(hResource, &pwszPath))
         {
             // Now, load the type library from module resource file...
@@ -614,7 +739,9 @@ STDAPI DsoGetTypeInfoEx(REFGUID rlibid, LCID lcid, WORD wVerMaj, WORD wVerMin, H
 
             // Register library to make things easier next time...
             if (SUCCEEDED(hr))
+            {
                 RegisterTypeLib(ptlib, pwszPath, NULL);
+            }
 
             DsoMemFree(pwszPath);
         }
@@ -622,10 +749,13 @@ STDAPI DsoGetTypeInfoEx(REFGUID rlibid, LCID lcid, WORD wVerMaj, WORD wVerMin, H
 
     // We have the typelib. Now get the requested typeinfo...
     if (SUCCEEDED(hr))
+    {
         hr = ptlib->GetTypeInfoOfGuid(rguid, ppti);
+    }
 
     // Release the type library interface.
     SAFE_RELEASE_INTERFACE(ptlib);
+
     return hr;
 }
 
@@ -682,11 +812,16 @@ STDAPI DsoReportError(HRESULT hr, LPWSTR pwszCustomMessage, EXCEPINFO* peiDispEx
     UINT nID = 0;
 
     // Don't need to do anything unless this is an error.
-    if ((hr == S_OK) || SUCCEEDED(hr)) return hr;
+    if ((hr == S_OK) || SUCCEEDED(hr))
+    {
+        return hr;
+    }
 
     // Is this one of our custom errors (if so we will pull description from resource)...
     if ((hr > DSO_E_ERR_BASE) && (hr < DSO_E_ERR_MAX))
+    {
         nID = (hr & 0xFF);
+    }
 
     // Set the source name...
     bstrSource = SysAllocString(L"DsoFramerControl");
@@ -710,13 +845,19 @@ STDAPI DsoReportError(HRESULT hr, LPWSTR pwszCustomMessage, EXCEPINFO* peiDispEx
     if (SUCCEEDED(CreateErrorInfo(&pcerrinfo)))
     {
         pcerrinfo->SetSource(bstrSource);
-        pcerrinfo->SetDescription(bstrDescription);
+
+        if (bstrDescription)
+        {
+            pcerrinfo->SetDescription(bstrDescription);
+        }
 
         if (SUCCEEDED(pcerrinfo->QueryInterface(IID_IErrorInfo, (void**) &perrinfo)))
         {
             SetErrorInfo(0, perrinfo);
+
             perrinfo->Release();
         }
+
         pcerrinfo->Release();
     }
 
@@ -800,6 +941,7 @@ BOOL __fastcall DsoPVarBoolFromPVar(VARIANT *px, BOOL fdef)
 STDAPI_(BOOL) FFileExists(WCHAR* wzPath)
 {
     DWORD dw = 0xFFFFFFFF;
+
     if (v_fUnicodeAPI)
     {
         dw = GetFileAttributesW(wzPath);
@@ -807,10 +949,15 @@ STDAPI_(BOOL) FFileExists(WCHAR* wzPath)
     else
     {
         LPSTR psz = DsoConvertToMBCS(wzPath);
+
         if (psz)
+        {
             dw = GetFileAttributesA(psz);
+        }
+
         DsoMemFree(psz);
     }
+
     return (dw != 0xFFFFFFFF);
 }
 
@@ -823,7 +970,9 @@ STDAPI_(BOOL) FFileExists(WCHAR* wzPath)
 STDAPI_(BOOL) FOpenLocalFile(WCHAR* wzFilePath, DWORD dwAccess, DWORD dwShareMode, DWORD dwCreate, HANDLE* phFile)
 {
     CHECK_NULL_RETURN(phFile, FALSE);
+
     *phFile = INVALID_HANDLE_VALUE;
+    
     if (v_fUnicodeAPI)
     {
         *phFile = CreateFileW(wzFilePath, dwAccess, dwShareMode, NULL, dwCreate, FILE_ATTRIBUTE_NORMAL, NULL);
@@ -831,10 +980,15 @@ STDAPI_(BOOL) FOpenLocalFile(WCHAR* wzFilePath, DWORD dwAccess, DWORD dwShareMod
     else
     {
         LPSTR psz = DsoConvertToMBCS(wzFilePath);
+
         if (psz)
+        {
             *phFile = CreateFileA(psz, dwAccess, dwShareMode, NULL, dwCreate, FILE_ATTRIBUTE_NORMAL, NULL);
+        }
+        
         DsoMemFree(psz);
     }
+
     return (*phFile != INVALID_HANDLE_VALUE);
 }
 
@@ -851,6 +1005,7 @@ STDAPI_(BOOL) FOpenLocalFile(WCHAR* wzFilePath, DWORD dwAccess, DWORD dwShareMod
 STDAPI_(BOOL) FPerformShellOp(DWORD dwOp, WCHAR* wzFrom, WCHAR* wzTo)
 {
     BOOL f = FALSE;
+
     if (v_fUnicodeAPI)
     {
         switch (dwOp)
@@ -875,9 +1030,14 @@ STDAPI_(BOOL) FPerformShellOp(DWORD dwOp, WCHAR* wzFrom, WCHAR* wzTo)
         }
 
         if (pszFrom)
+        {
             DsoMemFree(pszFrom);
+        }
+
         if (pszTo)
+        {
             DsoMemFree(pszTo);
+        }
     }
 
     return f;
@@ -894,41 +1054,51 @@ STDAPI_(BOOL) FGetModuleFileName(HMODULE hModule, WCHAR** wzFileName)
     DWORD dw;
 
     CHECK_NULL_RETURN(wzFileName, FALSE);
+
     *wzFileName = NULL;
 
     pwsz = (LPWSTR)DsoMemAlloc((MAX_PATH * sizeof(WCHAR)));
+    
     CHECK_NULL_RETURN(pwsz, FALSE);
 
     if (v_fUnicodeAPI)
     {
         dw = GetModuleFileNameW(hModule, pwsz, MAX_PATH);
+    
         if (dw == 0)
         {
             DsoMemFree(pwsz);
+        
             return FALSE;
         }
     }
     else
     {
         dw = GetModuleFileNameA(hModule, (LPSTR)pwsz, MAX_PATH);
+
         if (dw == 0)
         {
             DsoMemFree(pwsz);
+
             return FALSE;
         }
 
         LPWSTR pwsz2 = DsoConvertToLPWSTR((LPSTR)pwsz);
+
         if (pwsz2 == NULL)
         {
             DsoMemFree(pwsz);
+
             return FALSE;
         }
 
         DsoMemFree(pwsz);
+
         pwsz = pwsz2;
     }
 
     *wzFileName = pwsz;
+
     return TRUE;
 }
 
@@ -947,7 +1117,9 @@ STDAPI_(BOOL) FIsIECacheFile(LPWSTR pwszFile)
     if (RegOpenKey(HKEY_CURRENT_USER,
         "Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Shell Folders", &hk) == ERROR_SUCCESS)
     {
-        DWORD dwT, dwS; dwT = MAX_PATH;
+        DWORD dwS = 0;
+        DWORD dwT = MAX_PATH;
+        
         memset(rgbuffer, 0, (MAX_PATH * sizeof(WCHAR)));
 
         if (v_fUnicodeAPI)
@@ -973,8 +1145,10 @@ STDAPI_(BOOL) FIsIECacheFile(LPWSTR pwszFile)
         {
             dwS = lstrlenW(pwszTmpCache);
             dwT = lstrlenW(pwszFile);
+
             fIsCacheFile = ((dwS < dwT) &&
                 (DsoCompareStringsEx(pwszTmpCache, dwS, pwszFile, dwS) == CSTR_EQUAL));
+            
             DsoMemFree(pwszTmpCache);
         }
     }
@@ -992,6 +1166,7 @@ STDAPI_(BOOL) FIsIECacheFile(LPWSTR pwszFile)
 STDAPI_(BOOL) FDrawText(HDC hdc, WCHAR* pwsz, LPRECT prc, UINT fmt)
 {
     BOOL f;
+
     if (v_fUnicodeAPI)
     {
         f = (BOOL)DrawTextW(hdc, pwsz, -1, prc, fmt);
@@ -999,9 +1174,12 @@ STDAPI_(BOOL) FDrawText(HDC hdc, WCHAR* pwsz, LPRECT prc, UINT fmt)
     else
     {
         LPSTR psz = DsoConvertToMBCS(pwsz);
+
         f = (BOOL)DrawTextA(hdc, psz, -1, prc, fmt);
+        
         DsoMemFree(psz);
     }
+
     return f;
 }
 
@@ -1015,6 +1193,7 @@ STDAPI_(BOOL) FDrawText(HDC hdc, WCHAR* pwsz, LPRECT prc, UINT fmt)
 STDAPI_(BOOL) FSetRegKeyValue(HKEY hk, WCHAR* pwsz)
 {
     LONG lret;
+
     if (v_fUnicodeAPI)
     {
         lret = RegSetValueExW(hk, NULL, 0, REG_SZ, (BYTE *)pwsz, (lstrlenW(pwsz) * sizeof(WCHAR)));
@@ -1022,9 +1201,12 @@ STDAPI_(BOOL) FSetRegKeyValue(HKEY hk, WCHAR* pwsz)
     else
     {
         LPSTR psz = DsoConvertToMBCS(pwsz);
+        
         lret = RegSetValueExA(hk, NULL, 0, REG_SZ, (BYTE *)psz, lstrlen(psz));
+
         DsoMemFree(psz);
     }
+
     return (lret == ERROR_SUCCESS);
 }
 
@@ -1037,23 +1219,36 @@ STDAPI_(BOOL) FOpenPrinter(LPCWSTR pwszPrinter, LPHANDLE phandle)
 {
     BOOL fRet = FALSE;
     DWORD dwLastError = 0;
+
     if (v_fUnicodeAPI)
     {
         PRINTER_DEFAULTSW prtdef;
+
         memset(&prtdef, 0, sizeof(PRINTER_DEFAULTSW));
+
         prtdef.DesiredAccess = PRINTER_ACCESS_USE;
+
         fRet = OpenPrinterW((LPWSTR)pwszPrinter, phandle, &prtdef);
     }
     else
     {
         LPSTR psz = DsoConvertToMBCS(pwszPrinter);
+
         fRet = OpenPrinterA(psz, phandle, NULL);
+        
         if (!fRet)
+        {
             dwLastError = GetLastError();
+        }
+        
         DsoMemFree(psz);
     }
+    
     if (dwLastError)
+    {
         SetLastError(dwLastError);
+    }
+    
     return fRet;
 }
 
@@ -1071,7 +1266,9 @@ STDAPI_(BOOL) FGetPrinterSettings(HANDLE hprinter, LPWSTR *ppwszProcessor, LPWST
 
     if ((ppwszProcessor == NULL) || (ppwszDevice == NULL) || (ppwszOutput == NULL) ||
         (ppdvmode == NULL) || (pcbSize == NULL))
+    {
         return FALSE;
+    }
 
     *ppwszProcessor = NULL;
     *ppwszDevice = NULL;
@@ -1082,10 +1279,13 @@ STDAPI_(BOOL) FGetPrinterSettings(HANDLE hprinter, LPWSTR *ppwszProcessor, LPWST
     if (v_fUnicodeAPI) // Use Unicode API if possible (much easier)...
     {
         GetPrinterW(hprinter, 2, NULL, 0, &cbAlloc);
+
         PRINTER_INFO_2W *pinfo = (PRINTER_INFO_2W*)DsoMemAlloc(++cbAlloc);
+        
         if (pinfo)
         {
             fRet = GetPrinterW(hprinter, 2, (BYTE *)pinfo, cbAlloc, &cbNeed);
+
             if (fRet)
             {
                 *ppwszProcessor = DsoConvertToLPWSTR("winspool");
@@ -1095,10 +1295,13 @@ STDAPI_(BOOL) FGetPrinterSettings(HANDLE hprinter, LPWSTR *ppwszProcessor, LPWST
                 if (pinfo->pDevMode) // If we have the devmode, just need to copy it...
                 {
                     DWORD cbData = (pinfo->pDevMode->dmSize) + (pinfo->pDevMode->dmDriverExtra);
+
                     *ppdvmode = (DEVMODEW*)DsoMemAlloc(cbData);
+                    
                     if (*ppdvmode)
                     {
                         memcpy(*ppdvmode, pinfo->pDevMode, cbData);
+
                         *pcbSize = cbData;
                     }
                 }
@@ -1118,10 +1321,13 @@ STDAPI_(BOOL) FGetPrinterSettings(HANDLE hprinter, LPWSTR *ppwszProcessor, LPWST
     else
     {
         GetPrinterA(hprinter, 2, NULL, 0, &cbAlloc);
+
         PRINTER_INFO_2A *pinfo = (PRINTER_INFO_2A *)DsoMemAlloc(++cbAlloc);
+        
         if (pinfo)
         {
             fRet = GetPrinterA(hprinter, 2, (BYTE *)pinfo, cbAlloc, &cbNeed);
+
             if (fRet)
             {
                 *ppwszProcessor = DsoConvertToLPWSTR("winspool");
@@ -1137,6 +1343,7 @@ STDAPI_(BOOL) FGetPrinterSettings(HANDLE hprinter, LPWSTR *ppwszProcessor, LPWST
                                   pinfo->pDevMode->dmDriverExtra;
 
                     *ppdvmode = (DEVMODEW*)DsoMemAlloc(cbData);
+
                     if (*ppdvmode)
                     {
                         DsoConvertToUnicodeEx(
@@ -1194,8 +1401,12 @@ STDAPI_(BOOL) FGetPrinterSettings(HANDLE hprinter, LPWSTR *ppwszProcessor, LPWST
             dwLastError = ERROR_NOT_ENOUGH_MEMORY;
         }
     }
+
     if (dwLastError)
+    {
         SetLastError(dwLastError);
+    }
+
     return fRet;
 }
 
@@ -1215,6 +1426,7 @@ STDAPI DsoGetFileFromUser(HWND hwndOwner, LPCWSTR pwzTitle, DWORD dwFlags,
 
     // Make sure they pass a *bstr...
     CHECK_NULL_RETURN(pbstrFile,  E_POINTER);
+
     *pbstrFile = NULL;
 
     buffer[0] = 0; buffer[1] = 0;
@@ -1224,7 +1436,9 @@ STDAPI DsoGetFileFromUser(HWND hwndOwner, LPCWSTR pwzTitle, DWORD dwFlags,
     if (v_fUnicodeAPI)
     {
         OPENFILENAMEW ofnw;
+
         memset(&ofnw,  0,   sizeof(OPENFILENAMEW));
+        
         ofnw.lStructSize  = sizeof(OPENFILENAMEW);
         ofnw.hwndOwner    = hwndOwner;
         ofnw.lpstrFilter  = pwzFilter;
@@ -1238,22 +1452,32 @@ STDAPI DsoGetFileFromUser(HWND hwndOwner, LPCWSTR pwzTitle, DWORD dwFlags,
         if (pwszCurrentItem)
         {
             dw = lstrlenW(pwszCurrentItem);
+
             if ((dw) && (dw < MAX_PATH))
             {
                 memcpy(ofnw.lpstrFile, pwszCurrentItem,  dw * sizeof(WCHAR));
+
                 ofnw.lpstrFile[dw] = L'\0';
             }
         }
 
         if (fShowSave)
+        {
             fSuccess = GetSaveFileNameW(&ofnw);
+        }
         else
+        {
             fSuccess = GetOpenFileNameW(&ofnw);
+        }
 
         if (fSuccess)
         {
             *pbstrFile = SysAllocString((LPWSTR)&buffer[0]);
-            if (pfReadOnly) *pfReadOnly = (ofnw.Flags & OFN_READONLY);
+
+            if (pfReadOnly)
+            {
+                *pfReadOnly = (ofnw.Flags & OFN_READONLY);
+            }
         }
     }
     else
@@ -1261,7 +1485,9 @@ STDAPI DsoGetFileFromUser(HWND hwndOwner, LPCWSTR pwzTitle, DWORD dwFlags,
         // If not, then we use OPENFILENAMEA and thunk down our params to
         // the MBCS of the system, and then thunk back the Unicode for the return...
         OPENFILENAMEA ofn;
+
         memset(&ofn,  0,   sizeof(OPENFILENAMEA));
+        
         ofn.lStructSize  = sizeof(OPENFILENAMEA);
         ofn.hwndOwner    = hwndOwner;
         ofn.lpstrFilter  = DsoConvertToMBCS(pwzFilter);
@@ -1273,18 +1499,27 @@ STDAPI DsoGetFileFromUser(HWND hwndOwner, LPCWSTR pwzTitle, DWORD dwFlags,
         ofn.Flags        = dwFlags;
 
         if (pwszCurrentItem)
+        {
             DsoConvertToMBCSEx(pwszCurrentItem, lstrlenW(pwszCurrentItem), (LPSTR)&buffer[0], MAX_PATH, GetACP());
+        }
 
         if (fShowSave)
+        {
             fSuccess = GetSaveFileNameA(&ofn);
+        }
         else
+        {
             fSuccess = GetOpenFileNameA(&ofn);
+        }
 
         if (fSuccess)
         {
             *pbstrFile = DsoConvertToBSTR((LPCSTR)&buffer[0]);
+
             if (pfReadOnly)
+            {
                 *pfReadOnly = (ofn.Flags & OFN_READONLY);
+            }
         }
 
         DsoMemFree((void*)(ofn.lpstrDefExt));
@@ -1307,11 +1542,13 @@ STDAPI DsoGetOleInsertObjectFromUser(HWND hwndOwner, LPCWSTR pwzTitle, DWORD dwF
 {
     BYTE buffer[MAX_PATH * sizeof(WCHAR)];
     LPCLSID lpNewExcludeList = NULL;
+
     int nNewExcludeCount = 0;
     int nNewExcludeLen = 0;
 
     // Make sure they pass a *bstr...
     CHECK_NULL_RETURN(pbstrResult,  E_POINTER);
+    
     *pbstrResult = NULL;
 
     // To limit list to just those marked as DocObject servers, you have to enum
@@ -1335,6 +1572,7 @@ STDAPI DsoGetOleInsertObjectFromUser(HWND hwndOwner, LPCWSTR pwzTitle, DWORD dwF
                     {
                         CLSID clsid;
                         LPWSTR pwszClsid = DsoConvertToLPWSTR(szName);
+
                         if ((pwszClsid) && SUCCEEDED(CLSIDFromString(pwszClsid, &clsid)))
                         {
                             if (lpNewExcludeList == NULL)
@@ -1343,6 +1581,7 @@ STDAPI DsoGetOleInsertObjectFromUser(HWND hwndOwner, LPCWSTR pwzTitle, DWORD dwF
                                 nNewExcludeLen = 16;
                                 lpNewExcludeList = new CLSID[nNewExcludeLen];
                             }
+
                             if (nNewExcludeCount == nNewExcludeLen)
                             {
                                 LPCLSID lpOldList = lpNewExcludeList;
@@ -1355,22 +1594,27 @@ STDAPI DsoGetOleInsertObjectFromUser(HWND hwndOwner, LPCWSTR pwzTitle, DWORD dwF
                             lpNewExcludeList[nNewExcludeCount] = clsid;
                             nNewExcludeCount++;
                         }
+                        
                         SAFE_FREESTRING(pwszClsid);
+
                         RegCloseKey(hkDocObject);
                     }
 
                     RegCloseKey(hkItem);
                 }
             }
+
             RegCloseKey(hkCLSID);
         }
     }
+
     buffer[0] = 0; buffer[1] = 0;
 
     // See if we have Unicode function to call...
     if (v_fUnicodeAPI)
     {
         OLEUIINSERTOBJECTW oidlg = {0};
+
         oidlg.cbStruct = sizeof(OLEUIINSERTOBJECTW);
         oidlg.dwFlags = dwFlags;
         oidlg.hWndOwner = hwndOwner;
@@ -1385,25 +1629,34 @@ STDAPI DsoGetOleInsertObjectFromUser(HWND hwndOwner, LPCWSTR pwzTitle, DWORD dwF
             if ((oidlg.dwFlags & IOF_SELECTCREATENEW) && (oidlg.clsid != GUID_NULL))
             {
                 LPOLESTR posz;
+
                 if (SUCCEEDED(ProgIDFromCLSID(oidlg.clsid, &posz)))
                 {
                     *pbstrResult = SysAllocString(posz);
+
                     CoTaskMemFree(posz);
                 }
+
                 if (ptype)
+                {
                     *ptype = IOF_SELECTCREATENEW;
+                }
             }
             else if ((oidlg.dwFlags & IOF_SELECTCREATEFROMFILE) && (buffer[0] != 0))
             {
                 *pbstrResult = SysAllocString((LPWSTR)buffer);
+
                 if (ptype)
+                {
                     *ptype = IOF_SELECTCREATEFROMFILE;
+                }
             }
         }
     }
     else
     {
         OLEUIINSERTOBJECTA oidlg = { 0 };
+
         oidlg.cbStruct = sizeof(OLEUIINSERTOBJECTA);
         oidlg.dwFlags = dwFlags;
         oidlg.hWndOwner = hwndOwner;
@@ -1418,19 +1671,27 @@ STDAPI DsoGetOleInsertObjectFromUser(HWND hwndOwner, LPCWSTR pwzTitle, DWORD dwF
             if ((oidlg.dwFlags & IOF_SELECTCREATENEW) && (oidlg.clsid != GUID_NULL))
             {
                 LPOLESTR posz;
+
                 if (SUCCEEDED(ProgIDFromCLSID(oidlg.clsid, &posz)))
                 {
                     *pbstrResult = SysAllocString(posz);
+
                     CoTaskMemFree(posz);
                 }
+
                 if (ptype)
+                {
                     *ptype = IOF_SELECTCREATENEW;
+                }
             }
             else if ((oidlg.dwFlags & IOF_SELECTCREATEFROMFILE) && (buffer[0] != 0))
             {
                 *pbstrResult = DsoConvertToBSTR((LPSTR)buffer);
+
                 if (ptype)
+                {
                     *ptype = IOF_SELECTCREATEFROMFILE;
+                }
             }
         }
 
@@ -1438,7 +1699,9 @@ STDAPI DsoGetOleInsertObjectFromUser(HWND hwndOwner, LPCWSTR pwzTitle, DWORD dwF
     }
 
     if (lpNewExcludeList)
-        delete [] lpNewExcludeList;
+    {
+        delete[] lpNewExcludeList;
+    }
 
     // If we got a string, then success. All other errors (even user cancel) should
     // be treated as a general failure (feel free to change this for more full function).
