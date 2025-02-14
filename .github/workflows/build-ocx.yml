@@ -91,7 +91,7 @@ jobs:
     - name: Zip executable
       shell: pwsh
       run: |
-        cd "${{ BASE_PATH }}"
+        cd "${Env:BASE_PATH}"
         7z a "${Env:ARCHIVE_NAME}" "Debug\${Env:BINARY_NAME}.ocx" "Debug\${Env:BINARY_NAME}.pdb" "Release\${Env:BINARY_NAME}.ocx" "Release\${Env:BINARY_NAME}.pdb"
 
     - name: Upload artifact
