@@ -67,7 +67,7 @@ jobs:
         Write-Host "GitHub ref name: ${{ github.ref_name }}"
         Write-Host "Commit short SHA: ${Env:SHORT_SHA}"
         Write-Host "Version name: ${Env:VERSION_NAME}"
-        Write-Host "Base name: ${Env:BASE_PATH}"
+        Write-Host "Base path: ${Env:BASE_PATH}"
         Write-Host "Base name: ${Env:BASE_NAME}"
         Write-Host "Binary name: ${Env:BINARY_NAME}"
         Write-Host "Archive name: ${Env:ARCHIVE_NAME}"
@@ -81,8 +81,8 @@ jobs:
     - name: Build
       run: |
         cd "${Env:BASE_PATH}"
-        msbuild "${Env:BASE_NAME}.vcxproj" -property:Configuration=Debug
-        msbuild "${Env:BASE_NAME}.vcxproj" -property:Configuration=Release
+        msbuild "${Env:BASE_NAME}.vcxproj" -property:Platform=Win32 -property:Configuration=Debug
+        msbuild "${Env:BASE_NAME}.vcxproj" -property:Platform=Win32 -property:Configuration=Release
 
     - name: List artifacts
       run: |
