@@ -96,7 +96,7 @@ jobs:
       with:
         name: ${{ env.PRODUCT_NAME }}
         path: |
-          dist/${{ env.ARCHIVE_NAME }}
+          dist/${{ env.BASE_PATH }}/${{ env.ARCHIVE_BASE_NAME }}.zip
 
 
   publish:
@@ -121,7 +121,7 @@ jobs:
  
     - name: Display structure of downloaded files
       run: ls -R
-      working-directory: dist
+      working-directory: dist/${{ env.BASE_PATH }}
   
     - name: Publish on-demand release
       if: ${{ ! startsWith(github.ref, 'refs/tags/v') }}
@@ -132,7 +132,7 @@ jobs:
         prerelease: true
         title: "Development Release ${{ needs.build.outputs.short-sha }}"
         files: |
-          dist/*.zip
+          dist/${{ env.BASE_PATH }}/*.zip
 
     - name: Publish version release
       if: ${{ startsWith(github.ref, 'refs/tags/v') }}
@@ -143,4 +143,4 @@ jobs:
         prerelease: false
         title: "${{ env.PRODUCT_NAME }} ${{ github.ref_name }}"
         files: |
-          dist/*.zip
+          dist/${{ env.BASE_PATH }}/*.zip
