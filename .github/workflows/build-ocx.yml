@@ -95,7 +95,7 @@ jobs:
         7z a "${Env:ARCHIVE_NAME}" "Debug\${Env:BINARY_NAME}.ocx" "Debug\${Env:BINARY_NAME}.pdb" "Release\${Env:BINARY_NAME}.ocx" "Release\${Env:BINARY_NAME}.pdb"
 
     - name: Upload artifact
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: ${{ env.PRODUCT_NAME }}
         path: |
