@@ -18,7 +18,7 @@ env:
   BASE_NAME: dsoframer
   BINARY_NAME: dsoframer.ocx
   ARCHIVE_BASE_NAME: DSOFramer-Windows-x86-latest
-  ARCHIVE_NAME: ${{ env.ARCHIVE_BASE_NAME }}.zip
+  ARCHIVE_NAME: ${ARCHIVE_BASE_NAME}.zip
 
 
 jobs:
