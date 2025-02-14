@@ -16,9 +16,7 @@ env:
   PRODUCT_NAME: Microsoft DSOFramer
   BASE_PATH: Source_VC2022
   BASE_NAME: dsoframer
-  BINARY_NAME: dsoframer.ocx
   ARCHIVE_BASE_NAME: DSOFramer-Windows-x86-latest
-  ARCHIVE_NAME: ${ARCHIVE_BASE_NAME}.zip
 
 
 jobs:
@@ -69,8 +67,7 @@ jobs:
         Write-Host "Version name: ${Env:VERSION_NAME}"
         Write-Host "Base path: ${Env:BASE_PATH}"
         Write-Host "Base name: ${Env:BASE_NAME}"
-        Write-Host "Binary name: ${Env:BINARY_NAME}"
-        Write-Host "Archive name: ${Env:ARCHIVE_NAME}"
+        Write-Host "Archive base name: ${Env:ARCHIVE_BASE_NAME}"
 
     - name: Install MSVC
       uses: aminya/setup-cpp@v1
@@ -86,13 +83,13 @@ jobs:
 
     - name: List artifacts
       run: |
-        Get-ChildItem . -Recurse
+        Get-ChildItem "${Env:BASE_PATH}" -Recurse
 
     - name: Zip executable
       shell: pwsh
       run: |
         cd "${Env:BASE_PATH}"
-        7z a "${Env:ARCHIVE_NAME}" "Debug\${Env:BINARY_NAME}.ocx" "Debug\${Env:BINARY_NAME}.pdb" "Release\${Env:BINARY_NAME}.ocx" "Release\${Env:BINARY_NAME}.pdb"
+        7z a "${Env:ARCHIVE_BASE_NAME}.zip" "Debug\${Env:BASE_NAME}.ocx" "Debug\${Env:BASE_NAME}.pdb" "Release\${Env:BASE_NAME}.ocx" "Release\${Env:BASE_NAME}.pdb"
 
     - name: Upload artifact
       uses: actions/upload-artifact@v4
