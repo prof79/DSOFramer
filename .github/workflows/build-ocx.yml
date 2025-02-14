@@ -18,7 +18,7 @@ env:
   BASE_NAME: dsoframer
   BINARY_NAME: dsoframer.ocx
   ARCHIVE_BASE_NAME: DSOFramer-Windows-x86-latest
-  ARCHIVE_NAME: ${{ ARCHIVE_BASE_NAME }}.zip
+  ARCHIVE_NAME: ${{ env.ARCHIVE_BASE_NAME }}.zip
 
 
 jobs:
@@ -80,9 +80,9 @@ jobs:
 
     - name: Build
       run: |
-        cd "${{ BASE_PATH }}"
-        msbuild "${{ BASE_NAME }}.vcxproj" -property:Configuration=Debug
-        msbuild "${{ BASE_NAME }}.vcxproj" -property:Configuration=Release
+        cd "${Env:BASE_PATH}"
+        msbuild "${Env:BASE_NAME}.vcxproj" -property:Configuration=Debug
+        msbuild "${Env:BASE_NAME}.vcxproj" -property:Configuration=Release
 
     - name: List artifacts
       run: |
@@ -144,6 +144,6 @@ jobs:
         repo_token: "${{ secrets.GITHUB_TOKEN }}"
         automatic_release_tag: ${{ github.ref_name }}
         prerelease: false
-        title: "${{ PRODUCT_NAME }} ${{ github.ref_name }}"
+        title: "${{ env.PRODUCT_NAME }} ${{ github.ref_name }}"
         files: |
           dist/*.zip
