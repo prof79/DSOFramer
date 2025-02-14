@@ -18,4 +18,4 @@ For a quick fix/proof-of-concept you can use [Resource Hacker](https://www.angus
 * See `Sources_VC2022` for the updated/work-in-progress sources.
 * See `Sources` for the original Microsoft sources for comparison.
 * See `Microsoft` for original binaries recovered before they were removed from the original pages.
-* See `eula.txt` about what Microsoft originally said about licensing and liabilities.
+* See `Microsoft\eula.txt` about what Microsoft originally said about licensing and liabilities.
