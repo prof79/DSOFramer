@@ -96,7 +96,7 @@ jobs:
       with:
         name: ${{ env.PRODUCT_NAME }}
         path: |
-          dist/${{ env.BASE_PATH }}/${{ env.ARCHIVE_BASE_NAME }}.zip
+          ${{ env.BASE_PATH }}/${{ env.ARCHIVE_BASE_NAME }}.zip
 
 
   publish:
