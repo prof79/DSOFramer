@@ -1,0 +1,149 @@
+# This workflow will install MSVC dependencies and
+# build debug and release OCXs on demand or version tag push.
+
+name: MSVC Build OCX
+
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+  workflow_dispatch:
+
+
+env:
+  PRODUCT_NAME: Microsoft DSOFramer
+  BASE_PATH: Source_VC2022
+  BASE_NAME: dsoframer
+  BINARY_NAME: dsoframer.ocx
+  ARCHIVE_BASE_NAME: DSOFramer-Windows-x86-latest
+  ARCHIVE_NAME: ${{ ARCHIVE_BASE_NAME }}.zip
+
+
+jobs:
+
+  build:
+
+    strategy:
+      matrix:
+        os:
+          - windows-latest
+
+    runs-on: ${{ matrix.os }}
+
+    outputs:
+      short-sha: ${{ steps.short-hash.outputs.short-sha }}
+
+    steps:
+
+    - uses: actions/checkout@v4
+
+    - name: Set short commit hash variable
+      id: short-hash
+      shell: pwsh
+      run: |
+        $shortHash = ${Env:GITHUB_SHA}.Substring(0, 7)
+
+        Write-Output "SHORT_SHA=$shortHash" >> "${Env:GITHUB_ENV}"
+        Write-Output "short-sha=$shortHash" >> "${Env:GITHUB_OUTPUT}"
+
+    - name: Set version name variable
+      shell: pwsh
+      run: |
+        $versionName = ${Env:SHORT_SHA}
+        
+        if (${Env:GITHUB_REF} -match '^refs/tags/v')
+        {
+          $versionName = ${Env:GITHUB_REF_NAME}
+        }
+
+        Write-Output "VERSION_NAME=$versionName" >> "${Env:GITHUB_ENV}"
+
+    - name: Show build variables
+      shell: pwsh
+      run: |
+        Write-Host "GitHub ref: ${{ github.ref }}"
+        Write-Host "GitHub ref name: ${{ github.ref_name }}"
+        Write-Host "Commit short SHA: ${Env:SHORT_SHA}"
+        Write-Host "Version name: ${Env:VERSION_NAME}"
+        Write-Host "Base name: ${Env:BASE_PATH}"
+        Write-Host "Base name: ${Env:BASE_NAME}"
+        Write-Host "Binary name: ${Env:BINARY_NAME}"
+        Write-Host "Archive name: ${Env:ARCHIVE_NAME}"
+
+    - name: Install MSVC
+      uses: aminya/setup-cpp@v1
+      with:
+        compiler: msvc
+        vcvarsall: true
+
+    - name: Build
+      run: |
+        cd "${{ BASE_PATH }}"
+        msbuild "${{ BASE_NAME }}.vcxproj" -property:Configuration=Debug
+        msbuild "${{ BASE_NAME }}.vcxproj" -property:Configuration=Release
+
+    - name: List artifacts
+      run: |
+        Get-ChildItem . -Recurse
+
+    - name: Zip executable
+      shell: pwsh
+      run: |
+        cd "${{ BASE_PATH }}"
+        7z a "${Env:ARCHIVE_NAME}" "Debug\${Env:BINARY_NAME}.ocx" "Debug\${Env:BINARY_NAME}.pdb" "Release\${Env:BINARY_NAME}.ocx" "Release\${Env:BINARY_NAME}.pdb"
+
+    - name: Upload artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: ${{ env.PRODUCT_NAME }}
+        path: |
+          dist/${{ env.ARCHIVE_NAME }}
+
+
+  publish:
+
+    needs: build
+
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+
+    steps:
+
+    - name: Create dist directory
+      run: mkdir dist
+
+    - name: Download artifact
+      uses: actions/download-artifact@v3
+      with:
+        name: ${{ env.PRODUCT_NAME }}
+        path: dist
+ 
+    - name: Display structure of downloaded files
+      run: ls -R
+      working-directory: dist
+  
+    - name: Publish on-demand release
+      if: ${{ ! startsWith(github.ref, 'refs/tags/v') }}
+      uses: "marvinpinto/action-automatic-releases@latest"
+      with:
+        repo_token: "${{ secrets.GITHUB_TOKEN }}"
+        automatic_release_tag: "ondemand"
+        prerelease: true
+        title: "Development Release ${{ needs.build.outputs.short-sha }}"
+        files: |
+          dist/*.zip
+
+    - name: Publish version release
+      if: ${{ startsWith(github.ref, 'refs/tags/v') }}
+      uses: "marvinpinto/action-automatic-releases@latest"
+      with:
+        repo_token: "${{ secrets.GITHUB_TOKEN }}"
+        automatic_release_tag: ${{ github.ref_name }}
+        prerelease: false
+        title: "${{ PRODUCT_NAME }} ${{ github.ref_name }}"
+        files: |
+          dist/*.zip
