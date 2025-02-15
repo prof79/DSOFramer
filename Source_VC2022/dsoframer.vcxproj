@@ -92,7 +92,7 @@ echo regsvr32 exec. time &gt; "$(OutDir)regsvr32.trg"
     <Link>
       <AdditionalDependencies>oledlg.lib;urlmon.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>Debug\dsoframer.ocx</OutputFile>
-      <Version>1.2</Version>
+      <Version>1.4</Version>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <ModuleDefinitionFile>.\dsoframer.def</ModuleDefinitionFile>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -148,7 +148,7 @@ echo regsvr32 exec. time &gt; "$(OutDir)regsvr32.trg"
     <Link>
       <AdditionalDependencies>oledlg.lib;urlmon.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>Release\dsoframer.ocx</OutputFile>
-      <Version>1.2</Version>
+      <Version>1.4</Version>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <ModuleDefinitionFile>.\dsoframer.def</ModuleDefinitionFile>
       <GenerateDebugInformation>true</GenerateDebugInformation>
