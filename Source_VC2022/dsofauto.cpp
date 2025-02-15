@@ -32,10 +32,13 @@
 STDMETHODIMP CDsoFramerControl::Activate()
 {
     HRESULT hr;
-    ODS("CDsoFramerControl::Activate\n");
+
+    ODS(_T("CDsoFramerControl::Activate\n"));
 
     if (m_fInControlActivate)
+    {
         return S_FALSE;
+    }
 
     // Don't allow recursion of this function or we could get stuck in
     // loop trying to constantly grab focus.
@@ -48,7 +51,9 @@ STDMETHODIMP CDsoFramerControl::Activate()
 
     // Invalidate windows to update painting...
     if (SUCCEEDED(hr))
+    {
         InvalidateAllChildWindows(m_hwnd);
+    }
 
     m_fInControlActivate = FALSE;
 
@@ -68,9 +73,11 @@ STDMETHODIMP CDsoFramerControl::Activate()
 STDMETHODIMP CDsoFramerControl::get_ActiveDocument(IDispatch** ppdisp)
 {
     HRESULT hr = DSO_E_DOCUMENTNOTOPEN;
+
     IUnknown* punk;
 
-    ODS("CDsoFramerControl::get_ActiveDocument\n");
+    ODS(_T("CDsoFramerControl::get_ActiveDocument\n"));
+
     CHECK_NULL_RETURN(ppdisp, E_POINTER); *ppdisp = NULL;
 
     // Get IDispatch from open document object.
@@ -78,7 +85,9 @@ STDMETHODIMP CDsoFramerControl::get_ActiveDocument(IDispatch** ppdisp)
     {
         // Cannot access object if in print preview..
         if (m_pDocObjFrame->InPrintPreview())
+        {
             return ProvideErrorInfo(DSO_E_INMODALSTATE);
+        }
 
         // Ask ip active object for IDispatch interface. If it is not supported on
         // active object interface, try to get it from OLE object iface...
@@ -87,6 +96,7 @@ STDMETHODIMP CDsoFramerControl::get_ActiveDocument(IDispatch** ppdisp)
         {
             hr = punk->QueryInterface(IID_IDispatch, (void**)ppdisp);
         }
+
         ASSERT(SUCCEEDED(hr));
     }
 
@@ -103,13 +113,16 @@ STDMETHODIMP CDsoFramerControl::get_ActiveDocument(IDispatch** ppdisp)
 STDMETHODIMP CDsoFramerControl::ExecOleCommand(LONG OLECMDID, VARIANT Options, VARIANT* vInParam, VARIANT* vInOutParam)
 {
     HRESULT hr = E_INVALIDARG;
+
     DWORD dwOptions = (DWORD)LONG_FROM_VARIANT(Options, 0);
 
-    TRACE1("CDsoFramerControl::DoOleCommand(%d)\n", OLECMDID);
+    TRACE1(_T("CDsoFramerControl::DoOleCommand(%d)\n"), OLECMDID);
 
     // Cannot access object if in modal condition...
     if ((m_fModalState) || (m_fNoInteractive))
+    {
         return ProvideErrorInfo(DSO_E_INMODALSTATE);
+    }
 
     // Handle some custom commands that don't need doc open to call...
     switch (OLECMDID)
@@ -117,11 +130,14 @@ STDMETHODIMP CDsoFramerControl::ExecOleCommand(LONG OLECMDID, VARIANT Options, V
     case OLECMDID_RESETFRAMEHOOK:
         {
             LONG lhwnd = (DWORD)LONG_FROM_VARIANT(*vInParam, 0);
+
             return ResetFrameHook((HWND)lhwnd);
         }
     case OLECMDID_LOCKSERVER:
         if (BOOL_FROM_VARIANT(Options, TRUE) == FALSE)
+        {
             return put_LockServer(VARIANT_FALSE);
+        }
     }
 
     // The rest require a doc object loaded first...
@@ -132,17 +148,21 @@ STDMETHODIMP CDsoFramerControl::ExecOleCommand(LONG OLECMDID, VARIANT Options, V
     case OLECMDID_GETDATAFORMAT:
         // If requesting special data get...
         hr = m_pDocObjFrame->HrGetDataFromObject(vInParam, vInOutParam);
+
         break;
 
     case OLECMDID_SETDATAFORMAT:
         // If requesting special data set...
         hr = m_pDocObjFrame->HrSetDataInObject(vInParam, vInOutParam, BOOL_FROM_VARIANT(Options, TRUE));
+
         break;
 
     case OLECMDID_LOCKSERVER:
         // optional lock on server...
         if (BOOL_FROM_VARIANT(Options, FALSE))
+        {
             hr = put_LockServer(VARIANT_TRUE);
+        }
         break;
 
     case OLECMDID_NOTIFYACTIVE:
@@ -150,6 +170,7 @@ STDMETHODIMP CDsoFramerControl::ExecOleCommand(LONG OLECMDID, VARIANT Options, V
         if (vInParam)
         {
             m_pDocObjFrame->OnNotifyAppActivate(BOOL_FROM_VARIANT(*vInParam, FALSE), 0);
+
             hr = S_OK;
         }
         break;
@@ -161,11 +182,18 @@ STDMETHODIMP CDsoFramerControl::ExecOleCommand(LONG OLECMDID, VARIANT Options, V
         // specify if user should be prompted or not, so update the options to allow the
         // assuption to still work as expected (this is for compatibility)...
         if ((dwOptions == 0) && ((DsoPVarFromPVarRef(&Options)->vt & 0xFF) == VT_BOOL))
-            dwOptions = (BOOL_FROM_VARIANT(Options, FALSE) ? OLECMDEXECOPT_PROMPTUSER : OLECMDEXECOPT_DODEFAULT);
+        {
+            dwOptions = (
+                BOOL_FROM_VARIANT(Options, FALSE)
+                    ? OLECMDEXECOPT_PROMPTUSER
+                    : OLECMDEXECOPT_DODEFAULT
+            );
+        }
 
         // Ask object server to do the command...
         hr = m_pDocObjFrame->DoOleCommand(OLECMDID, dwOptions, vInParam, vInOutParam);
     }
+
     return hr;
 }
 
@@ -185,31 +213,42 @@ STDMETHODIMP CDsoFramerControl::CreateNew(BSTR ProgIdOrTemplate)
     IStorage *pstgTemplate = NULL;
     LPWSTR pwszTempFile = NULL;
 
-    TRACE1("CDsoFramerControl::CreateNew(%S)\n", ProgIdOrTemplate);
+    TRACE1(_T("CDsoFramerControl::CreateNew(%S)\n"), ProgIdOrTemplate);
 
     // Check the string to make sure a valid item is passed...
     if (!(ProgIdOrTemplate) || (SysStringLen(ProgIdOrTemplate) < 4))
+    {
         return E_INVALIDARG;
+    }
 
     // Cannot create object if we are not activate yet, or if in modal condition...
     if (!(m_fInPlaceActive) || (m_fModalState))
+    {
         return ProvideErrorInfo(DSO_E_INMODALSTATE);
+    }
 
     // Make sure any open document is closed first...
     if ((m_pDocObjFrame) && FAILED(hr = Close()))
+    {
         return hr;
+    }
 
     // Make sure we are the active component for this process...
     if (FAILED(hr = Activate()))
+    {
         return hr;
+    }
 
     // Let's make a doc frame for ourselves...
     m_pDocObjFrame = CDsoDocObject::CreateInstance((IDsoDocObjectSite*)&m_xDsoDocObjectSite);
     if (!(m_pDocObjFrame))
+    {
         return E_OUTOFMEMORY;
+    }
 
     // Start a wait operation to notify user...
     hCur = SetCursor(LoadCursor(NULL, IDC_WAIT));
+
     m_fInDocumentLoad = TRUE;
 
     // If the string passed looks like a URL, it is a web template. We need
@@ -221,6 +260,7 @@ STDMETHODIMP CDsoFramerControl::CreateNew(BSTR ProgIdOrTemplate)
         if (FAILED(hr = URLDownloadFile(NULL, ProgIdOrTemplate, pwszTempFile)))
         {
             DsoMemFree(pwszTempFile); pwszTempFile = NULL;
+
             goto error_out;
         }
 
@@ -236,6 +276,7 @@ STDMETHODIMP CDsoFramerControl::CreateNew(BSTR ProgIdOrTemplate)
         if ((hr = StgIsStorageFile(ProgIdOrTemplate)) != S_OK)
         {
             hr = (FAILED(hr) ? hr : STG_E_NOTFILEBASEDSTORAGE);
+
             goto error_out;
         }
 
@@ -243,19 +284,23 @@ STDMETHODIMP CDsoFramerControl::CreateNew(BSTR ProgIdOrTemplate)
         hr = StgOpenStorage(ProgIdOrTemplate, NULL,
             (STGM_READ | STGM_SHARE_DENY_WRITE | STGM_TRANSACTED),
              NULL, 0, &pstgTemplate);
+
         GOTO_ON_FAILURE(hr, error_out);
 
         // We get the CLSID from the template...
         hr = ReadClassStg(pstgTemplate, &clsid);
+
         if (FAILED(hr) || (clsid == GUID_NULL))
         {
             hr = (FAILED(hr) ? hr : STG_E_OLDFORMAT);
+
             goto error_out;
         }
     }
     else if (FAILED(CLSIDFromProgID(ProgIdOrTemplate, &clsid))) // Otherwise the string passed is assumed a ProgID...
     {
         hr = DSO_E_INVALIDPROGID;
+
         goto error_out;
     }
 
@@ -266,9 +311,11 @@ STDMETHODIMP CDsoFramerControl::CreateNew(BSTR ProgIdOrTemplate)
     if (!(m_pHookManager) && FDelayFrameHookSet())
     {
         m_pHookManager = CDsoFrameHookManager::RegisterFramerControl(m_hwndParent, m_hwnd);
+
         if (!m_pHookManager)
         {
             hr = DSO_E_FRAMEHOOKFAILED;
+
             goto error_out;
         }
     }
@@ -292,7 +339,9 @@ STDMETHODIMP CDsoFramerControl::CreateNew(BSTR ProgIdOrTemplate)
         EnableDropFile(FALSE);
 
         if (!m_fShowToolbars)
+        {
             m_pDocObjFrame->OnNotifyChangeToolState(FALSE);
+        }
 
         hr = m_pDocObjFrame->IPActivateView();
     }
@@ -304,18 +353,23 @@ STDMETHODIMP CDsoFramerControl::CreateNew(BSTR ProgIdOrTemplate)
     {
 error_out:
         m_fFreezeEvents = TRUE;
+        
         Close();
+        
         m_fFreezeEvents = FALSE;
+
         hr = ProvideErrorInfo(hr);
     }
     else
     {
         // Fire the OnDocumentOpened event...
         VARIANT rgargs[2];
+        
         rgargs[0].vt = VT_DISPATCH; get_ActiveDocument(&(rgargs[0].pdispVal));
         rgargs[1].vt = VT_BSTR; rgargs[1].bstrVal = NULL;
 
         RaiseAutomationEvent(DSOF_DISPID_DOCOPEN, 2, rgargs);
+
         VariantClear(&rgargs[0]);
 
         // Ensure we are active control...
@@ -326,6 +380,7 @@ error_out:
     }
 
     m_fInDocumentLoad = FALSE;
+
     SetCursor(hCur);
 
     SAFE_RELEASE_INTERFACE(pstgTemplate);
@@ -334,7 +389,9 @@ error_out:
     if (pwszTempFile)
     {
         FPerformShellOp(FO_DELETE, pwszTempFile, NULL);
+
         DsoMemFree(pwszTempFile);
+        
         SysFreeString(ProgIdOrTemplate);
     }
 
@@ -357,55 +414,78 @@ error_out:
 STDMETHODIMP CDsoFramerControl::Open(VARIANT Document, VARIANT ReadOnly, VARIANT ProgId, VARIANT WebUsername, VARIANT WebPassword)
 {
     HRESULT   hr;
+    
     LPWSTR    pwszDocument  = LPWSTR_FROM_VARIANT(Document);
     LPWSTR    pwszAltProgId = LPWSTR_FROM_VARIANT(ProgId);
     LPWSTR    pwszUserName  = LPWSTR_FROM_VARIANT(WebUsername);
     LPWSTR    pwszPassword  = LPWSTR_FROM_VARIANT(WebPassword);
+
     BOOL      fOpenReadOnly = BOOL_FROM_VARIANT(ReadOnly, FALSE);
+    
     CLSID     clsidAlt      = GUID_NULL;
+    
     HCURSOR   hCur;
+    
     IUnknown* punk = NULL;
 
     BIND_OPTS bopts = {sizeof(BIND_OPTS), BIND_MAYBOTHERUSER, 0, 10000};
 
-    TRACE1("CDsoFramerControl::Open(%S)\n", pwszDocument);
+    TRACE1(_T("CDsoFramerControl::Open(%S)\n"), pwszDocument);
 
     // We must have either a string (file path or URL) or an object to open from...
     if (!(pwszDocument) || (*pwszDocument == L'\0'))
     {
         if (!(pwszDocument) && ((punk = PUNK_FROM_VARIANT(Document)) == NULL))
+        {
             return E_INVALIDARG;
+        }
     }
 
     // If the user passed the ProgId, find the alternative CLSID for server...
     if ((pwszAltProgId) && FAILED(CLSIDFromProgID(pwszAltProgId, &clsidAlt)))
+    {
         return E_INVALIDARG;
+    }
 
     // Cannot create object if we are not activate yet, or if in modal condition...
     if (!(m_fInPlaceActive) || (m_fModalState))
+    {
         return ProvideErrorInfo(DSO_E_INMODALSTATE);
+    }
 
     // OK. If here, all the parameters look good and it is time to try and open
     // the document object. Start by closing any existing document first...
     if ((m_pDocObjFrame) && FAILED(hr = Close()))
+    {
         return hr;
+    }
 
     // Make sure we are the active component for this process...
-    if (FAILED(hr = Activate())) return hr;
+    if (FAILED(hr = Activate()))
+    {
+        return hr;
+    }
 
     // Let's make a doc frame for ourselves...
     if (!(m_pDocObjFrame = CDsoDocObject::CreateInstance((IDsoDocObjectSite*)&m_xDsoDocObjectSite)))
+    {
         return E_OUTOFMEMORY;
+    }
 
     // If we had delayed the frame hook, we should set it up now...
     if (!(m_pHookManager) && FDelayFrameHookSet())
     {
         m_pHookManager = CDsoFrameHookManager::RegisterFramerControl(m_hwndParent, m_hwnd);
-        if (!m_pHookManager) return ProvideErrorInfo(DSO_E_FRAMEHOOKFAILED);
+
+        if (!m_pHookManager)
+        {
+            return ProvideErrorInfo(DSO_E_FRAMEHOOKFAILED);
+        }
     }
 
     // Start a wait operation to notify user...
     hCur = SetCursor(LoadCursor(NULL, IDC_WAIT));
+
     m_fInDocumentLoad = TRUE;
 
     // Setup the bind options based on read-only flag....
@@ -426,14 +506,21 @@ STDMETHODIMP CDsoFramerControl::Open(VARIANT Document, VARIANT ReadOnly, VARIANT
         {
             hr = m_pDocObjFrame->CreateFromFile(pwszDocument, clsidAlt, &bopts);
         }
-        else hr = E_INVALIDARG;
+        else
+        {
+            hr = E_INVALIDARG;
+        }
     }
     else if (punk)
     {
         // If we have an object to load from, try loading it direct...
         hr = m_pDocObjFrame->CreateFromRunningObject(punk, NULL, &bopts);
     }
-    else hr = E_UNEXPECTED; // Unhandled load type??
+    else
+    {
+        // Unhandled load type??
+        hr = E_UNEXPECTED;
+    }
 
     // If successful, we can activate the object...
     if (SUCCEEDED(hr))
@@ -441,7 +528,9 @@ STDMETHODIMP CDsoFramerControl::Open(VARIANT Document, VARIANT ReadOnly, VARIANT
         EnableDropFile(FALSE);
 
         if (!m_fShowToolbars)
+        {
             m_pDocObjFrame->OnNotifyChangeToolState(FALSE);
+        }
 
         hr = m_pDocObjFrame->IPActivateView();
     }
@@ -452,18 +541,23 @@ STDMETHODIMP CDsoFramerControl::Open(VARIANT Document, VARIANT ReadOnly, VARIANT
     if (FAILED(hr))
     {
         m_fFreezeEvents = TRUE;
+        
         Close();
+        
         m_fFreezeEvents = FALSE;
+
         hr = ProvideErrorInfo(hr);
     }
     else
     {
         // Fire the OnDocumentOpened event...
         VARIANT rgargs[2];
+
         rgargs[0].vt = VT_DISPATCH; get_ActiveDocument(&(rgargs[0].pdispVal));
         rgargs[1].vt = VT_BSTR; rgargs[1].bstrVal = SysAllocString(pwszDocument);
 
         RaiseAutomationEvent(DSOF_DISPID_DOCOPEN, 2, rgargs);
+
         VariantClear(&rgargs[1]);
         VariantClear(&rgargs[0]);
 
@@ -475,7 +569,9 @@ STDMETHODIMP CDsoFramerControl::Open(VARIANT Document, VARIANT ReadOnly, VARIANT
     }
 
     m_fInDocumentLoad = FALSE;
+    
     SetCursor(hCur);
+
     return hr;
 }
 
@@ -494,33 +590,43 @@ STDMETHODIMP CDsoFramerControl::Save(VARIANT SaveAsDocument, VARIANT OverwriteEx
     LPWSTR    pwszPassword = LPWSTR_FROM_VARIANT(WebPassword);
     BOOL      fOverwrite   = BOOL_FROM_VARIANT(OverwriteExisting, FALSE);
 
-    TRACE1("CDsoFramerControl::Save(%S)\n", pwszDocument);
+    TRACE1(_T("CDsoFramerControl::Save(%S)\n"), pwszDocument);
+
     CHECK_NULL_RETURN(m_pDocObjFrame, ProvideErrorInfo(DSO_E_DOCUMENTNOTOPEN));
 
     // Cannot access object if in modal condition...
     if ((m_fModalState) || (m_fNoInteractive))
+    {
         return ProvideErrorInfo(DSO_E_INMODALSTATE);
+    }
 
     // If user passed a value for SaveAs, it must be a valid string...
     if (!(PARAM_IS_MISSING(&SaveAsDocument)) &&
         ((pwszDocument == NULL) || (*pwszDocument == L'\0')))
+    {
         return E_INVALIDARG;
+    }
 
     // Raise the BeforeDocumentSaved event to host...
     if (m_dispEvents)
     {
-        VARIANT rgargs[3]; VARIANT_BOOL vtboolCancel = VARIANT_FALSE;
+        VARIANT rgargs[3];
+        VARIANT_BOOL vtboolCancel = VARIANT_FALSE;
+        
         rgargs[2].vt = VT_DISPATCH; get_ActiveDocument(&(rgargs[2].pdispVal));
         rgargs[1].vt = VT_BSTR; rgargs[1].bstrVal = SysAllocString(pwszDocument);
         rgargs[0].vt = (VT_BOOL | VT_BYREF); rgargs[0].pboolVal = &vtboolCancel;
 
         RaiseAutomationEvent(DSOF_DISPID_BDOCSAVE, 3, rgargs);
+
         VariantClear(&rgargs[2]);
         VariantClear(&rgargs[1]);
 
         // Setting Cancel param will abort the save...
         if (vtboolCancel != VARIANT_FALSE)
+        {
             return E_ABORT;
+        }
     }
 
     // Now do the save...
@@ -553,10 +659,13 @@ STDMETHODIMP CDsoFramerControl::Save(VARIANT SaveAsDocument, VARIANT OverwriteEx
         if (m_dispEvents)
         {
             VARIANT rgargs[3];
+            
             rgargs[2].vt = VT_DISPATCH; get_ActiveDocument(&(rgargs[2].pdispVal));
             rgargs[1].vt = VT_BSTR; rgargs[1].bstrVal = SysAllocString(m_pDocObjFrame->GetSourceDocName());
             rgargs[0].vt = VT_BSTR; rgargs[0].bstrVal = SysAllocString(m_pDocObjFrame->GetSourceName());
+
             RaiseAutomationEvent(DSOF_DISPID_SAVECOMPLETE, 3, rgargs);
+
             VariantClear(&rgargs[2]);
             VariantClear(&rgargs[1]);
             VariantClear(&rgargs[0]);
@@ -567,6 +676,7 @@ STDMETHODIMP CDsoFramerControl::Save(VARIANT SaveAsDocument, VARIANT OverwriteEx
     }
 
     SetCursor(hCur);
+
     return ProvideErrorInfo(hr);
 }
 
@@ -577,13 +687,15 @@ STDMETHODIMP CDsoFramerControl::Save(VARIANT SaveAsDocument, VARIANT OverwriteEx
 //
 STDMETHODIMP CDsoFramerControl::Close()
 {
-    ODS("CDsoFramerControl::Close\n");
+    ODS(_T("CDsoFramerControl::Close\n"));
 
     CDsoDocObject* pdframe = m_pDocObjFrame;
     if (pdframe)
     {
         // Fire the BeforeDocumentClosed event to give host chance to cancel...
-        VARIANT rgargs[2]; VARIANT_BOOL vtboolCancel = VARIANT_FALSE;
+        VARIANT rgargs[2];
+        VARIANT_BOOL vtboolCancel = VARIANT_FALSE;
+
         rgargs[1].vt = VT_DISPATCH; get_ActiveDocument(&(rgargs[1].pdispVal));
         rgargs[0].vt = (VT_BOOL | VT_BYREF); rgargs[0].pboolVal = &vtboolCancel;
 
@@ -592,7 +704,9 @@ STDMETHODIMP CDsoFramerControl::Close()
         VariantClear(&rgargs[1]);
 
         if (vtboolCancel != VARIANT_FALSE)
+        {
             return E_ABORT;
+        }
 
         // If not canceled, clear the member variable then call close on doc frame...
         m_pDocObjFrame = NULL;
@@ -610,6 +724,7 @@ STDMETHODIMP CDsoFramerControl::Close()
     // Redraw the caption as needed...
     RedrawCaption();
     EnableDropFile(TRUE);
+
     return S_OK;
 }
 
@@ -625,18 +740,26 @@ STDMETHODIMP CDsoFramerControl::put_Caption(BSTR bstr)
 
     // Set the new one (if provided)...
     if ((bstr) && (SysStringLen(bstr) > 0))
+    {
         m_bstrCustomCaption = SysAllocString(bstr);
+    }
 
     ViewChanged();
+    
     m_fDirty = TRUE;
+
     return S_OK;
 }
 
 STDMETHODIMP CDsoFramerControl::get_Caption(BSTR* pbstr)
 {
-    if (pbstr) *pbstr = (m_bstrCustomCaption ?
-        SysAllocString(m_bstrCustomCaption) :
-        SysAllocString(L"Office Framer Control"));
+    if (pbstr)
+    {
+        *pbstr = (m_bstrCustomCaption ?
+            SysAllocString(m_bstrCustomCaption) :
+            SysAllocString(L"Office Framer Control"));
+    }
+
     return S_OK;
 }
 
@@ -647,27 +770,35 @@ STDMETHODIMP CDsoFramerControl::get_Caption(BSTR* pbstr)
 //
 STDMETHODIMP CDsoFramerControl::put_Titlebar(VARIANT_BOOL vbool)
 {
-    TRACE1("CDsoFramerControl::put_Titlebar(%d)\n", vbool);
+    TRACE1(_T("CDsoFramerControl::put_Titlebar(%d)\n"), vbool);
 
     // Cannot access object if in modal condition...
     if (m_fModalState)
+    {
         return ProvideErrorInfo(DSO_E_INMODALSTATE);
+    }
 
     if (m_fShowTitlebar != (WORD)(BOOL)vbool)
     {
         m_fShowTitlebar = (BOOL)vbool;
         m_fDirty = TRUE;
+
         OnResize();
         ViewChanged();
     }
+
     return S_OK;
 }
 
 STDMETHODIMP CDsoFramerControl::get_Titlebar(VARIANT_BOOL* pbool)
 {
-    ODS("CDsoFramerControl::get_Titlebar\n");
+    ODS(_T("CDsoFramerControl::get_Titlebar\n"));
+    
     if (pbool)
+    {
         *pbool = (m_fShowTitlebar ? VARIANT_TRUE : VARIANT_FALSE);
+    }
+
     return S_OK;
 }
 
@@ -679,12 +810,14 @@ STDMETHODIMP CDsoFramerControl::get_Titlebar(VARIANT_BOOL* pbool)
 //
 STDMETHODIMP CDsoFramerControl::put_Toolbars(VARIANT_BOOL vbool)
 {
-    TRACE1("CDsoFramerControl::put_Toolbars(%d)\n", vbool);
+    TRACE1(_T("CDsoFramerControl::put_Toolbars(%d)\n"), vbool);
 
     // If the control is in modal state, we can't do things that
     // will call the server directly, like toggle toolbars...
     if ((m_fModalState) || (m_fNoInteractive))
+    {
         return ProvideErrorInfo(DSO_E_INMODALSTATE);
+    }
 
     if (m_fShowToolbars != (WORD)(BOOL)vbool)
     {
@@ -692,19 +825,26 @@ STDMETHODIMP CDsoFramerControl::put_Toolbars(VARIANT_BOOL vbool)
         m_fDirty = TRUE;
 
         if (m_pDocObjFrame)
+        {
             m_pDocObjFrame->OnNotifyChangeToolState(m_fShowToolbars);
+        }
 
         ViewChanged();
         OnResize();
     }
+
     return S_OK;
 }
 
 STDMETHODIMP CDsoFramerControl::get_Toolbars(VARIANT_BOOL* pbool)
 {
-    ODS("CDsoFramerControl::get_Toolbars\n");
+    ODS(_T("CDsoFramerControl::get_Toolbars\n"));
+    
     if (pbool)
+    {
         *pbool = (m_fShowToolbars ? VARIANT_TRUE : VARIANT_FALSE);
+    }
+
     return S_OK;
 }
 
@@ -723,23 +863,31 @@ STDMETHODIMP CDsoFramerControl::get_Toolbars(VARIANT_BOOL* pbool)
 //
 STDMETHODIMP CDsoFramerControl::put_ModalState(VARIANT_BOOL vbool)
 {
-    TRACE1("CDsoFramerControl::put_ModalState(%d)\n", vbool);
+    TRACE1(_T("CDsoFramerControl::put_ModalState(%d)\n"), vbool);
 
     // you can't force modal state change unless active...
     if ((m_fNoInteractive) || (!m_fComponentActive))
+    {
         return ProvideErrorInfo(E_ACCESSDENIED);
+    }
 
     if (m_fModalState != (WORD)(BOOL)vbool)
+    {
         UpdateModalState((vbool != VARIANT_FALSE), TRUE);
+    }
 
     return S_OK;
 }
 
 STDMETHODIMP CDsoFramerControl::get_ModalState(VARIANT_BOOL* pbool)
 {
-    ODS("CDsoFramerControl::get_ModalState\n");
+    ODS(_T("CDsoFramerControl::get_ModalState\n"));
+    
     if (pbool)
+    {
         *pbool = ((m_fModalState) ? VARIANT_TRUE : VARIANT_FALSE);
+    }
+
     return S_OK;
 }
 
@@ -753,13 +901,18 @@ STDMETHODIMP CDsoFramerControl::ShowDialog(dsoShowDialogType DlgType)
 {
     HRESULT hr = E_ACCESSDENIED;
 
-    TRACE1("CDsoFramerControl::ShowDialog(%d)\n", DlgType);
+    TRACE1(_T("CDsoFramerControl::ShowDialog(%d)\n"), DlgType);
+    
     if ((DlgType < dsoFileNew) || (DlgType > dsoDialogProperties))
+    {
         return E_INVALIDARG;
+    }
 
     // Cannot access object if in modal condition...
     if ((m_fModalState) || (m_fNoInteractive))
+    {
         return ProvideErrorInfo(DSO_E_INMODALSTATE);
+    }
 
     // The first three dialog types we handle...
     if (DlgType < dsoDialogSaveCopy)
@@ -769,6 +922,7 @@ STDMETHODIMP CDsoFramerControl::ShowDialog(dsoShowDialogType DlgType)
     else if (m_pDocObjFrame)    // The others are provided by the server via IOleCommandTarget...
     {
         DWORD dwOleCmd;
+        
         switch (DlgType)
         {
         case dsoDialogSaveCopy:   dwOleCmd = OLECMDID_SAVECOPYAS; break;
@@ -776,6 +930,7 @@ STDMETHODIMP CDsoFramerControl::ShowDialog(dsoShowDialogType DlgType)
         case dsoDialogProperties: dwOleCmd = OLECMDID_PROPERTIES; break;
         default:                  dwOleCmd = OLECMDID_PRINT;      break;
         }
+
         hr = m_pDocObjFrame->DoOleCommand(dwOleCmd, OLECMDEXECOPT_PROMPTUSER, NULL, NULL);
     }
 
@@ -794,40 +949,56 @@ STDMETHODIMP CDsoFramerControl::ShowDialog(dsoShowDialogType DlgType)
 //
 STDMETHODIMP CDsoFramerControl::put_EnableFileCommand(dsoFileCommandType Item, VARIANT_BOOL vbool)
 {
-    TRACE2("CDsoFramerControl::put_EnableFileCommand(%d, %d)\n", Item, vbool);
+    TRACE2(_T("CDsoFramerControl::put_EnableFileCommand(%d, %d)\n"), Item, vbool);
 
     if ((Item < dsoFileNew) || (Item > dsoFilePrintPreview))
+    {
         return E_INVALIDARG;
+    }
 
     // You cannot access menu when in a modal condition...
     if ((m_fModalState) || (m_fNoInteractive))
+    {
         return ProvideErrorInfo(DSO_E_INMODALSTATE);
+    }
 
     // We keep bit flags for menu state. Just set the bit and a update
     // the embedded object as needed. User will see change next time menu is shown...
     UINT code = (1 << Item);
+    
     if (vbool == 0)
+    {
         m_wFileMenuFlags &= ~(code);
+    }
     else
+    {
         m_wFileMenuFlags |= code;
+    }
 
     // This should update toolbar icon (if server supports it)
     if (m_pDocObjFrame)
+    {
         m_pDocObjFrame->DoOleCommand(OLECMDID_UPDATECOMMANDS, 0, NULL, NULL);
+    }
 
     return S_OK;
 }
 
 STDMETHODIMP CDsoFramerControl::get_EnableFileCommand(dsoFileCommandType Item, VARIANT_BOOL* pbool)
 {
-    TRACE1("CDsoFramerControl::get_EnableFileCommand(%d)\n", Item);
+    TRACE1(_T("CDsoFramerControl::get_EnableFileCommand(%d)\n"), Item);
 
     if ((Item < dsoFileNew) || (Item > dsoFilePrintPreview))
+    {
         return E_INVALIDARG;
+    }
 
     UINT code = (1 << Item);
+
     if (pbool)
+    {
         *pbool = ((m_wFileMenuFlags & code) ? VARIANT_TRUE : VARIANT_FALSE);
+    }
 
     return S_OK;
 }
@@ -839,30 +1010,40 @@ STDMETHODIMP CDsoFramerControl::get_EnableFileCommand(dsoFileCommandType Item, V
 //
 STDMETHODIMP CDsoFramerControl::put_BorderStyle(dsoBorderStyle style)
 {
-    ODS("CDsoFramerControl::put_BorderStyle\n");
+    ODS(_T("CDsoFramerControl::put_BorderStyle\n"));
 
     if ((style < dsoBorderNone) || (style > dsoBorder3DThin))
+    {
         return E_INVALIDARG;
+    }
 
     // Cannot access object if in modal condition...
     if (m_fModalState)
+    {
         return ProvideErrorInfo(DSO_E_INMODALSTATE);
+    }
 
     if (m_fBorderStyle != (DWORD)style)
     {
         m_fBorderStyle = style;
         m_fDirty = TRUE;
+
         OnResize();
         ViewChanged();
     }
+
     return S_OK;
 }
 
 STDMETHODIMP CDsoFramerControl::get_BorderStyle(dsoBorderStyle* pstyle)
 {
-    ODS("CDsoFramerControl::get_BorderStyle\n");
+    ODS(_T("CDsoFramerControl::get_BorderStyle\n"));
+
     if (pstyle)
+    {
         *pstyle = (dsoBorderStyle)m_fBorderStyle;
+    }
+
     return S_OK;
 }
 
@@ -872,96 +1053,126 @@ STDMETHODIMP CDsoFramerControl::get_BorderStyle(dsoBorderStyle* pstyle)
 //
 STDMETHODIMP CDsoFramerControl::put_BorderColor(OLE_COLOR clr)
 {
-    ODS("CDsoFramerControl::put_BorderColor\n");
+    ODS(_T("CDsoFramerControl::put_BorderColor\n"));
+    
     if (m_clrBorderColor != clr)
     {
         m_clrBorderColor = clr;
         m_fDirty = TRUE;
+
         ViewChanged();
     }
+
     return S_OK;
 }
 
 STDMETHODIMP CDsoFramerControl::get_BorderColor(OLE_COLOR* pclr)
 {
     if (pclr)
+    {
         *pclr = m_clrBorderColor;
+    }
+
     return S_OK;
 }
 
 STDMETHODIMP CDsoFramerControl::put_BackColor(OLE_COLOR clr)
 {
-    ODS("CDsoFramerControl::put_BackColor\n");
+    ODS(_T("CDsoFramerControl::put_BackColor\n"));
+    
     if (m_clrBackColor != clr)
     {
         m_clrBackColor = clr;
         m_fDirty = TRUE;
+
         ViewChanged();
     }
+
     return S_OK;
 }
 
 STDMETHODIMP CDsoFramerControl::get_BackColor(OLE_COLOR* pclr)
 {
     if (pclr)
+    {
         *pclr = m_clrBackColor;
+    }
+
     return S_OK;
 }
 
 STDMETHODIMP CDsoFramerControl::put_ForeColor(OLE_COLOR clr)
 {
-    ODS("CDsoFramerControl::put_ForeColor\n");
+    ODS(_T("CDsoFramerControl::put_ForeColor\n"));
+
     if (m_clrForeColor != clr)
     {
         m_clrForeColor = clr;
         m_fDirty = TRUE;
+
         ViewChanged();
     }
+
     return S_OK;
 }
 
 STDMETHODIMP CDsoFramerControl::get_ForeColor(OLE_COLOR* pclr)
 {
     if (pclr)
+    {
         *pclr = m_clrForeColor;
+    }
+
     return S_OK;
 }
 
 STDMETHODIMP CDsoFramerControl::put_TitlebarColor(OLE_COLOR clr)
 {
-    ODS("CDsoFramerControl::put_TitlebarColor\n");
+    ODS(_T("CDsoFramerControl::put_TitlebarColor\n"));
+    
     if (m_clrTBarColor != clr)
     {
         m_clrTBarColor = clr;
         m_fDirty = TRUE;
+
         ViewChanged();
     }
+
     return S_OK;
 }
 
 STDMETHODIMP CDsoFramerControl::get_TitlebarColor(OLE_COLOR* pclr)
 {
     if (pclr)
+    {
         *pclr = m_clrTBarColor;
+    }
+
     return S_OK;
 }
 
 STDMETHODIMP CDsoFramerControl::put_TitlebarTextColor(OLE_COLOR clr)
 {
-    ODS("CDsoFramerControl::put_TitlebarTextColor\n");
+    ODS(_T("CDsoFramerControl::put_TitlebarTextColor\n"));
+    
     if (m_clrTBarTextColor != clr)
     {
         m_clrTBarTextColor = clr;
         m_fDirty = TRUE;
+
         ViewChanged();
     }
+
     return S_OK;
 }
 
 STDMETHODIMP CDsoFramerControl::get_TitlebarTextColor(OLE_COLOR* pclr)
 {
     if (pclr)
+    {
         *pclr = m_clrTBarTextColor;
+    }
+
     return S_OK;
 }
 
@@ -972,28 +1183,36 @@ STDMETHODIMP CDsoFramerControl::get_TitlebarTextColor(OLE_COLOR* pclr)
 //
 STDMETHODIMP CDsoFramerControl::put_Menubar(VARIANT_BOOL vbool)
 {
-    TRACE1("CDsoFramerControl::put_Menubar(%d)\n", vbool);
+    TRACE1(_T("CDsoFramerControl::put_Menubar(%d)\n"), vbool);
 
     // If the control is in modal state, we can't do things that
     // will call the server directly, like toggle menu bar...
     if ((m_fModalState) || (m_fNoInteractive))
+    {
         return ProvideErrorInfo(DSO_E_INMODALSTATE);
+    }
 
     if (m_fShowMenuBar != (WORD)(BOOL)vbool)
     {
         m_fShowMenuBar = (BOOL)vbool;
         m_fDirty = TRUE;
+
         ViewChanged();
         OnResize();
     }
+
     return S_OK;
 }
 
 STDMETHODIMP CDsoFramerControl::get_Menubar(VARIANT_BOOL* pbool)
 {
-    ODS("CDsoFramerControl::get_Menubar\n");
+    ODS(_T("CDsoFramerControl::get_Menubar\n"));
+    
     if (pbool)
+    {
         *pbool = (m_fShowMenuBar ? VARIANT_TRUE : VARIANT_FALSE);
+    }
+
     return S_OK;
 }
 
@@ -1004,20 +1223,27 @@ STDMETHODIMP CDsoFramerControl::get_Menubar(VARIANT_BOOL* pbool)
 //
 STDMETHODIMP CDsoFramerControl::put_HostName(BSTR bstr)
 {
-    TRACE1("CDsoFramerControl::put_HostName(%S)\n", bstr);
+    TRACE1(_T("CDsoFramerControl::put_HostName(%S)\n"), bstr);
+
     SAFE_FREESTRING(m_pwszHostName);
 
     if ((bstr) && (SysStringLen(bstr) > 0))
+    {
         m_pwszHostName = DsoCopyString(bstr);
+    }
 
     return S_OK;
 }
 
 STDMETHODIMP CDsoFramerControl::get_HostName(BSTR* pbstr)
 {
-    ODS("CDsoFramerControl::get_HostName\n");
+    ODS(_T("CDsoFramerControl::get_HostName\n"));
+    
     if (pbstr)
+    {
         *pbstr = SysAllocString((m_pwszHostName ? m_pwszHostName : L"DsoFramerControl"));
+    }
+
     return S_OK;
 }
 
@@ -1028,10 +1254,13 @@ STDMETHODIMP CDsoFramerControl::get_HostName(BSTR* pbstr)
 //
 STDMETHODIMP CDsoFramerControl::get_DocumentFullName(BSTR* pbstr)
 {
-    ODS("CDsoFramerControl::get_DocumentFullName\n");
+    ODS(_T("CDsoFramerControl::get_DocumentFullName\n"));
+    
     CHECK_NULL_RETURN(pbstr, E_POINTER);
-    // Ask doc object site for the source name...
+    
+    // Ask doc object site for the source name ...
     *pbstr = (m_pDocObjFrame) ? SysAllocString(m_pDocObjFrame->GetSourceName()) : NULL;
+
     return S_OK;
 }
 
@@ -1042,10 +1271,13 @@ STDMETHODIMP CDsoFramerControl::get_DocumentFullName(BSTR* pbstr)
 //
 STDMETHODIMP CDsoFramerControl::get_DocumentName(BSTR* pbstr)
 {
-    ODS("CDsoFramerControl::get_DocumentName\n");
+    ODS(_T("CDsoFramerControl::get_DocumentName\n"));
+    
     CHECK_NULL_RETURN(pbstr, E_POINTER);
-    // Ask doc object site for the source doc name...
+    
+    // Ask doc object site for the source doc name ...
     *pbstr = (m_pDocObjFrame) ? SysAllocString(m_pDocObjFrame->GetSourceDocName()) : NULL;
+
     return S_OK;
 }
 
@@ -1056,10 +1288,14 @@ STDMETHODIMP CDsoFramerControl::get_DocumentName(BSTR* pbstr)
 //
 STDMETHODIMP CDsoFramerControl::get_IsReadOnly(VARIANT_BOOL* pbool)
 {
-    ODS("CDsoFramerControl::get_IsReadOnly\n");
+    ODS(_T("CDsoFramerControl::get_IsReadOnly\n"));
+    
     CHECK_NULL_RETURN(pbool, E_POINTER);
+    
     CHECK_NULL_RETURN(m_pDocObjFrame, ProvideErrorInfo(DSO_E_DOCUMENTNOTOPEN));
+    
     *pbool = (m_pDocObjFrame->IsReadOnly() ? VARIANT_TRUE : VARIANT_FALSE);
+
     return S_OK;
 }
 
@@ -1070,10 +1306,14 @@ STDMETHODIMP CDsoFramerControl::get_IsReadOnly(VARIANT_BOOL* pbool)
 //
 STDMETHODIMP CDsoFramerControl::get_IsDirty(VARIANT_BOOL* pbool)
 {
-    ODS("CDsoFramerControl::get_IsDirty\n");
+    ODS(_T("CDsoFramerControl::get_IsDirty\n"));
+    
     CHECK_NULL_RETURN(pbool, E_POINTER);
+    
     CHECK_NULL_RETURN(m_pDocObjFrame, ProvideErrorInfo(DSO_E_DOCUMENTNOTOPEN));
+    
     *pbool = (m_pDocObjFrame->IsDirty() ? VARIANT_TRUE : VARIANT_FALSE);
+
     return S_OK;
 }
 
@@ -1087,20 +1327,26 @@ STDMETHODIMP CDsoFramerControl::get_IsDirty(VARIANT_BOOL* pbool)
 STDMETHODIMP CDsoFramerControl::put_LockServer(VARIANT_BOOL vbool)
 {
     BOOL fLock = (vbool != VARIANT_FALSE);
-    TRACE1("CDsoFramerControl::put_LockServer(%d)\n", (DWORD)vbool);
+
+    TRACE1(_T("CDsoFramerControl::put_LockServer(%d)\n"), (DWORD)vbool);
 
     // We must have a server open to set a lock...
     if ((fLock) && (m_pDocObjFrame == NULL))
+    {
         return ProvideErrorInfo(DSO_E_DOCUMENTNOTOPEN);
+    }
 
     return SetTempServerLock(fLock);
 }
 
 STDMETHODIMP CDsoFramerControl::get_LockServer(VARIANT_BOOL* pvbool)
 {
-    ODS("CDsoFramerControl::get_LockServer\n");
+    ODS(_T("CDsoFramerControl::get_LockServer\n"));
+    
     CHECK_NULL_RETURN(pvbool, E_POINTER);
+    
     *pvbool = (VARIANT_BOOL)((m_pServerLock) ? VARIANT_TRUE : VARIANT_FALSE);
+
     return S_OK;
 }
 
@@ -1116,13 +1362,17 @@ STDMETHODIMP CDsoFramerControl::get_LockServer(VARIANT_BOOL* pvbool)
 //
 STDMETHODIMP CDsoFramerControl::GetDataObjectContent(VARIANT ClipFormatNameOrNumber, VARIANT *pvResults)
 {
-    ODS("CDsoFramerControl::GetDataObjectContent()\n");
+    ODS(_T("CDsoFramerControl::GetDataObjectContent()\n"));
+
     CHECK_NULL_RETURN(pvResults, E_POINTER); VariantInit(pvResults);
+    
     CHECK_NULL_RETURN(m_pDocObjFrame, ProvideErrorInfo(DSO_E_DOCUMENTNOTOPEN));
 
     // If the control is in modal state, we can't do anything...
     if ((m_fModalState) || (m_fNoInteractive))
+    {
         return ProvideErrorInfo(DSO_E_INMODALSTATE);
+    }
 
     return m_pDocObjFrame->HrGetDataFromObject(&ClipFormatNameOrNumber, pvResults);
 }
@@ -1136,12 +1386,15 @@ STDMETHODIMP CDsoFramerControl::GetDataObjectContent(VARIANT ClipFormatNameOrNum
 //
 STDMETHODIMP CDsoFramerControl::SetDataObjectContent(VARIANT ClipFormatNameOrNumber, VARIANT DataByteArray)
 {
-    ODS("CDsoFramerControl::SetDataObjectContent()\n");
+    ODS(_T("CDsoFramerControl::SetDataObjectContent()\n"));
+
     CHECK_NULL_RETURN(m_pDocObjFrame, ProvideErrorInfo(DSO_E_DOCUMENTNOTOPEN));
 
     // If the control is in modal state, we can't do anything...
     if ((m_fModalState) || (m_fNoInteractive))
+    {
         return ProvideErrorInfo(DSO_E_INMODALSTATE);
+    }
 
     return m_pDocObjFrame->HrSetDataInObject(&ClipFormatNameOrNumber, &DataByteArray, TRUE);
 }
@@ -1154,21 +1407,30 @@ STDMETHODIMP CDsoFramerControl::SetDataObjectContent(VARIANT ClipFormatNameOrNum
 //
 STDMETHODIMP CDsoFramerControl::put_ActivationPolicy(dsoActivationPolicy lPolicy)
 {
-    TRACE1("CDsoFramerControl::put_ActivationPolicy(%d)\n", lPolicy);
+    TRACE1(_T("CDsoFramerControl::put_ActivationPolicy(%d)\n"), lPolicy);
+    
     if (m_pDocObjFrame)
+    {
         return E_ACCESSDENIED;
+    }
 
     if ((lPolicy < dsoDefaultBehavior) || (lPolicy > 0x0F))
+    {
         return E_INVALIDARG;
+    }
 
     m_lActivationPolicy = lPolicy;
+
     return S_OK;
 }
 
 STDMETHODIMP CDsoFramerControl::get_ActivationPolicy(dsoActivationPolicy *plPolicy)
 {
     if (plPolicy)
+    {
         *plPolicy = (dsoActivationPolicy)m_lActivationPolicy;
+    }
+
     return S_OK;
 }
 
@@ -1180,7 +1442,8 @@ STDMETHODIMP CDsoFramerControl::get_ActivationPolicy(dsoActivationPolicy *plPoli
 STDMETHODIMP CDsoFramerControl::put_FrameHookPolicy(dsoFrameHookPolicy lPolicy)
 {
     HRESULT hr = E_ACCESSDENIED;
-    TRACE1("CDsoFramerControl::put_FrameHookPolicy(%d)\n", lPolicy);
+
+    TRACE1(_T("CDsoFramerControl::put_FrameHookPolicy(%d)\n"), lPolicy);
 
     switch (lPolicy)
     {
@@ -1208,7 +1471,10 @@ STDMETHODIMP CDsoFramerControl::put_FrameHookPolicy(dsoFrameHookPolicy lPolicy)
 STDMETHODIMP CDsoFramerControl::get_FrameHookPolicy(dsoFrameHookPolicy *plPolicy)
 {
     if (plPolicy)
+    {
         *plPolicy = (dsoFrameHookPolicy)m_lHookPolicy;
+    }
+
     return S_OK;
 }
 
@@ -1220,16 +1486,21 @@ STDMETHODIMP CDsoFramerControl::get_FrameHookPolicy(dsoFrameHookPolicy *plPolicy
 //
 STDMETHODIMP CDsoFramerControl::put_MenuAccelerators(VARIANT_BOOL vbool)
 {
-    ODS("CDsoFramerControl::put_MenuAccelerators\n");
+    ODS(_T("CDsoFramerControl::put_MenuAccelerators\n"));
+    
     m_fDisableMenuAccel = (vbool == VARIANT_FALSE);
+
     return S_OK;
 }
 
 STDMETHODIMP CDsoFramerControl::get_MenuAccelerators(VARIANT_BOOL* pvbool)
 {
-    ODS("CDsoFramerControl::get_MenuAccelerators\n");
+    ODS(_T("CDsoFramerControl::get_MenuAccelerators\n"));
+    
     CHECK_NULL_RETURN(pvbool, E_POINTER);
+    
     *pvbool = (m_fDisableMenuAccel ? VARIANT_FALSE : VARIANT_TRUE);
+
     return S_OK;
 }
 
@@ -1240,16 +1511,21 @@ STDMETHODIMP CDsoFramerControl::get_MenuAccelerators(VARIANT_BOOL* pvbool)
 //
 STDMETHODIMP CDsoFramerControl::put_EventsEnabled(VARIANT_BOOL vbool)
 {
-    ODS("CDsoFramerControl::put_EventsEnabled\n");
+    ODS(_T("CDsoFramerControl::put_EventsEnabled\n"));
+    
     m_fFreezeEvents = (vbool == VARIANT_FALSE);
+
     return S_OK;
 }
 
 STDMETHODIMP CDsoFramerControl::get_EventsEnabled(VARIANT_BOOL* pvbool)
 {
-    ODS("CDsoFramerControl::get_EventsEnabled\n");
+    ODS(_T("CDsoFramerControl::get_EventsEnabled\n"));
+    
     CHECK_NULL_RETURN(pvbool, E_POINTER);
+    
     *pvbool = (m_fFreezeEvents ? VARIANT_FALSE : VARIANT_TRUE);
+
     return S_OK;
 }
 
@@ -1267,7 +1543,10 @@ STDMETHODIMP CDsoFramerControl::get_EventsEnabled(VARIANT_BOOL* pvbool)
 STDMETHODIMP CDsoFramerControl::GetTypeInfoCount(UINT* pctinfo)
 {
     if (pctinfo)
+    {
         *pctinfo = 1;
+    }
+
     return S_OK;
 }
 
@@ -1275,7 +1554,8 @@ STDMETHODIMP CDsoFramerControl::GetTypeInfo(UINT iTInfo, LCID lcid, ITypeInfo** 
 {
     HRESULT hr = S_OK;
 
-    ODS("CDsoFramerControl::GetTypeInfo\n");
+    ODS(_T("CDsoFramerControl::GetTypeInfo\n"));
+
     CHECK_NULL_RETURN(ppTInfo, E_POINTER); *ppTInfo = NULL;
 
     // We only support default interface late bound...
@@ -1290,6 +1570,7 @@ STDMETHODIMP CDsoFramerControl::GetTypeInfo(UINT iTInfo, LCID lcid, ITypeInfo** 
 
     // Return interface with ref count (if we have it, otherwise error)...
     SAFE_SET_INTERFACE(*ppTInfo, m_ptiDispType);
+
     return hr;
 }
 
@@ -1298,16 +1579,20 @@ STDMETHODIMP CDsoFramerControl::GetIDsOfNames(REFIID riid, LPOLESTR* rgszNames, 
     HRESULT hr;
     ITypeInfo *pti;
 
-    ODS("CDsoFramerControl::GetIDsOfNames\n");
+    ODS(_T("CDsoFramerControl::GetIDsOfNames\n"));
+    
     CHECK_NULL_RETURN((IID_NULL == riid), DISP_E_UNKNOWNINTERFACE);
 
     // Get the type info for this dispinterface...
     hr = GetTypeInfo(0, lcid, &pti);
+    
     RETURN_ON_FAILURE(hr);
 
     // Ask OLE to translate the name...
     hr = pti->GetIDsOfNames(rgszNames, cNames, rgDispId);
+    
     pti->Release();
+
     return hr;
 }
 
@@ -1327,14 +1612,17 @@ STDMETHODIMP CDsoFramerControl::Invoke(DISPID dispIdMember, REFIID riid, LCID lc
             pVarResult->vt = VT_BOOL;
             pVarResult->boolVal = VARIANT_TRUE;
         }
+
         return S_OK;
     }
 
-    TRACE1("CDsoFramerControl::Invoke(dispid = %d)\n", dispIdMember);
+    TRACE1(_T("CDsoFramerControl::Invoke(dispid = %d)\n"), dispIdMember);
+
     CHECK_NULL_RETURN((IID_NULL == riid), DISP_E_UNKNOWNINTERFACE);
 
     // Get the type info for this dispinterface...
     hr = GetTypeInfo(0, lcid, &pti);
+
     RETURN_ON_FAILURE(hr);
 
     // Store pExcepInfo (to fill-in disp excepinfo if error occurs)...
@@ -1345,7 +1633,9 @@ STDMETHODIMP CDsoFramerControl::Invoke(DISPID dispIdMember, REFIID riid, LCID lc
 
     // Don't need this anymore...
     m_pDispExcep = NULL;
+    
     pti->Release();
+
     return hr;
 }
 
@@ -1358,7 +1648,9 @@ STDMETHODIMP CDsoFramerControl::ProvideErrorInfo(HRESULT hres)
 {
     // Don't need to do anything on success...
     if ((hres == S_OK) || SUCCEEDED(hres))
+    {
         return hres;
+    }
 
     // Fill in the error information as needed...
     return DsoReportError(hres, NULL, m_pDispExcep);

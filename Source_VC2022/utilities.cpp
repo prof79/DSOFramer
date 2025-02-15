@@ -156,6 +156,7 @@ STDAPI_(LPWSTR) DsoConvertToLPWSTR(LPCSTR pszMbcsString)
 
     return pwsz;
 }
+
 ////////////////////////////////////////////////////////////////////////
 // DsoConvertToMBCS
 //
@@ -280,14 +281,14 @@ STDAPI_(LPWSTR) DsoCopyStringCatEx(LPCWSTR pwszBaseString, UINT cStrs, LPCWSTR *
     UINT *pcblens;
 
     // We assume you have a base string to start with. If not, we return NULL...
-    if ((pwszBaseString == NULL) ||
+    if ((pwszBaseString == nullptr) ||
         ((cblenb = lstrlenW(pwszBaseString)) < 1))
     {
-        return NULL;
+        return nullptr;
     }
 
     // If we have nothing to append, just do a plain copy...
-    if ((cStrs == 0) || (ppwszStrs == NULL))
+    if ((cStrs == 0) || (ppwszStrs == nullptr))
     {
         return DsoCopyString(pwszBaseString);
     }
@@ -297,7 +298,7 @@ STDAPI_(LPWSTR) DsoCopyStringCatEx(LPCWSTR pwszBaseString, UINT cStrs, LPCWSTR *
     cblent = cblenb;
     pcblens = new UINT[cStrs];
 
-    CHECK_NULL_RETURN(pcblens,  NULL);
+    CHECK_NULL_RETURN(pcblens,  nullptr);
 
     for (i = 0; i < cStrs; i++)
     {
@@ -312,7 +313,7 @@ STDAPI_(LPWSTR) DsoCopyStringCatEx(LPCWSTR pwszBaseString, UINT cStrs, LPCWSTR *
     {
         pwsz = (LPWSTR)DsoMemAlloc(((cblent + 1) * sizeof(WCHAR)));
 
-        CHECK_NULL_RETURN(pwsz,   NULL);
+        CHECK_NULL_RETURN(pwsz,   nullptr);
 
         memcpy(pwsz, pwszBaseString, (cblenb * sizeof(WCHAR)));
         
@@ -340,7 +341,7 @@ STDAPI_(LPWSTR) DsoCopyStringCatEx(LPCWSTR pwszBaseString, UINT cStrs, LPCWSTR *
 //
 STDAPI_(LPSTR) DsoCLSIDtoLPSTR(REFCLSID clsid)
 {
-    LPSTR psz = NULL;
+    LPSTR psz = nullptr;
     LPWSTR pwsz;
 
     if (SUCCEEDED(StringFromCLSID(clsid, &pwsz)))
@@ -391,12 +392,14 @@ STDAPI_(UINT) DsoCompareStringsEx(LPCWSTR pwsz1, INT cch1, LPCWSTR pwsz2, INT cc
                 continue;
             }
 
+            // TODO: unwide char?
             if (((pwsz1[iret] >= 'A') && (pwsz1[iret] <= 'Z')) &&
                 ((pwsz1[iret] + ('a' - 'A')) == pwsz2[iret]))
             {
                 continue;
             }
 
+            // TODO: unwide char?
             if (((pwsz2[iret] >= 'A') && (pwsz2[iret] <= 'Z')) &&
                 ((pwsz2[iret] + ('a' - 'A')) == pwsz1[iret]))
             {
@@ -488,6 +491,7 @@ STDAPI_(BOOL) GetTempPathForURLDownload(WCHAR* pwszURL, WCHAR** ppwszLocalFile)
 
     *ppwszLocalFile = NULL;
 
+    // TODO: Lots of unwide head-scratching ahead
     if (GetTempPath(MAX_PATH, szTmpPath))
     {
         DWORD dwtlen = lstrlen(szTmpPath);
@@ -555,17 +559,17 @@ STDAPI URLDownloadFile(LPUNKNOWN punk, WCHAR* pwszURL, WCHAR* pwszLocalFile)
 {
     typedef HRESULT (WINAPI *PFN_URLDTFW)(LPUNKNOWN, LPCWSTR, LPCWSTR, DWORD, LPUNKNOWN);
 
-    static PFN_URLDTFW pfnURLDownloadToFileW = NULL;
+    static PFN_URLDTFW pfnURLDownloadToFileW = nullptr;
 
     HMODULE hUrlmon;
 
-    if (pfnURLDownloadToFileW == NULL)
+    if (pfnURLDownloadToFileW == nullptr)
     {
-        hUrlmon = LoadLibrary("URLMON.DLL");
+        hUrlmon = LoadLibrary(_T("URLMON.DLL"));
 
         if (hUrlmon)
         {
-            pfnURLDownloadToFileW = (PFN_URLDTFW)GetProcAddress(hUrlmon, "URLDownloadToFileW");
+            pfnURLDownloadToFileW = (PFN_URLDTFW)GetProcAddress(hUrlmon, _T("URLDownloadToFileW"));
         }
     }
 
@@ -574,7 +578,7 @@ STDAPI URLDownloadFile(LPUNKNOWN punk, WCHAR* pwszURL, WCHAR* pwszLocalFile)
         return E_UNEXPECTED;
     }
 
-    return pfnURLDownloadToFileW(punk, pwszURL, pwszLocalFile, 0, NULL);
+    return pfnURLDownloadToFileW(punk, pwszURL, pwszLocalFile, 0, nullptr);
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -591,7 +595,7 @@ constexpr auto PTS_PER_INCH      = 72;      // number points (font size) per inc
 //
 STDAPI_(void) DsoHimetricToPixels(LONG* px, LONG* py)
 {
-    HDC hdc = GetDC(NULL);
+    HDC hdc = GetDC(nullptr);
 
     if (px)
     {
@@ -603,7 +607,7 @@ STDAPI_(void) DsoHimetricToPixels(LONG* px, LONG* py)
         *py = MAP_LOGHIM_TO_PIX(*py, GetDeviceCaps(hdc, LOGPIXELSY));
     }
 
-    ReleaseDC(NULL, hdc);
+    ReleaseDC(nullptr, hdc);
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -611,7 +615,7 @@ STDAPI_(void) DsoHimetricToPixels(LONG* px, LONG* py)
 //
 STDAPI_(void) DsoPixelsToHimetric(LONG* px, LONG* py)
 {
-    HDC hdc = GetDC(NULL);
+    HDC hdc = GetDC(nullptr);
 
     if (px)
     {
@@ -623,7 +627,7 @@ STDAPI_(void) DsoPixelsToHimetric(LONG* px, LONG* py)
         *py = MAP_PIX_TO_LOGHIM(*py, GetDeviceCaps(hdc, LOGPIXELSY));
     }
 
-    ReleaseDC(NULL, hdc);
+    ReleaseDC(nullptr, hdc);
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -631,14 +635,16 @@ STDAPI_(void) DsoPixelsToHimetric(LONG* px, LONG* py)
 //
 STDAPI_(HBITMAP) DsoGetBitmapFromWindow(HWND hwnd)
 {
-    HBITMAP hbmpold, hbmp = NULL;
+    HBITMAP hbmpold, hbmp = nullptr;
+
     HDC hdcWin, hdcMem;
+    
     RECT rc;
     INT x, y;
 
     if (!GetWindowRect(hwnd, &rc))
     {
-        return NULL;
+        return nullptr;
     }
 
     x = (rc.right - rc.left);
@@ -769,7 +775,7 @@ STDAPI DsoDispatchInvoke(LPDISPATCH pdisp, LPOLESTR pwszname, DISPID dspid, WORD
 {
     HRESULT    hr = S_FALSE;
     DISPID     dspidPut = DISPID_PROPERTYPUT;
-    DISPPARAMS dspparm = {NULL, NULL, 0, 0};
+    DISPPARAMS dspparm = {nullptr, nullptr, 0, 0};
 
     CHECK_NULL_RETURN(pdisp, E_POINTER);
 
@@ -1115,7 +1121,7 @@ STDAPI_(BOOL) FIsIECacheFile(LPWSTR pwszFile)
     HKEY hk;
 
     if (RegOpenKey(HKEY_CURRENT_USER,
-        "Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Shell Folders", &hk) == ERROR_SUCCESS)
+        _T("Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Shell Folders"), &hk) == ERROR_SUCCESS)
     {
         DWORD dwS = 0;
         DWORD dwT = MAX_PATH;
@@ -1427,7 +1433,7 @@ STDAPI DsoGetFileFromUser(HWND hwndOwner, LPCWSTR pwzTitle, DWORD dwFlags,
     // Make sure they pass a *bstr...
     CHECK_NULL_RETURN(pbstrFile,  E_POINTER);
 
-    *pbstrFile = NULL;
+    *pbstrFile = nullptr;
 
     buffer[0] = 0; buffer[1] = 0;
 
@@ -1529,7 +1535,7 @@ STDAPI DsoGetFileFromUser(HWND hwndOwner, LPCWSTR pwzTitle, DWORD dwFlags,
 
     // If we got a string, then success. All other errors (even user cancel) should
     // be treated as a general failure (feel free to change this for more full function).
-    return ((*pbstrFile == NULL) ? E_FAIL : S_OK);
+    return ((*pbstrFile == nullptr) ? E_FAIL : S_OK);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////
@@ -1541,7 +1547,8 @@ STDAPI DsoGetOleInsertObjectFromUser(HWND hwndOwner, LPCWSTR pwzTitle, DWORD dwF
         BOOL fDocObjectOnly, BOOL fAllowControls, BSTR *pbstrResult, UINT *ptype)
 {
     BYTE buffer[MAX_PATH * sizeof(WCHAR)];
-    LPCLSID lpNewExcludeList = NULL;
+
+    LPCLSID lpNewExcludeList = nullptr;
 
     int nNewExcludeCount = 0;
     int nNewExcludeLen = 0;
@@ -1549,7 +1556,7 @@ STDAPI DsoGetOleInsertObjectFromUser(HWND hwndOwner, LPCWSTR pwzTitle, DWORD dwF
     // Make sure they pass a *bstr...
     CHECK_NULL_RETURN(pbstrResult,  E_POINTER);
     
-    *pbstrResult = NULL;
+    *pbstrResult = nullptr;
 
     // To limit list to just those marked as DocObject servers, you have to enum
     // the registry and create an exclude list for OLE dialog. Exclude all except
@@ -1562,13 +1569,13 @@ STDAPI DsoGetOleInsertObjectFromUser(HWND hwndOwner, LPCWSTR pwzTitle, DWORD dwF
         DWORD dwIndex = 0;
         CHAR szName[MAX_PATH + 1];
 
-        if (RegOpenKeyEx(HKEY_CLASSES_ROOT, "CLSID", 0, KEY_READ|KEY_ENUMERATE_SUB_KEYS, &hkCLSID) == ERROR_SUCCESS)
+        if (RegOpenKeyEx(HKEY_CLASSES_ROOT, _T("CLSID"), 0, KEY_READ|KEY_ENUMERATE_SUB_KEYS, &hkCLSID) == ERROR_SUCCESS)
         {
             while (RegEnumKey(hkCLSID, dwIndex++, szName, MAX_PATH) == ERROR_SUCCESS)
             {
                 if (RegOpenKeyEx(hkCLSID, szName, 0, KEY_READ, &hkItem) == ERROR_SUCCESS)
                 {
-                    if ((RegOpenKeyEx(hkItem, "DocObject", 0, KEY_READ, &hkDocObject) != ERROR_SUCCESS))
+                    if ((RegOpenKeyEx(hkItem, _T("DocObject"), 0, KEY_READ, &hkDocObject) != ERROR_SUCCESS))
                     {
                         CLSID clsid;
                         LPWSTR pwszClsid = DsoConvertToLPWSTR(szName);

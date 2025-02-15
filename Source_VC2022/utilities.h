@@ -25,10 +25,11 @@
 ////////////////////////////////////////////////////////////////////////
 // Fixed Win32 Errors as HRESULTs
 //
-#define E_WIN32_BUFFERTOOSMALL    0x8007007A   //HRESULT_FROM_WIN32(ERROR_INSUFFICIENT_BUFFER)
-#define E_WIN32_ACCESSVIOLATION   0x800701E7   //HRESULT_FROM_WIN32(ERROR_INVALID_ADDRESS)
-#define E_WIN32_LASTERROR        (0x80070000 | GetLastError()) // Assured Error with last Win32 code
-#define E_VBA_NOREMOTESERVER      0x800A01CE
+constexpr auto E_WIN32_BUFFERTOOSMALL   = 0x8007007A;                       // HRESULT_FROM_WIN32(ERROR_INSUFFICIENT_BUFFER)
+constexpr auto E_WIN32_ACCESSVIOLATION  = 0x800701E7;                       // HRESULT_FROM_WIN32(ERROR_INVALID_ADDRESS)
+constexpr auto E_VBA_NOREMOTESERVER     = 0x800A01CE;
+
+#define E_WIN32_LASTERROR               (0x80070000 | GetLastError())       // Assured Error with last Win32 code
 
 ////////////////////////////////////////////////////////////////////////
 // Heap Allocation
@@ -157,23 +158,23 @@ BOOL       __fastcall DsoPVarBoolFromPVar(VARIANT* px, BOOL fdef);
 #define ODS(x)  OutputDebugString(x)
 
 #define TRACE1(sz, arg1) { \
-    CHAR ach[1024]; \
+    TCHAR ach[1024]; \
     wsprintf(ach, (sz), (arg1)); \
     ODS(ach); }
 
 #define TRACE2(sz, arg1, arg2) { \
-    CHAR ach[1024]; \
+    TCHAR ach[1024]; \
     wsprintf(ach, (sz), (arg1), (arg2)); \
     ODS(ach); }
 
 #define TRACE3(sz, arg1, arg2, arg3) { \
-    CHAR ach[1024]; \
+    TCHAR ach[1024]; \
     wsprintf(ach, (sz), (arg1), (arg2), (arg3)); \
     ODS(ach); }
 
 #define TRACE_LPRECT(sz, lprc) { \
-    CHAR ach[1024]; \
-    wsprintf(ach, "RECT %s - left=%d, top=%d, right=%d, bottom=%d\n", \
+    TCHAR ach[1024]; \
+    wsprintf(ach, _T("RECT %s - left=%d, top=%d, right=%d, bottom=%d\n"), \
         (sz), (lprc)->left, (lprc)->top, (lprc)->right, (lprc)->bottom); \
     ODS(ach); }
 
@@ -194,9 +195,9 @@ BOOL       __fastcall DsoPVarBoolFromPVar(VARIANT* px, BOOL fdef);
 #ifdef _DEBUG
 #define DEFINE_REFCOUNT ULONG    m_cRef;
 #define IMPLEMENT_DEBUG_ADDREF   m_cRef++;
-#define IMPLEMENT_DEBUG_RELEASE(x)  ASSERT(m_cRef > 0); m_cRef--; if (m_cRef == 0){ODS(" > I" #x " released\n");}
+#define IMPLEMENT_DEBUG_RELEASE(x)  ASSERT(m_cRef > 0); m_cRef--; if (m_cRef == 0){ODS(_T(" > I") #x _T(" released\n"));}
 #define IMPLEMENT_DEBUG_REFSET   m_cRef = 0;
-#define IMPLEMENT_DEBUG_REFCHECK(x) ASSERT(m_cRef == 0); if (m_cRef != 0){ODS(" * I" #x " NOT released!!\n");}
+#define IMPLEMENT_DEBUG_REFCHECK(x) ASSERT(m_cRef == 0); if (m_cRef != 0){ODS(_T(" * I") #x _T(" NOT released!!\n"));}
 #else
 #define DEFINE_REFCOUNT
 #define IMPLEMENT_DEBUG_ADDREF

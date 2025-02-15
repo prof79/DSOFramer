@@ -32,16 +32,18 @@
 //
 STDMETHODIMP CDsoFramerClassFactory::QueryInterface(REFIID riid, void** ppv)
 {
-    ODS("CDsoFramerClassFactory::QueryInterface\n");
+    ODS(_T("CDsoFramerClassFactory::QueryInterface\n"));
     CHECK_NULL_RETURN(ppv, E_POINTER);
 
     if ((IID_IUnknown == riid) || (IID_IClassFactory == riid))
     {
         SAFE_SET_INTERFACE(*ppv, (IClassFactory*)this);
+
         return S_OK;
     }
 
     *ppv = NULL;
+
     return E_NOINTERFACE;
 }
 
@@ -50,7 +52,8 @@ STDMETHODIMP CDsoFramerClassFactory::QueryInterface(REFIID riid, void** ppv)
 //
 STDMETHODIMP_(ULONG) CDsoFramerClassFactory::AddRef(void)
 {
-    TRACE1("CDsoFramerClassFactory::AddRef - %d\n", m_cRef+1);
+    TRACE1(_T("CDsoFramerClassFactory::AddRef - %d\n"), m_cRef+1);
+
     return ++m_cRef;
 }
 
@@ -59,13 +62,17 @@ STDMETHODIMP_(ULONG) CDsoFramerClassFactory::AddRef(void)
 //
 STDMETHODIMP_(ULONG) CDsoFramerClassFactory::Release(void)
 {
-    TRACE1("CDsoFramerClassFactory::Release - %d\n", m_cRef-1);
+    TRACE1(_T("CDsoFramerClassFactory::Release - %d\n"), m_cRef-1);
+
     if (0 != --m_cRef)
         return m_cRef;
 
-    ODS("CDsoFramerClassFactory delete\n");
+    ODS(_T("CDsoFramerClassFactory delete\n"));
+
     InterlockedDecrement((LPLONG)&v_cLocks);
+    
     delete this;
+    
     return 0;
 }
 
@@ -80,15 +87,19 @@ STDMETHODIMP CDsoFramerClassFactory::CreateInstance(LPUNKNOWN punk, REFIID riid,
     CDsoFramerControl* pocx;
     IUnknown* pnkInternal;
 
-    ODS("CDsoFramerClassFactory::CreateInstance\n");
+    ODS(_T("CDsoFramerClassFactory::CreateInstance\n"));
+
     CHECK_NULL_RETURN(ppv, E_POINTER);  *ppv = NULL;
 
     // Aggregation requires you ask for (internal) IUnknown
     if ((punk) && (riid != IID_IUnknown))
+    {
         return E_INVALIDARG;
+    }
 
     // Create a new instance of the control...
     pocx = new CDsoFramerControl(punk);
+
     CHECK_NULL_RETURN(pocx, E_OUTOFMEMORY);
 
     // Grab the internal IUnknown to use for the QI (you don't agg in CF:CreateInstance)...
@@ -98,12 +109,15 @@ STDMETHODIMP CDsoFramerClassFactory::CreateInstance(LPUNKNOWN punk, REFIID riid,
     if (SUCCEEDED(hr = pocx->InitializeNewInstance()) &&
         SUCCEEDED(hr = pnkInternal->QueryInterface(riid, ppv)))
     {
-        InterlockedIncrement((LPLONG)&v_cLocks); // on success, bump up the lock count...
+        // on success, bump up the lock count...
+        InterlockedIncrement((LPLONG)&v_cLocks);
     }
     else
     {
         // else cleanup the object
-        delete pocx; *ppv = NULL;
+        delete pocx;
+        
+        *ppv = NULL;
     }
 
     return hr;
@@ -116,10 +130,16 @@ STDMETHODIMP CDsoFramerClassFactory::CreateInstance(LPUNKNOWN punk, REFIID riid,
 //
 STDMETHODIMP CDsoFramerClassFactory::LockServer(BOOL fLock)
 {
-    TRACE1("CDsoFramerClassFactory::LockServer - %d\n", fLock);
+    TRACE1(_T("CDsoFramerClassFactory::LockServer - %d\n"), fLock);
+
     if (fLock)
+    {
         InterlockedIncrement((LPLONG)&v_cLocks);
+    }
     else
+    {
         InterlockedDecrement((LPLONG)&v_cLocks);
+    }
+
     return S_OK;
 }

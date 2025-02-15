@@ -52,6 +52,7 @@
 #include <oleidl.h>
 #include <objsafe.h>
 #include <strsafe.h>
+#include <VersionHelpers.h>
 
 #include "version.h"
 #include "utilities.h"
@@ -171,7 +172,9 @@ private:
 class CDsoFramerControl : public _FramerControl
 {
 public:
+
     CDsoFramerControl(LPUNKNOWN punk);
+
     ~CDsoFramerControl(void);
 
     // IUnknown Implementation -- Always delgates to outer unknown...
@@ -439,7 +442,7 @@ public:
 
     STDMETHODIMP_(void)    OnPaletteChanged(HWND hwndPalChg);
     STDMETHODIMP_(void)    OnSyncPaint();
-    STDMETHODIMP_(void)    OnWindowEnable(BOOL fEnable){TRACE1("CDsoFramerControl::OnWindowEnable(%d)\n", fEnable);}
+    STDMETHODIMP_(void)    OnWindowEnable(BOOL fEnable){TRACE1(_T("CDsoFramerControl::OnWindowEnable(%d)\n"), fEnable);}
     STDMETHODIMP_(BOOL)    OnSysCommandMenu(CHAR ch);
 
     STDMETHODIMP_(HMENU)   GetActivePopupMenu();
@@ -462,7 +465,9 @@ public:
     {
         // Send data change notification.
         if (m_pDataAdviseHolder)
+        {
             m_pDataAdviseHolder->SendOnDataChange((IDataObject*)&m_xDataObject, NULL, 0);
+        }
 
         // Send the view change notification....
         if (m_pViewAdviseSink)
@@ -470,7 +475,9 @@ public:
             m_pViewAdviseSink->OnViewChange(DVASPECT_CONTENT, -1);
             // If they asked to be advised once, kill the connection
             if (m_fViewAdviseOnlyOnce)
+            {
                 m_xViewObjectEx.SetAdvise(DVASPECT_CONTENT, 0, NULL);
+            }
         }
 
         // Ensure a full repaint...
@@ -479,42 +486,63 @@ public:
 
     void __fastcall GetSizeRectAfterBorder(LPRECT lprcx, LPRECT lprc)
     {
-        if (lprcx) CopyRect(lprc, lprcx);
-        else SetRect(lprc, 0, 0, m_Size.cx, m_Size.cy);
+        if (lprcx)
+        {
+            CopyRect(lprc, lprcx);
+        }
+        else
+        {
+            SetRect(lprc, 0, 0, m_Size.cx, m_Size.cy);
+        }
+        
         if (m_fBorderStyle)
-            InflateRect(lprc, -(4-m_fBorderStyle), -(4-m_fBorderStyle));
+        {
+            InflateRect(lprc, -(4 - m_fBorderStyle), -(4 - m_fBorderStyle));
+        }
     }
 
     void __fastcall GetSizeRectAfterTitlebar(LPRECT lprcx, LPRECT lprc)
     {
         GetSizeRectAfterBorder(lprcx, lprc);
+
         if (m_fShowTitlebar)
+        {
             lprc->top += 21;
+        }
     }
 
     void __fastcall GetSizeRectForMenuBar(LPRECT lprcx, LPRECT lprc)
     {
         GetSizeRectAfterTitlebar(lprcx, lprc);
+
         lprc->bottom = lprc->top + 24;
     }
 
     void __fastcall GetSizeRectForDocument(LPRECT lprcx, LPRECT lprc)
     {
         GetSizeRectAfterTitlebar(lprcx, lprc);
+
         if (m_fShowMenuBar)
+        {
             lprc->top += 24;
+        }
+
         if (lprc->top > lprc->bottom)
+        {
             lprc->top = lprc->bottom;
+        }
     }
 
     void __fastcall RedrawCaption()
     {
         RECT rcT;
+
         if ((m_hwnd) && (m_fShowTitlebar))
         {
             GetClientRect(m_hwnd, &rcT); rcT.bottom = 21;
             InvalidateRect(m_hwnd, &rcT, FALSE);
         }
+
         if ((m_hwnd) && (m_fShowMenuBar))
         {
             GetSizeRectForMenuBar(NULL, &rcT);
@@ -540,82 +568,82 @@ public:
     // nested classes for each interface.
 private:
 
-    ULONG                   m_cRef;                // Reference count
-    IUnknown               *m_pOuterUnknown;       // Outer IUnknown (points to m_xInternalUnknown if not agg)
-    ITypeInfo              *m_ptiDispType;         // ITypeInfo Pointer (IDispatch Impl)
-    EXCEPINFO              *m_pDispExcep;          // EXCEPINFO Pointer (IDispatch Impl)
+    ULONG                   m_cRef = 0UL;                           // Reference count
+    IUnknown               *m_pOuterUnknown = nullptr;              // Outer IUnknown (points to m_xInternalUnknown if not agg)
+    ITypeInfo              *m_ptiDispType = nullptr;                // ITypeInfo Pointer (IDispatch Impl)
+    EXCEPINFO              *m_pDispExcep = nullptr;                 // EXCEPINFO Pointer (IDispatch Impl)
 
-    HWND                    m_hwnd;                // our window
-    HWND                    m_hwndParent;          // immediate parent window
-    SIZEL                   m_Size{};                // the size of this control
-    RECT                    m_rcLocation;          // where we at
+    HWND                    m_hwnd = nullptr;                       // our window
+    HWND                    m_hwndParent = nullptr;                 // immediate parent window
+    SIZEL                   m_Size{};                               // the size of this control
+    RECT                    m_rcLocation{};                         // where we at
 
-    IOleClientSite         *m_pClientSite;         // active client site of host containter
-    IOleControlSite        *m_pControlSite;        // control site
-    IOleInPlaceSite        *m_pInPlaceSite;        // inplace site
-    IOleInPlaceFrame       *m_pInPlaceFrame;       // inplace frame
-    IOleInPlaceUIWindow    *m_pInPlaceUIWindow;    // inplace ui window
+    IOleClientSite         *m_pClientSite = nullptr;                // active client site of host containter
+    IOleControlSite        *m_pControlSite = nullptr;               // control site
+    IOleInPlaceSite        *m_pInPlaceSite = nullptr;               // inplace site
+    IOleInPlaceFrame       *m_pInPlaceFrame = nullptr;              // inplace frame
+    IOleInPlaceUIWindow    *m_pInPlaceUIWindow = nullptr;           // inplace ui window
 
-    IAdviseSink            *m_pViewAdviseSink;     // advise sink for view (only 1 allowed)
-    IOleAdviseHolder       *m_pOleAdviseHolder;    // OLE advise holder (for oleobject sinks)
-    IDataAdviseHolder      *m_pDataAdviseHolder;   // OLE data advise holder (for dataobject sink)
-    IDispatch              *m_dispEvents;          // event sink (we only support 1 at a time)
-    IStorage               *m_pOleStorage;         // IStorage for OLE hosts.
+    IAdviseSink            *m_pViewAdviseSink = nullptr;            // advise sink for view (only 1 allowed)
+    IOleAdviseHolder       *m_pOleAdviseHolder = nullptr;           // OLE advise holder (for oleobject sinks)
+    IDataAdviseHolder      *m_pDataAdviseHolder = nullptr;          // OLE data advise holder (for dataobject sink)
+    IDispatch              *m_dispEvents = nullptr;                 // event sink (we only support 1 at a time)
+    IStorage               *m_pOleStorage = nullptr;                // IStorage for OLE hosts.
 
-    CDsoDocObject          *m_pDocObjFrame;        // The Embedding Class
-    CDsoDocObject          *m_pServerLock;         // Optional Server Lock for out-of-proc DocObject
+    CDsoDocObject          *m_pDocObjFrame = nullptr;               // The Embedding Class
+    CDsoDocObject          *m_pServerLock = nullptr;                // Optional Server Lock for out-of-proc DocObject
 
-    OLE_COLOR               m_clrBorderColor = 0;   // Control Colors
-    OLE_COLOR               m_clrBackColor = 0;     // "
-    OLE_COLOR               m_clrForeColor = 0;     // "
-    OLE_COLOR               m_clrTBarColor = 0;     // "
-    OLE_COLOR               m_clrTBarTextColor = 0; // "
+    OLE_COLOR               m_clrBorderColor = 0;                   // Control Colors
+    OLE_COLOR               m_clrBackColor = 0;                     // "
+    OLE_COLOR               m_clrForeColor = 0;                     // "
+    OLE_COLOR               m_clrTBarColor = 0;                     // "
+    OLE_COLOR               m_clrTBarTextColor = 0;                 // "
 
-    BSTR                    m_bstrCustomCaption;   // A custom caption (if provided)
-    HMENU                   m_hmenuFilePopup;      // The File menu popup
-    WORD                    m_wFileMenuFlags;      // Bitflags of enabled file menu items.
-    WORD                    m_wSelMenuItem;        // Which item (if any) is selected
-    WORD                    m_cMenuItems;          // Count of items on menu bar
-    RECT                    m_rgrcMenuItems[DSO_MAX_MENUITEMS]; // Menu bar items
-    CHAR                    m_rgchMenuAccel[DSO_MAX_MENUITEMS]; // Menu bar accelerators
-    LPWSTR                  m_pwszHostName;        // Custom name for SetHostNames
+    BSTR                    m_bstrCustomCaption = nullptr;          // A custom caption (if provided)
+    HMENU                   m_hmenuFilePopup = nullptr;             // The File menu popup
+    WORD                    m_wFileMenuFlags = (WORD) 0u;            // Bitflags of enabled file menu items.
+    WORD                    m_wSelMenuItem = (WORD) - 1u;            // Which item (if any) is selected
+    WORD                    m_cMenuItems = (WORD) 0u;                // Count of items on menu bar
+    RECT                    m_rgrcMenuItems[DSO_MAX_MENUITEMS]{};   // Menu bar items
+    CHAR                    m_rgchMenuAccel[DSO_MAX_MENUITEMS]{};   // Menu bar accelerators
+    LPWSTR                  m_pwszHostName = nullptr;               // Custom name for SetHostNames
 
-    class CDsoFrameHookManager*  m_pHookManager;   // Frame Window Hook Manager Class
-    LONG                    m_lHookPolicy;         // Policy on how to use frame hook for this host.
-    LONG                    m_lActivationPolicy;   // Policy on activation behavior for comp focus
-    HBITMAP                 m_hbmDeactive;         // Bitmap used for IPDeactiveOnXXX policies
-    ULONGLONG               m_uiSyncPaint;         // Sync paint counter for draw issues with UIDeactivateOnXXX
+    class CDsoFrameHookManager*  m_pHookManager = nullptr;          // Frame Window Hook Manager Class
+    LONG                    m_lHookPolicy = 0L;                     // Policy on how to use frame hook for this host.
+    LONG                    m_lActivationPolicy = 0L;               // Policy on activation behavior for comp focus
+    HBITMAP                 m_hbmDeactive = nullptr;                // Bitmap used for IPDeactiveOnXXX policies
+    ULONGLONG               m_uiSyncPaint = 0ULL;                   // Sync paint counter for draw issues with UIDeactivateOnXXX
 
-    unsigned int        m_fDirty:1;                // does the control need to be resaved?
-    unsigned int        m_fInPlaceActive:1;        // are we in place active or not?
-    unsigned int        m_fInPlaceVisible:1;       // we are in place visible or not?
-    unsigned int        m_fUIActive:1;             // are we UI active or not.
-    unsigned int        m_fHasFocus:1;             // do we have current focus.
-    unsigned int        m_fViewAdvisePrimeFirst: 1;// for IViewobject2::setadvise
-    unsigned int        m_fViewAdviseOnlyOnce: 1;  // for IViewobject2::setadvise
-    unsigned int        m_fUsingWindowRgn:1;       // for SetObjectRects and clipping
-    unsigned int        m_fFreezeEvents:1;         // should events be frozen?
-    unsigned int        m_fDesignMode:1;           // are we in design mode?
-    unsigned int        m_fModeFlagValid:1;        // has mode changed since last check?
-    unsigned int        m_fBorderStyle:2;          // the border style
-    unsigned int        m_fShowTitlebar:1;         // should we show titlebar?
-    unsigned int        m_fShowToolbars:1;         // should we show toolbars?
-    unsigned int        m_fModalState:1;           // are we modal?
-    unsigned int        m_fObjectMenu:1;           // are we over obj menu item?
-    unsigned int        m_fConCntDone:1;           // for enum connectpts
-    unsigned int        m_fAppActive:1;            // is the app active?
-    unsigned int        m_fComponentActive:1;      // is the component active?
-    unsigned int        m_fShowMenuBar:1;          // should we show menubar?
-    unsigned int        m_fInDocumentLoad:1;       // set when loading file
-    unsigned int        m_fNoInteractive:1;        // set when we don't allow interaction with docobj
-    unsigned int        m_fShowMenuPrev:1;         // were menus visible before loss of interactivity?
-    unsigned int        m_fShowToolsPrev:1;        // were toolbars visible before loss of interactivity?
-    unsigned int        m_fSyncPaintTimer:1;       // is syncpaint timer running?
-    unsigned int        m_fInControlActivate:1;    // is currently in activation call?
-    unsigned int        m_fInFocusChange:1;        // are we in a focus change?
-    unsigned int        m_fActivateOnStatus:1;     // we need to activate on change of status
-    unsigned int        m_fDisableMenuAccel:1;     // using menu accelerators
-    unsigned int        m_fBkgrdPaintTimer:1;      // using menu accelerators
+	unsigned int            m_fDirty = 1;                           // does the control need to be resaved?
+	unsigned int            m_fInPlaceActive = 1;                   // are we in place active or not?
+	unsigned int            m_fInPlaceVisible = 1;                  // we are in place visible or not?
+	unsigned int            m_fUIActive = 1;                        // are we UI active or not.
+	unsigned int            m_fHasFocus = 1;                        // do we have current focus.
+	unsigned int            m_fViewAdvisePrimeFirst = 1;            // for IViewobject2::setadvise
+	unsigned int            m_fViewAdviseOnlyOnce = 1;              // for IViewobject2::setadvise
+	unsigned int            m_fUsingWindowRgn = 1;                  // for SetObjectRects and clipping
+	unsigned int            m_fFreezeEvents = 1;                    // should events be frozen?
+	unsigned int            m_fDesignMode = 1;                      // are we in design mode?
+	unsigned int            m_fModeFlagValid = 1;                   // has mode changed since last check?
+	unsigned int            m_fBorderStyle = 2;                     // the border style
+	unsigned int            m_fShowTitlebar = 1;                    // should we show titlebar?
+	unsigned int            m_fShowToolbars = 1;                    // should we show toolbars?
+	unsigned int            m_fModalState = 1;                      // are we modal?
+	unsigned int            m_fObjectMenu = 1;                      // are we over obj menu item?
+	unsigned int            m_fConCntDone = 1;                      // for enum connectpts
+	unsigned int            m_fAppActive = 1;                       // is the app active?
+	unsigned int            m_fComponentActive = 1;                 // is the component active?
+	unsigned int            m_fShowMenuBar = 1;                     // should we show menubar?
+	unsigned int            m_fInDocumentLoad = 1;                  // set when loading file
+	unsigned int            m_fNoInteractive = 1;                   // set when we don't allow interaction with docobj
+	unsigned int            m_fShowMenuPrev = 1;                    // were menus visible before loss of interactivity?
+	unsigned int            m_fShowToolsPrev = 1;                   // were toolbars visible before loss of interactivity?
+	unsigned int            m_fSyncPaintTimer = 1;                  // is syncpaint timer running?
+	unsigned int            m_fInControlActivate = 1;               // is currently in activation call?
+	unsigned int            m_fInFocusChange = 1;                   // are we in a focus change?
+	unsigned int            m_fActivateOnStatus = 1;                // we need to activate on change of status
+	unsigned int            m_fDisableMenuAccel = 1;                // using menu accelerators
+	unsigned int            m_fBkgrdPaintTimer = 1;                 // using menu accelerators
 };
 
 ////////////////////////////////////////////////////////////////////
@@ -633,17 +661,20 @@ private:
 class CDsoFrameWindowHook
 {
 public:
+
     CDsoFrameWindowHook()
     {
-        ODS("CDsoFrameWindowHook created\n");
+        ODS(_T("CDsoFrameWindowHook created\n"));
+
         m_cHookCount = 0;
-        m_hwndTopLevelHost = NULL;
-        m_pfnOrigWndProc = NULL;
+        m_hwndTopLevelHost = nullptr;
+        m_pfnOrigWndProc = nullptr;
         m_fHostUnicodeWindow = FALSE;
     }
+
     ~CDsoFrameWindowHook()
     {
-        ODS("CDsoFrameWindowHook deleted\n");
+        ODS(_T("CDsoFrameWindowHook deleted\n"));
     }
 
     static STDMETHODIMP_(CDsoFrameWindowHook*) AttachToFrameWindow(HWND hwndParent);
@@ -656,10 +687,12 @@ public:
         HostWindowProcHook(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
 protected:
-    DWORD                   m_cHookCount;
-    HWND                    m_hwndTopLevelHost;    // Top-level host window (hooked)
-    WNDPROC                 m_pfnOrigWndProc;
-    BOOL                    m_fHostUnicodeWindow;
+
+    DWORD                   m_cHookCount = 0L;
+    // Top-level host window (hooked)
+    HWND                    m_hwndTopLevelHost = nullptr;
+    WNDPROC                 m_pfnOrigWndProc = nullptr;
+    BOOL                    m_fHostUnicodeWindow = TRUE;
 };
 
 // THE MAX NUMBER OF DSOFRAMER CONTROLS PER PROCESS
@@ -674,9 +707,10 @@ protected:
 class CDsoFrameHookManager
 {
 public:
+
     CDsoFrameHookManager()
     {
-        ODS("CDsoFrameHookManager created\n");
+        ODS(_T("CDsoFrameHookManager created\n"));
 
         m_fAppActive = TRUE;
         m_idxActive = DSOF_MAX_CONTROLS;
@@ -685,7 +719,7 @@ public:
 
     ~CDsoFrameHookManager()
     {
-        ODS("CDsoFrameHookManager deleted\n");
+        ODS(_T("CDsoFrameHookManager deleted\n"));
     }
 
     static STDMETHODIMP_(CDsoFrameHookManager*)
@@ -705,14 +739,15 @@ public:
     STDMETHODIMP_(BOOL) SendNotifyMessage(HWND hwnd, DWORD msg, WPARAM wParam, LPARAM lParam);
 
 protected:
+
     struct FHOOK_COMPONENTS
     {
-        HWND hwndControl;
-        CDsoFrameWindowHook *phookFrame;
+        HWND hwndControl = nullptr;
+        CDsoFrameWindowHook *phookFrame = nullptr;
     };
 
-    BOOL                    m_fAppActive;
-    DWORD                   m_idxActive;
-    DWORD                   m_cComponents;
+    BOOL                    m_fAppActive = FALSE;
+    DWORD                   m_idxActive = 0L;
+    DWORD                   m_cComponents = 0L;
     FHOOK_COMPONENTS        m_pComponents[DSOF_MAX_CONTROLS]{};
 };

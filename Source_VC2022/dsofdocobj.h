@@ -219,20 +219,20 @@ public:
     STDMETHODIMP_(BOOL) GetDocumentTypeAndFileExtension(WCHAR** ppwszFileType, WCHAR** ppwszFileExt);
 
     // Inline accessors for control to get IP object info...
-    inline IOleInPlaceActiveObject*  GetActiveObject()  { return m_pipactive; }
-    inline IOleObject*               GetOleObject()     { return m_pole; }
-    inline HWND         GetDocWindow()      { return m_hwnd; }
-    inline HWND         GetActiveWindow()   { return m_hwndUIActiveObj; }
-    inline BOOL         IsReadOnly()        { return m_fOpenReadOnly; }
-    inline BOOL         InPrintPreview()    { return ((m_pprtprv != NULL) || (m_fInPptSlideShow)); }
-    inline HWND         GetMenuHWND()       { return m_hwndMenuObj; }
-    inline HMENU        GetActiveMenu()     { return m_hMenuActive; }
-    inline HMENU        GetMergedMenu()     { return m_hMenuMerged; }
-    inline void         SetMergedMenu(HMENU h) { m_hMenuMerged = h; }
-    inline LPCWSTR      GetSourceName()     { return ((m_pwszWebResource) ? m_pwszWebResource : m_pwszSourceFile); }
-    inline LPCWSTR      GetSourceDocName()  { return ((m_pwszSourceFile) ? &m_pwszSourceFile[m_idxSourceName] : NULL); }
-    inline CLSID*       GetServerCLSID()    { return &m_clsidObject; }
-    inline BOOL         IsIPActive()        { return (m_pipobj != NULL); }
+    inline IOleInPlaceActiveObject* GetActiveObject()   { return m_pipactive; }
+    inline IOleObject*              GetOleObject()      { return m_pole; }
+    inline HWND                     GetDocWindow()      { return m_hwnd; }
+    inline HWND                     GetActiveWindow()   { return m_hwndUIActiveObj; }
+    inline BOOL                     IsReadOnly()        { return m_fOpenReadOnly; }
+    inline BOOL                     InPrintPreview()    { return ((m_pprtprv != NULL) || (m_fInPptSlideShow)); }
+    inline HWND                     GetMenuHWND()       { return m_hwndMenuObj; }
+    inline HMENU                    GetActiveMenu()     { return m_hMenuActive; }
+    inline HMENU                    GetMergedMenu()     { return m_hMenuMerged; }
+    inline void                     SetMergedMenu(HMENU h) { m_hMenuMerged = h; }
+    inline LPCWSTR                  GetSourceName()     { return ((m_pwszWebResource) ? m_pwszWebResource : m_pwszSourceFile); }
+    inline LPCWSTR                  GetSourceDocName()  { return ((m_pwszSourceFile) ? &m_pwszSourceFile[m_idxSourceName] : NULL); }
+    inline CLSID*                   GetServerCLSID()    { return &m_clsidObject; }
+    inline BOOL                     IsIPActive()        { return (m_pipobj != NULL); }
 
     BOOL IsWordObject()
     {
@@ -296,46 +296,46 @@ protected:
 
     // The private class variables...
 private:
-    ULONG                m_cRef;                // Reference count
-    HWND                 m_hwnd;                // our window
-    HWND                 m_hwndCtl;             // The control's window
-    RECT                 m_rcViewRect;          // Viewable area (set by host)
-    IDsoDocObjectSite   *m_psiteCtl;            // The control's site interface
-    IOleCommandTarget   *m_pcmdCtl;             // IOCT of host (for frame msgs)
+    ULONG                m_cRef = 0UL;                  // Reference count
+    HWND                 m_hwnd = nullptr;              // our window
+    HWND                 m_hwndCtl = nullptr;           // The control's window
+    RECT                 m_rcViewRect{};                // Viewable area (set by host)
+    IDsoDocObjectSite   *m_psiteCtl = nullptr;          // The control's site interface
+    IOleCommandTarget   *m_pcmdCtl = nullptr;           // IOCT of host (for frame msgs)
 
-    LPWSTR               m_pwszHostName;        // Ole Host Name for container
-    LPWSTR               m_pwszSourceFile;      // Path to Source File (on Open)
-    IMoniker            *m_pmkSourceFile;       // Moniker to original source file
-    IBindCtx            *m_pbctxSourceFile;     // Bind context used to original source file
-    IStorage            *m_pstgSourceFile;      // Original File Storage (if open/save file)
-    DWORD                m_idxSourceName;       // Index to doc name in m_pwszSourceFile
+    LPWSTR               m_pwszHostName = nullptr;      // Ole Host Name for container
+    LPWSTR               m_pwszSourceFile = nullptr;    // Path to Source File (on Open)
+    IMoniker            *m_pmkSourceFile = nullptr;     // Moniker to original source file
+    IBindCtx            *m_pbctxSourceFile = nullptr;   // Bind context used to original source file
+    IStorage            *m_pstgSourceFile = nullptr;    // Original File Storage (if open/save file)
+    DWORD                m_idxSourceName = 0L;          // Index to doc name in m_pwszSourceFile
 
-    CLSID                m_clsidObject;         // CLSID of the embedded object
-    IStorage            *m_pstgroot;            // Root temp storage
-    IStorage            *m_pstgfile;            // In-memory file storage
-    IStream             *m_pstmview;            // In-memory view info stream
+    CLSID                m_clsidObject{};               // CLSID of the embedded object
+    IStorage            *m_pstgroot = nullptr;          // Root temp storage
+    IStorage            *m_pstgfile = nullptr;          // In-memory file storage
+    IStream             *m_pstmview = nullptr;          // In-memory view info stream
 
-    LPWSTR               m_pwszWebResource;     // The full URL to the web resource
-    IStream             *m_pstmWebResource;     // Original Download Stream (if open/save URL)
-    IUnknown            *m_punkIPPResource;     // MSDAIPP provider resource (for URL authoring)
-    LPWSTR               m_pwszUsername;        // Username and password used by MSDAIPP
-    LPWSTR               m_pwszPassword;        // for Authentication (see IAuthenticate)
+    LPWSTR               m_pwszWebResource = nullptr;   // The full URL to the web resource
+    IStream*             m_pstmWebResource{};           // Original Download Stream (if open/save URL)
+    IUnknown*            m_punkIPPResource{};           // MSDAIPP provider resource (for URL authoring)
+    LPWSTR               m_pwszUsername = nullptr;      // Username and password used by MSDAIPP
+    LPWSTR               m_pwszPassword = nullptr;      // for Authentication (see IAuthenticate)
 
-    IOleObject              *m_pole;            // Embedded OLE Object (OLE)
-    IOleInPlaceObject       *m_pipobj;          // The IP object methods (OLE)
-    IOleInPlaceActiveObject *m_pipactive;       // The UI Active object methods (OLE)
-    IOleDocumentView        *m_pdocv;           // MSO Document View (DocObj)
-    IOleCommandTarget       *m_pcmdt;           // MSO Command Target (DocObj)
-    IOleInplacePrintPreview *m_pprtprv;         // MSO Print Preview (DocObj)
+    IOleObject              *m_pole = nullptr;          // Embedded OLE Object (OLE)
+    IOleInPlaceObject       *m_pipobj = nullptr;        // The IP object methods (OLE)
+    IOleInPlaceActiveObject *m_pipactive = nullptr;     // The UI Active object methods (OLE)
+    IOleDocumentView        *m_pdocv = nullptr;         // MSO Document View (DocObj)
+    IOleCommandTarget       *m_pcmdt = nullptr;         // MSO Command Target (DocObj)
+    IOleInplacePrintPreview *m_pprtprv = nullptr;       // MSO Print Preview (DocObj)
 
-    HMENU                m_hMenuActive;         // The menu supplied by embedded object
-    HMENU                m_hMenuMerged;         // The merged menu (set by control host)
-    HOLEMENU             m_holeMenu;            // The OLE Menu Descriptor
-    HWND                 m_hwndMenuObj;         // The window for menu commands
-    HWND                 m_hwndIPObject;        // IP active object window
-    HWND                 m_hwndUIActiveObj;     // UI Active object window
-    DWORD                m_dwObjectThreadID;    // Thread Id of UI server
-    BORDERWIDTHS         m_bwToolSpace;         // Toolspace...
+    HMENU                m_hMenuActive = nullptr;       // The menu supplied by embedded object
+    HMENU                m_hMenuMerged = nullptr;       // The merged menu (set by control host)
+    HOLEMENU             m_holeMenu = nullptr;          // The OLE Menu Descriptor
+    HWND                 m_hwndMenuObj = nullptr;       // The window for menu commands
+    HWND                 m_hwndIPObject = nullptr;      // IP active object window
+    HWND                 m_hwndUIActiveObj = nullptr;   // UI Active object window
+    DWORD                m_dwObjectThreadID = 0L;       // Thread Id of UI server
+    BORDERWIDTHS         m_bwToolSpace{};               // Toolspace...
 
     // Bitflags (state info)...
     unsigned int         m_fDisplayTools:1;

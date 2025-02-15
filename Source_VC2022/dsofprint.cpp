@@ -29,12 +29,15 @@ STDMETHODIMP CDsoFramerControl::_PrintOutOld(VARIANT PromptToSelectPrinter)
     DWORD dwOption = BOOL_FROM_VARIANT(PromptToSelectPrinter, FALSE)
                    ? OLECMDEXECOPT_PROMPTUSER : OLECMDEXECOPT_DODEFAULT;
 
-    TRACE1("CDsoFramerControl::_PrintOutOld(%d)\n", dwOption);
+    TRACE1(_T("CDsoFramerControl::_PrintOutOld(%d)\n"), dwOption);
+
     CHECK_NULL_RETURN(m_pDocObjFrame, ProvideErrorInfo(DSO_E_DOCUMENTNOTOPEN));
 
     // Cannot access object if in modal condition...
     if ((m_fModalState) || (m_pDocObjFrame->InPrintPreview()))
+    {
         return ProvideErrorInfo(DSO_E_INMODALSTATE);
+    }
 
     return m_pDocObjFrame->DoOleCommand(OLECMDID_PRINT, dwOption, NULL, NULL);
 }
@@ -50,37 +53,53 @@ STDMETHODIMP CDsoFramerControl::PrintOut(VARIANT PromptUser, VARIANT PrinterName
                 VARIANT Copies, VARIANT FromPage, VARIANT ToPage, VARIANT OutputFile)
 {
     HRESULT hr;
+
     BOOL fPromptUser   = BOOL_FROM_VARIANT(PromptUser, FALSE);
+    
     LPWSTR pwszPrinter = LPWSTR_FROM_VARIANT(PrinterName);
     LPWSTR pwszOutput  = LPWSTR_FROM_VARIANT(OutputFile);
+    
     LONG lCopies       = LONG_FROM_VARIANT(Copies, 1);
     LONG lFrom         = LONG_FROM_VARIANT(FromPage, 0);
     LONG lTo           = LONG_FROM_VARIANT(ToPage, 0);
 
-    TRACE3("CDsoFramerControl::PrintOut(%d, %S, %d)\n", fPromptUser, pwszPrinter, lCopies);
+    TRACE3(_T("CDsoFramerControl::PrintOut(%d, %S, %d)\n"), fPromptUser, pwszPrinter, lCopies);
+
     CHECK_NULL_RETURN(m_pDocObjFrame, ProvideErrorInfo(DSO_E_DOCUMENTNOTOPEN));
 
     // First we do validation of all parameters passed to the function...
     if ((pwszPrinter) && (*pwszPrinter == L'\0'))
+    {
         return E_INVALIDARG;
+    }
 
     if ((pwszOutput) && (*pwszOutput == L'\0'))
+    {
         return E_INVALIDARG;
+    }
 
     if ((lCopies < 1) || (lCopies > 200))
+    {
         return E_INVALIDARG;
+    }
 
     if (((lFrom != 0) || (lTo != 0)) && ((lFrom < 1) || (lTo < lFrom)))
+    {
         return E_INVALIDARG;
+    }
 
     // Cannot access object if in modal condition...
     if ((m_fModalState) || (m_pDocObjFrame->InPrintPreview()))
+    {
         return ProvideErrorInfo(DSO_E_INMODALSTATE);
+    }
 
     // If no printer name was provided, we can print to the default device
     // using IOleCommandTarget with OLECMDID_PRINT...
     if (pwszPrinter == NULL)
+    {
         return _PrintOutOld(PromptUser);
+    }
 
     // Ask the embedded document to print itself to specific printer...
     hr = m_pDocObjFrame->PrintDocument(pwszPrinter, pwszOutput, (UINT)lCopies,
@@ -89,7 +108,9 @@ STDMETHODIMP CDsoFramerControl::PrintOut(VARIANT PromptUser, VARIANT PrinterName
     // If call failed because interface doesn't exist, change error
     // to let caller know it is because DocObj doesn't support this command...
     if (FAILED(hr) && (hr == E_NOINTERFACE))
+    {
         hr = DSO_E_COMMANDNOTSUPPORTED;
+    }
 
     return ProvideErrorInfo(hr);
 }
@@ -102,12 +123,16 @@ STDMETHODIMP CDsoFramerControl::PrintOut(VARIANT PromptUser, VARIANT PrinterName
 STDMETHODIMP CDsoFramerControl::PrintPreview()
 {
     HRESULT hr;
-    ODS("CDsoFramerControl::PrintPreview\n");
+
+    ODS(_T("CDsoFramerControl::PrintPreview\n"));
+    
     CHECK_NULL_RETURN(m_pDocObjFrame, ProvideErrorInfo(DSO_E_DOCUMENTNOTOPEN));
 
     // Cannot access object if in modal condition...
     if (m_fModalState)
+    {
         return ProvideErrorInfo(DSO_E_INMODALSTATE);
+    }
 
     // Try to set object into print preview mode...
     hr = m_pDocObjFrame->StartPrintPreview();
@@ -115,7 +140,9 @@ STDMETHODIMP CDsoFramerControl::PrintPreview()
     // If call failed because interface doesn't exist, change error
     // to let caller know it is because DocObj doesn't support this command...
     if (FAILED(hr) && (hr == E_NOINTERFACE))
+    {
         hr = DSO_E_COMMANDNOTSUPPORTED;
+    }
 
     return ProvideErrorInfo(hr);
 }
@@ -128,12 +155,15 @@ STDMETHODIMP CDsoFramerControl::PrintPreview()
 //
 STDMETHODIMP CDsoFramerControl::PrintPreviewExit()
 {
-    ODS("CDsoFramerControl::PrintPreviewExit\n");
+    ODS(_T("CDsoFramerControl::PrintPreviewExit\n"));
+
     CHECK_NULL_RETURN(m_pDocObjFrame, ProvideErrorInfo(DSO_E_DOCUMENTNOTOPEN));
 
     // Try to set object out of print preview mode...
     if (m_pDocObjFrame->InPrintPreview())
+    {
         m_pDocObjFrame->ExitPrintPreview(TRUE);
+    }
 
     return S_OK;
 }
@@ -147,16 +177,20 @@ STDMETHODIMP CDsoFramerControl::PrintPreviewExit()
 STDMETHODIMP CDsoDocObject::PrintDocument(LPCWSTR pwszPrinter, LPCWSTR pwszOutput, UINT cCopies, UINT nFrom, UINT nTo, BOOL fPromptUser)
 {
     HRESULT hr;
+
     IPrint *print;
     HANDLE hPrint;
+    
     DVTARGETDEVICE *ptd = NULL;
 
-    ODS("CDsoDocObject::PrintDocument\n");
+    ODS(_T("CDsoDocObject::PrintDocument\n"));
+    
     CHECK_NULL_RETURN(m_pole, E_UNEXPECTED);
 
     // First thing we need to do is ask object for IPrint. If it does not
     // support it, we cannot continue. It is up to DocObj if this is allowed...
     hr = m_pole->QueryInterface(IID_IPrint, (void **)&print);
+
     RETURN_ON_FAILURE(hr);
 
     // Now setup printer settings into DEVMODE for IPrint. Open printer
@@ -191,26 +225,36 @@ STDMETHODIMP CDsoDocObject::PrintDocument(LPCWSTR pwszPrinter, LPCWSTR pwszOutpu
 
             // Allocate new target device using COM Task Allocator...
             ptd = (DVTARGETDEVICE*)CoTaskMemAlloc(cbDVTargetSize);
+
             if (ptd)
             {
                 // Copy all the data in the DVT...
                 DWORD dwOffset = sizeof(DWORD) + sizeof(DEVNAMES);
+
                 ptd->tdSize = cbDVTargetSize;
 
                 ptd->tdDriverNameOffset = (WORD)dwOffset;
+                
                 memcpy((BYTE *)(((BYTE *)ptd) + dwOffset), pwszDefProcessor, cbPrintName);
+                
                 dwOffset += cbPrintName;
 
                 ptd->tdDeviceNameOffset = (WORD)dwOffset;
+                
                 memcpy((BYTE *)(((BYTE *)ptd) + dwOffset), pwszDefDriver, cbDeviceName);
+                
                 dwOffset += cbDeviceName;
 
                 ptd->tdPortNameOffset = (WORD)dwOffset;
+                
                 memcpy((BYTE *)(((BYTE *)ptd) + dwOffset), pwszPort, cbOutputName);
+                
                 dwOffset += cbOutputName;
 
                 ptd->tdExtDevmodeOffset = (WORD)dwOffset;
+                
                 memcpy((BYTE *)(((BYTE *)ptd) + dwOffset), pDevMode, cbDevModeSize);
+                
                 dwOffset += cbDevModeSize;
 
                 ASSERT(dwOffset == cbDVTargetSize);
@@ -231,6 +275,7 @@ STDMETHODIMP CDsoDocObject::PrintDocument(LPCWSTR pwszPrinter, LPCWSTR pwszOutpu
         SAFE_FREESTRING(pwszDefPort);
         SAFE_FREESTRING(pwszDefDriver);
         SAFE_FREESTRING(pwszDefProcessor);
+        
         ClosePrinter(hPrint);
     }
     else
@@ -267,10 +312,16 @@ STDMETHODIMP CDsoDocObject::PrintDocument(LPCWSTR pwszPrinter, LPCWSTR pwszOutpu
                 print->SetInitialPageNum(ppgset->rgPages[0].nFromPage);
 
                 grfPrintFlags = (PRINTFLAG_MAYBOTHERUSER | PRINTFLAG_RECOMPOSETODEVICE);
+
                 if (fPromptUser)
+                {
                     grfPrintFlags |= PRINTFLAG_PROMPTUSER;
+                }
+
                 if (pwszOutput)
+                {
                     grfPrintFlags |= PRINTFLAG_PRINTTOFILE;
+                }
 
                 // Now ask server to print it using settings passed...
                 hr = print->Print(grfPrintFlags, &ptd, &ppgset, NULL, (IContinueCallback *)&m_xContinueCallback,
@@ -281,7 +332,9 @@ STDMETHODIMP CDsoDocObject::PrintDocument(LPCWSTR pwszPrinter, LPCWSTR pwszOutpu
             SetCursor(hCur);
 
             if (ppgset)
+            {
                 CoTaskMemFree(ppgset);
+            }
         }
         else
         {
@@ -291,9 +344,12 @@ STDMETHODIMP CDsoDocObject::PrintDocument(LPCWSTR pwszPrinter, LPCWSTR pwszOutpu
 
     // We are done...
     if (ptd)
+    {
         CoTaskMemFree(ptd);
+    }
 
     print->Release();
+
     return hr;
 }
 
@@ -305,18 +361,23 @@ STDMETHODIMP CDsoDocObject::PrintDocument(LPCWSTR pwszPrinter, LPCWSTR pwszOutpu
 STDMETHODIMP CDsoDocObject::StartPrintPreview()
 {
     HRESULT hr;
+
     IOleInplacePrintPreview *prev;
     HCURSOR hCur;
 
-    ODS("CDsoDocObject::StartPrintPreview\n");
+    ODS(_T("CDsoDocObject::StartPrintPreview\n"));
+    
     CHECK_NULL_RETURN(m_pole, E_UNEXPECTED);
 
     // No need to do anything if already in preview...
     if (InPrintPreview())
+    {
         return S_FALSE;
+    }
 
     // Otherwise, ask document server if it supports preview...
     hr = m_pole->QueryInterface(IID_IOleInplacePrintPreview, (void **)&prev);
+
     if (SUCCEEDED(hr))
     {
         // Tell user we waiting (switch to preview can be slow for very large docs)...
@@ -324,13 +385,16 @@ STDMETHODIMP CDsoDocObject::StartPrintPreview()
 
         // If it does, make sure it can go into preview mode...
         hr = prev->QueryStatus();
+
         if (SUCCEEDED(hr))
         {
             SEH_TRY
 
                 // Notify the control that preview started...
                 if (m_hwndCtl)
+                {
                     SendMessage(m_hwndCtl, DSO_WM_ASYNCH_STATECHANGE, DSO_STATE_INTERACTIVE, (LPARAM)FALSE);
+                }
 
                 // We will allow application to bother user and switch printers...
                 hr = prev->StartPrintPreview(
@@ -348,11 +412,14 @@ STDMETHODIMP CDsoDocObject::StartPrintPreview()
             {
                 // Otherwise, notify the control that preview failed...
                 if (m_hwndCtl)
+                {
                     PostMessage(m_hwndCtl, DSO_WM_ASYNCH_STATECHANGE, DSO_STATE_INTERACTIVE, (LPARAM)TRUE);
+                }
             }
         }
 
         SetCursor(hCur);
+
         prev->Release();
     }
     else if (IsPPTObject() && (m_hwndUIActiveObj))
@@ -363,6 +430,7 @@ STDMETHODIMP CDsoDocObject::StartPrintPreview()
             PostMessage(m_hwndUIActiveObj, WM_KEYUP,   VK_F5, 0xC0000001))
         {
             m_fAttemptPptPreview = TRUE;
+
             hr = S_OK;
         }
     }
@@ -377,11 +445,13 @@ STDMETHODIMP CDsoDocObject::StartPrintPreview()
 //
 STDMETHODIMP CDsoDocObject::ExitPrintPreview(BOOL fForceExit)
 {
-    TRACE1("CDsoDocObject::ExitPrintPreview(fForceExit=%d)\n", (DWORD)fForceExit);
+    TRACE1(_T("CDsoDocObject::ExitPrintPreview(fForceExit=%d)\n"), (DWORD)fForceExit);
 
     // Need to be in preview to run this function...
     if (!InPrintPreview())
+    {
         return S_FALSE;
+    }
 
     // If the user closes the app or otherwise terminates the preview, we need
     // to notify the ActiveDocument server to leave preview mode...
@@ -390,7 +460,9 @@ STDMETHODIMP CDsoDocObject::ExitPrintPreview(BOOL fForceExit)
         if (fForceExit) // Tell docobj we want to end preview...
         {
             HRESULT hr = m_pprtprv->EndPrintPreview(TRUE);
+
             ASSERT(SUCCEEDED(hr));
+            
             (void)hr;
         }
     }
@@ -406,9 +478,11 @@ STDMETHODIMP CDsoDocObject::ExitPrintPreview(BOOL fForceExit)
             // to the right window, so we can use that trick to get the right window and
             // make the call in a way that that should succeed regardless of PPT version...
             SetFocus(m_hwndUIActiveObj);
+
             PostMessage(GetFocus(), WM_KEYDOWN, VK_ESCAPE, 0x00000001);
             PostMessage(GetFocus(), WM_KEYUP,   VK_ESCAPE, 0xC0000001);
         }
+
         m_fAttemptPptPreview = FALSE;
         m_fInPptSlideShow = FALSE;
     }
@@ -421,6 +495,7 @@ STDMETHODIMP CDsoDocObject::ExitPrintPreview(BOOL fForceExit)
 
     // Free our reference to preview interface...
     SAFE_RELEASE_INTERFACE(m_pprtprv);
+
     return S_OK;
 }
 
@@ -442,6 +517,8 @@ STDMETHODIMP_(void) CDsoDocObject::CheckForPPTPreviewChange()
 
         // Notify the control that preview started...
         if (m_hwndCtl)
+        {
             SendMessage(m_hwndCtl, DSO_WM_ASYNCH_STATECHANGE, DSO_STATE_INTERACTIVE, (LPARAM)FALSE);
+        }
     }
 }
