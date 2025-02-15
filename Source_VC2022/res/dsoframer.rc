@@ -81,13 +81,14 @@ BEGIN
     BEGIN
         BLOCK "040904b0"
         BEGIN
-            VALUE "Comments", "UNSUPPORTED BY MICROSOFT\0"
-            VALUE "CompanyName", "Your Company\0"
-            VALUE "FileDescription", "Your Company's Office Framer Control Sample\0"
+            VALUE "CompanyName", "Open Source\0"
+            VALUE "LegalCopyright", "Original Copyright (C) 1999-2004; Microsoft Corporation. All rights reserved.\0"
+            VALUE "FileDescription", "Office Framer Control Sample\0"
             VALUE "FileVersion", DSOFRAMERCTL_VERSIONSTRFULL "\0"
             VALUE "OriginalFilename", "dsoframer.ocx\0"
             VALUE "ProductName", "DSOFRAMER\0"
             VALUE "ProductVersion", DSOFRAMERCTL_VERSIONSTR "\0"
+            VALUE "Comments", "UNSUPPORTED BY MICROSOFT\0"
         END
     END
     BLOCK "VarFileInfo"
