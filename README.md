@@ -10,8 +10,9 @@ It is still, and most interestingly, despite all shortcomings there may be, work
 
 * <https://stackoverflow.com/questions/72477616/office-365-word-cant-be-embed-in-place-inside-windows-native-application>
 * <https://learn.microsoft.com/en-us/windows/win32/hidpi/setting-the-default-dpi-awareness-for-a-process>
+* <https://stackoverflow.com/questions/4075802/creating-a-dpi-aware-application>
 
-For a quick fix/proof-of-concept you can use [Resource Hacker](https://www.angusj.com/resourcehacker) to edit your executable's manifest resource according to the Microsoft sample.
+For a quick fix/proof-of-concept you can use [Resource Hacker](https://www.angusj.com/resourcehacker) to edit your executable's manifest resource according to the Microsoft Learn sample.
 
 ## Instructions
 
