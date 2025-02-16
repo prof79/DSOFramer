@@ -39,7 +39,7 @@ STDMETHODIMP CDsoFramerControl::_PrintOutOld(VARIANT PromptToSelectPrinter)
         return ProvideErrorInfo(DSO_E_INMODALSTATE);
     }
 
-    return m_pDocObjFrame->DoOleCommand(OLECMDID_PRINT, dwOption, NULL, NULL);
+    return m_pDocObjFrame->DoOleCommand(OLECMDID_PRINT, dwOption, nullptr, nullptr);
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -96,7 +96,7 @@ STDMETHODIMP CDsoFramerControl::PrintOut(VARIANT PromptUser, VARIANT PrinterName
 
     // If no printer name was provided, we can print to the default device
     // using IOleCommandTarget with OLECMDID_PRINT...
-    if (pwszPrinter == NULL)
+    if (pwszPrinter == nullptr)
     {
         return _PrintOutOld(PromptUser);
     }
@@ -181,7 +181,7 @@ STDMETHODIMP CDsoDocObject::PrintDocument(LPCWSTR pwszPrinter, LPCWSTR pwszOutpu
     IPrint *print;
     HANDLE hPrint;
     
-    DVTARGETDEVICE *ptd = NULL;
+    DVTARGETDEVICE *ptd = nullptr;
 
     ODS(_T("CDsoDocObject::PrintDocument\n"));
     
@@ -197,10 +197,10 @@ STDMETHODIMP CDsoDocObject::PrintDocument(LPCWSTR pwszPrinter, LPCWSTR pwszOutpu
     // settings and gather default DEVMODE...
     if (FOpenPrinter(pwszPrinter, &hPrint))
     {
-        LPDEVMODEW pDevMode     = NULL;
-        LPWSTR pwszDefProcessor = NULL;
-        LPWSTR pwszDefDriver    = NULL;
-        LPWSTR pwszDefPort      = NULL;
+        LPDEVMODEW pDevMode     = nullptr;
+        LPWSTR pwszDefProcessor = nullptr;
+        LPWSTR pwszDefDriver    = nullptr;
+        LPWSTR pwszDefPort      = nullptr;
         LPWSTR pwszPort;
         DWORD  cbDevModeSize;
 
@@ -293,7 +293,7 @@ STDMETHODIMP CDsoDocObject::PrintDocument(LPCWSTR pwszPrinter, LPCWSTR pwszOutpu
         DWORD grfPrintFlags;
 
         // Setup the page range to print...
-        if ((ppgset = (PAGESET *)CoTaskMemAlloc(cbPgRngSize)) != NULL)
+        if ((ppgset = (PAGESET *)CoTaskMemAlloc(cbPgRngSize)) != nullptr)
         {
             ppgset->cbStruct    = cbPgRngSize;
             ppgset->cPageRange  = 1;
@@ -304,7 +304,7 @@ STDMETHODIMP CDsoDocObject::PrintDocument(LPCWSTR pwszPrinter, LPCWSTR pwszOutpu
             ppgset->rgPages[0].nToPage   = ((nTo) ? nTo : PAGESET_TOLASTPAGE);
 
             // Give indication we are waiting (on the print)...
-            HCURSOR hCur = SetCursor(LoadCursor(NULL, IDC_WAIT));
+            HCURSOR hCur = SetCursor(LoadCursor(nullptr, IDC_WAIT));
 
             SEH_TRY
 
@@ -324,7 +324,7 @@ STDMETHODIMP CDsoDocObject::PrintDocument(LPCWSTR pwszPrinter, LPCWSTR pwszOutpu
                 }
 
                 // Now ask server to print it using settings passed...
-                hr = print->Print(grfPrintFlags, &ptd, &ppgset, NULL, (IContinueCallback *)&m_xContinueCallback,
+                hr = print->Print(grfPrintFlags, &ptd, &ppgset, nullptr, (IContinueCallback *)&m_xContinueCallback,
                         ppgset->rgPages[0].nFromPage, &cPages, &cLastPage);
 
             SEH_EXCEPT(hr)
@@ -381,7 +381,7 @@ STDMETHODIMP CDsoDocObject::StartPrintPreview()
     if (SUCCEEDED(hr))
     {
         // Tell user we waiting (switch to preview can be slow for very large docs)...
-        hCur = SetCursor(LoadCursor(NULL, IDC_WAIT));
+        hCur = SetCursor(LoadCursor(nullptr, IDC_WAIT));
 
         // If it does, make sure it can go into preview mode...
         hr = prev->QueryStatus();
@@ -399,7 +399,7 @@ STDMETHODIMP CDsoDocObject::StartPrintPreview()
                 // We will allow application to bother user and switch printers...
                 hr = prev->StartPrintPreview(
                         (PREVIEWFLAG_MAYBOTHERUSER | PREVIEWFLAG_PROMPTUSER | PREVIEWFLAG_USERMAYCHANGEPRINTER),
-                        NULL, (IOlePreviewCallback *)&m_xPreviewCallback, 1);
+                        nullptr, (IOlePreviewCallback *)&m_xPreviewCallback, 1);
 
             SEH_EXCEPT(hr)
 

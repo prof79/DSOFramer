@@ -122,13 +122,13 @@ STDAPI DsoGetOleInsertObjectFromUser(HWND hwndOwner, LPCWSTR pwzTitle, DWORD dwF
 
 #define RETURN_ON_FAILURE(x)    if (FAILED(x)) return (x)
 #define GOTO_ON_FAILURE(x, lbl) if (FAILED(x)) goto lbl
-#define CHECK_NULL_RETURN(v, e) if ((v) == NULL) return (e)
+#define CHECK_NULL_RETURN(v, e) if ((v) == reinterpret_cast<DWORD>(nullptr)) return (e)
 
 #define SAFE_ADDREF_INTERFACE     if (x) { (x)->AddRef(); }
-#define SAFE_RELEASE_INTERFACE(x) if (x) { (x)->Release(); (x) = NULL; }
-#define SAFE_SET_INTERFACE(x, y)  if (((x) = (y)) != NULL) ((IUnknown*)(x))->AddRef()
-#define SAFE_FREESTRING(s)        if (s) { DsoMemFree(s); (s) = NULL; }
-#define SAFE_FREEBSTR(s)          if (s) { SysFreeString(s); (s) = NULL; }
+#define SAFE_RELEASE_INTERFACE(x) if (x) { (x)->Release(); (x) = nullptr; }
+#define SAFE_SET_INTERFACE(x, y)  if (((x) = (y)) != nullptr) ((IUnknown*)(x))->AddRef()
+#define SAFE_FREESTRING(s)        if (s) { DsoMemFree(s); (s) = nullptr; }
+#define SAFE_FREEBSTR(s)          if (s) { SysFreeString(s); (s) = nullptr; }
 
 VARIANT*   __fastcall DsoPVarFromPVarRef(VARIANT* px);
 BOOL       __fastcall DsoIsVarParamMissing(VARIANT* px);

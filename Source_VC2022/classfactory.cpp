@@ -33,6 +33,7 @@
 STDMETHODIMP CDsoFramerClassFactory::QueryInterface(REFIID riid, void** ppv)
 {
     ODS(_T("CDsoFramerClassFactory::QueryInterface\n"));
+
     CHECK_NULL_RETURN(ppv, E_POINTER);
 
     if ((IID_IUnknown == riid) || (IID_IClassFactory == riid))
@@ -42,7 +43,7 @@ STDMETHODIMP CDsoFramerClassFactory::QueryInterface(REFIID riid, void** ppv)
         return S_OK;
     }
 
-    *ppv = NULL;
+    *ppv = nullptr;
 
     return E_NOINTERFACE;
 }
@@ -89,7 +90,7 @@ STDMETHODIMP CDsoFramerClassFactory::CreateInstance(LPUNKNOWN punk, REFIID riid,
 
     ODS(_T("CDsoFramerClassFactory::CreateInstance\n"));
 
-    CHECK_NULL_RETURN(ppv, E_POINTER);  *ppv = NULL;
+    CHECK_NULL_RETURN(ppv, E_POINTER);  *ppv = nullptr;
 
     // Aggregation requires you ask for (internal) IUnknown
     if ((punk) && (riid != IID_IUnknown))
@@ -117,7 +118,7 @@ STDMETHODIMP CDsoFramerClassFactory::CreateInstance(LPUNKNOWN punk, REFIID riid,
         // else cleanup the object
         delete pocx;
         
-        *ppv = NULL;
+        *ppv = nullptr;
     }
 
     return hr;

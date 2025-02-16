@@ -78,7 +78,7 @@ STDMETHODIMP CDsoFramerControl::get_ActiveDocument(IDispatch** ppdisp)
 
     ODS(_T("CDsoFramerControl::get_ActiveDocument\n"));
 
-    CHECK_NULL_RETURN(ppdisp, E_POINTER); *ppdisp = NULL;
+    CHECK_NULL_RETURN(ppdisp, E_POINTER); *ppdisp = nullptr;
 
     // Get IDispatch from open document object.
     if ((m_pDocObjFrame) && (punk = (IUnknown*)(m_pDocObjFrame->GetActiveObject())))
@@ -210,8 +210,8 @@ STDMETHODIMP CDsoFramerControl::CreateNew(BSTR ProgIdOrTemplate)
     HRESULT hr;
     CLSID clsid;
     HCURSOR hCur;
-    IStorage *pstgTemplate = NULL;
-    LPWSTR pwszTempFile = NULL;
+    IStorage *pstgTemplate = nullptr;
+    LPWSTR pwszTempFile = nullptr;
 
     TRACE1(_T("CDsoFramerControl::CreateNew(%S)\n"), ProgIdOrTemplate);
 
@@ -247,7 +247,7 @@ STDMETHODIMP CDsoFramerControl::CreateNew(BSTR ProgIdOrTemplate)
     }
 
     // Start a wait operation to notify user...
-    hCur = SetCursor(LoadCursor(NULL, IDC_WAIT));
+    hCur = SetCursor(LoadCursor(nullptr, IDC_WAIT));
 
     m_fInDocumentLoad = TRUE;
 
@@ -257,9 +257,9 @@ STDMETHODIMP CDsoFramerControl::CreateNew(BSTR ProgIdOrTemplate)
         GetTempPathForURLDownload(ProgIdOrTemplate, &pwszTempFile))
     {
         // Ask URLMON to download the file...
-        if (FAILED(hr = URLDownloadFile(NULL, ProgIdOrTemplate, pwszTempFile)))
+        if (FAILED(hr = URLDownloadFile(nullptr, ProgIdOrTemplate, pwszTempFile)))
         {
-            DsoMemFree(pwszTempFile); pwszTempFile = NULL;
+            DsoMemFree(pwszTempFile); pwszTempFile = nullptr;
 
             goto error_out;
         }
@@ -281,9 +281,9 @@ STDMETHODIMP CDsoFramerControl::CreateNew(BSTR ProgIdOrTemplate)
         }
 
         // Open the template for read access only...
-        hr = StgOpenStorage(ProgIdOrTemplate, NULL,
+        hr = StgOpenStorage(ProgIdOrTemplate, nullptr,
             (STGM_READ | STGM_SHARE_DENY_WRITE | STGM_TRANSACTED),
-             NULL, 0, &pstgTemplate);
+             nullptr, 0, &pstgTemplate);
 
         GOTO_ON_FAILURE(hr, error_out);
 
@@ -366,7 +366,7 @@ error_out:
         VARIANT rgargs[2];
         
         rgargs[0].vt = VT_DISPATCH; get_ActiveDocument(&(rgargs[0].pdispVal));
-        rgargs[1].vt = VT_BSTR; rgargs[1].bstrVal = NULL;
+        rgargs[1].vt = VT_BSTR; rgargs[1].bstrVal = nullptr;
 
         RaiseAutomationEvent(DSOF_DISPID_DOCOPEN, 2, rgargs);
 
@@ -388,7 +388,7 @@ error_out:
     // Delete the temp file used in the URL download (if any)...
     if (pwszTempFile)
     {
-        FPerformShellOp(FO_DELETE, pwszTempFile, NULL);
+        FPerformShellOp(FO_DELETE, pwszTempFile, nullptr);
 
         DsoMemFree(pwszTempFile);
         
@@ -426,7 +426,7 @@ STDMETHODIMP CDsoFramerControl::Open(VARIANT Document, VARIANT ReadOnly, VARIANT
     
     HCURSOR   hCur;
     
-    IUnknown* punk = NULL;
+    IUnknown* punk = nullptr;
 
     BIND_OPTS bopts = {sizeof(BIND_OPTS), BIND_MAYBOTHERUSER, 0, 10000};
 
@@ -435,7 +435,7 @@ STDMETHODIMP CDsoFramerControl::Open(VARIANT Document, VARIANT ReadOnly, VARIANT
     // We must have either a string (file path or URL) or an object to open from...
     if (!(pwszDocument) || (*pwszDocument == L'\0'))
     {
-        if (!(pwszDocument) && ((punk = PUNK_FROM_VARIANT(Document)) == NULL))
+        if (!(pwszDocument) && ((punk = PUNK_FROM_VARIANT(Document)) == nullptr))
         {
             return E_INVALIDARG;
         }
@@ -484,7 +484,7 @@ STDMETHODIMP CDsoFramerControl::Open(VARIANT Document, VARIANT ReadOnly, VARIANT
     }
 
     // Start a wait operation to notify user...
-    hCur = SetCursor(LoadCursor(NULL, IDC_WAIT));
+    hCur = SetCursor(LoadCursor(nullptr, IDC_WAIT));
 
     m_fInDocumentLoad = TRUE;
 
@@ -514,7 +514,7 @@ STDMETHODIMP CDsoFramerControl::Open(VARIANT Document, VARIANT ReadOnly, VARIANT
     else if (punk)
     {
         // If we have an object to load from, try loading it direct...
-        hr = m_pDocObjFrame->CreateFromRunningObject(punk, NULL, &bopts);
+        hr = m_pDocObjFrame->CreateFromRunningObject(punk, nullptr, &bopts);
     }
     else
     {
@@ -602,7 +602,7 @@ STDMETHODIMP CDsoFramerControl::Save(VARIANT SaveAsDocument, VARIANT OverwriteEx
 
     // If user passed a value for SaveAs, it must be a valid string...
     if (!(PARAM_IS_MISSING(&SaveAsDocument)) &&
-        ((pwszDocument == NULL) || (*pwszDocument == L'\0')))
+        ((pwszDocument == nullptr) || (*pwszDocument == L'\0')))
     {
         return E_INVALIDARG;
     }
@@ -630,7 +630,7 @@ STDMETHODIMP CDsoFramerControl::Save(VARIANT SaveAsDocument, VARIANT OverwriteEx
     }
 
     // Now do the save...
-    hCur = SetCursor(LoadCursor(NULL, IDC_WAIT));
+    hCur = SetCursor(LoadCursor(nullptr, IDC_WAIT));
 
     SEH_TRY
 
@@ -709,7 +709,7 @@ STDMETHODIMP CDsoFramerControl::Close()
         }
 
         // If not canceled, clear the member variable then call close on doc frame...
-        m_pDocObjFrame = NULL;
+        m_pDocObjFrame = nullptr;
 
         SEH_TRY
             pdframe->Close();
@@ -718,7 +718,7 @@ STDMETHODIMP CDsoFramerControl::Close()
         delete pdframe;
 
         // Notify host that item is now closed...
-        RaiseAutomationEvent(DSOF_DISPID_DOCCLOSE, 0, NULL);
+        RaiseAutomationEvent(DSOF_DISPID_DOCCLOSE, 0, nullptr);
     }
 
     // Redraw the caption as needed...
@@ -931,7 +931,7 @@ STDMETHODIMP CDsoFramerControl::ShowDialog(dsoShowDialogType DlgType)
         default:                  dwOleCmd = OLECMDID_PRINT;      break;
         }
 
-        hr = m_pDocObjFrame->DoOleCommand(dwOleCmd, OLECMDEXECOPT_PROMPTUSER, NULL, NULL);
+        hr = m_pDocObjFrame->DoOleCommand(dwOleCmd, OLECMDEXECOPT_PROMPTUSER, nullptr, nullptr);
     }
 
     return ProvideErrorInfo(hr);
@@ -978,7 +978,7 @@ STDMETHODIMP CDsoFramerControl::put_EnableFileCommand(dsoFileCommandType Item, V
     // This should update toolbar icon (if server supports it)
     if (m_pDocObjFrame)
     {
-        m_pDocObjFrame->DoOleCommand(OLECMDID_UPDATECOMMANDS, 0, NULL, NULL);
+        m_pDocObjFrame->DoOleCommand(OLECMDID_UPDATECOMMANDS, 0, nullptr, nullptr);
     }
 
     return S_OK;
@@ -1259,7 +1259,7 @@ STDMETHODIMP CDsoFramerControl::get_DocumentFullName(BSTR* pbstr)
     CHECK_NULL_RETURN(pbstr, E_POINTER);
     
     // Ask doc object site for the source name ...
-    *pbstr = (m_pDocObjFrame) ? SysAllocString(m_pDocObjFrame->GetSourceName()) : NULL;
+    *pbstr = (m_pDocObjFrame) ? SysAllocString(m_pDocObjFrame->GetSourceName()) : nullptr;
 
     return S_OK;
 }
@@ -1276,7 +1276,7 @@ STDMETHODIMP CDsoFramerControl::get_DocumentName(BSTR* pbstr)
     CHECK_NULL_RETURN(pbstr, E_POINTER);
     
     // Ask doc object site for the source doc name ...
-    *pbstr = (m_pDocObjFrame) ? SysAllocString(m_pDocObjFrame->GetSourceDocName()) : NULL;
+    *pbstr = (m_pDocObjFrame) ? SysAllocString(m_pDocObjFrame->GetSourceDocName()) : nullptr;
 
     return S_OK;
 }
@@ -1331,7 +1331,7 @@ STDMETHODIMP CDsoFramerControl::put_LockServer(VARIANT_BOOL vbool)
     TRACE1(_T("CDsoFramerControl::put_LockServer(%d)\n"), (DWORD)vbool);
 
     // We must have a server open to set a lock...
-    if ((fLock) && (m_pDocObjFrame == NULL))
+    if ((fLock) && (m_pDocObjFrame == nullptr))
     {
         return ProvideErrorInfo(DSO_E_DOCUMENTNOTOPEN);
     }
@@ -1556,13 +1556,13 @@ STDMETHODIMP CDsoFramerControl::GetTypeInfo(UINT iTInfo, LCID lcid, ITypeInfo** 
 
     ODS(_T("CDsoFramerControl::GetTypeInfo\n"));
 
-    CHECK_NULL_RETURN(ppTInfo, E_POINTER); *ppTInfo = NULL;
+    CHECK_NULL_RETURN(ppTInfo, E_POINTER); *ppTInfo = nullptr;
 
     // We only support default interface late bound...
     CHECK_NULL_RETURN((iTInfo == 0), DISP_E_BADINDEX);
 
     // Load the type lib if we don't have the information already.
-    if (NULL == m_ptiDispType)
+    if (nullptr == m_ptiDispType)
     {
         hr = DsoGetTypeInfoEx(LIBID_DSOFramer, 0, DSOFRAMERCTL_VERSION_MAJOR, DSOFRAMERCTL_VERSION_MINOR,
                               v_hModule, IID__FramerControl, &m_ptiDispType);
@@ -1632,7 +1632,7 @@ STDMETHODIMP CDsoFramerControl::Invoke(DISPID dispIdMember, REFIID riid, LCID lc
     hr = pti->Invoke((PVOID)this, dispIdMember, wFlags, pDispParams, pVarResult, pExcepInfo, puArgErr);
 
     // Don't need this anymore...
-    m_pDispExcep = NULL;
+    m_pDispExcep = nullptr;
     
     pti->Release();
 
@@ -1653,5 +1653,5 @@ STDMETHODIMP CDsoFramerControl::ProvideErrorInfo(HRESULT hres)
     }
 
     // Fill in the error information as needed...
-    return DsoReportError(hres, NULL, m_pDispExcep);
+    return DsoReportError(hres, nullptr, m_pDispExcep);
 }

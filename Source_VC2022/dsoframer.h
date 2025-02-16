@@ -466,22 +466,23 @@ public:
         // Send data change notification.
         if (m_pDataAdviseHolder)
         {
-            m_pDataAdviseHolder->SendOnDataChange((IDataObject*)&m_xDataObject, NULL, 0);
+            m_pDataAdviseHolder->SendOnDataChange((IDataObject*)&m_xDataObject, 0, 0);
         }
 
         // Send the view change notification....
         if (m_pViewAdviseSink)
         {
             m_pViewAdviseSink->OnViewChange(DVASPECT_CONTENT, -1);
+
             // If they asked to be advised once, kill the connection
             if (m_fViewAdviseOnlyOnce)
             {
-                m_xViewObjectEx.SetAdvise(DVASPECT_CONTENT, 0, NULL);
+                m_xViewObjectEx.SetAdvise(DVASPECT_CONTENT, 0, nullptr);
             }
         }
 
         // Ensure a full repaint...
-        InvalidateRect(m_hwnd, NULL, TRUE);
+        InvalidateRect(m_hwnd, nullptr, TRUE);
     }
 
     void __fastcall GetSizeRectAfterBorder(LPRECT lprcx, LPRECT lprc)
@@ -545,7 +546,7 @@ public:
 
         if ((m_hwnd) && (m_fShowMenuBar))
         {
-            GetSizeRectForMenuBar(NULL, &rcT);
+            GetSizeRectForMenuBar(nullptr, &rcT);
             InvalidateRect(m_hwnd, &rcT, FALSE);
         }
     }

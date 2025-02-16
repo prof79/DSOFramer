@@ -74,7 +74,7 @@ STDMETHODIMP_(CDsoDocObject *) CDsoDocObject::CreateInstance(IDsoDocObjectSite *
     {
         pnew->Release();
 
-        pnew = NULL;
+        pnew = nullptr;
     }
 
     return pnew;
@@ -108,7 +108,7 @@ STDMETHODIMP CDsoDocObject::InitializeNewInstance(IDsoDocObjectSite* phost)
     }
 
     // Create a temp storage for this docobj site (if one already exists, bomb out)...
-    if ((m_pstgroot) || FAILED(hr = StgCreateDocfile(NULL, STGM_TRANSACTED | STGM_READWRITE |
+    if ((m_pstgroot) || FAILED(hr = StgCreateDocfile(nullptr, STGM_TRANSACTED | STGM_READWRITE |
         STGM_SHARE_EXCLUSIVE | STGM_CREATE | STGM_DELETEONRELEASE, 0, &m_pstgroot)))
     {
         return hr;
@@ -128,7 +128,7 @@ STDMETHODIMP CDsoDocObject::InitializeNewInstance(IDsoDocObjectSite* phost)
         wndclass.style          = CS_VREDRAW | CS_HREDRAW | CS_DBLCLKS;
         wndclass.lpfnWndProc    = CDsoDocObject::FrameWindowProc;
         wndclass.hInstance      = v_hModule;
-        wndclass.hCursor        = LoadCursor(NULL, IDC_ARROW);
+        wndclass.hCursor        = LoadCursor(nullptr, IDC_ARROW);
         wndclass.lpszClassName  = _T("DSOFramerDocWnd");
         
         if (RegisterClass(&wndclass) == 0)
@@ -162,11 +162,11 @@ STDMETHODIMP CDsoDocObject::InitializeNewInstance(IDsoDocObjectSite* phost)
     }
 
     // Create our site window at the give location (we are child of the control window)...
-    m_hwnd = CreateWindowEx(0, _T("DSOFramerDocWnd"), NULL, WS_CHILD,
+    m_hwnd = CreateWindowEx(0, _T("DSOFramerDocWnd"), nullptr, WS_CHILD,
                             m_rcViewRect.left, m_rcViewRect.top,
                             (m_rcViewRect.right - m_rcViewRect.left),
                             (m_rcViewRect.bottom - m_rcViewRect.top),
-                            hwndCtl, NULL, v_hModule, NULL);
+                            hwndCtl, nullptr, v_hModule, nullptr);
 
     if (!m_hwnd)
     {
@@ -184,7 +184,7 @@ STDMETHODIMP CDsoDocObject::InitializeNewInstance(IDsoDocObjectSite* phost)
     
     m_psiteCtl->GetHostName(&m_pwszHostName);
 
-    if (m_pwszHostName == NULL)
+    if (m_pwszHostName == nullptr)
     {
         m_pwszHostName = DsoCopyString(L"DsoFramerControl");
     }
@@ -204,10 +204,10 @@ STDMETHODIMP CDsoDocObject::CreateDocObject(REFCLSID rclsid)
 
     CLSID               clsid;
     DWORD               dwMiscStatus = 0;
-    IOleObject*         pole         = NULL;
-    IPersistStorage*    pipstg       = NULL;
+    IOleObject*         pole         = nullptr;
+    IPersistStorage*    pipstg       = nullptr;
 
-    BOOL                fInitNew     = (m_pstgfile == NULL);
+    BOOL                fInitNew     = (m_pstgfile == nullptr);
 
     ODS(_T("CDsoDocObject::CreateDocObject(CLSID)\n"));
 
@@ -301,7 +301,7 @@ STDMETHODIMP CDsoDocObject::CreateDocObject(REFCLSID rclsid)
     else
     {
         // Be sure they disconnect from our site if we failed load...
-        pole->SetClientSite(NULL);
+        pole->SetClientSite(nullptr);
     }
 
     // This will free the OLE server if anything above failed...
@@ -345,7 +345,7 @@ STDMETHODIMP CDsoDocObject::CreateDocObject(IStorage *pstg)
     }
 
     // Copy data into the new storage and commit the change...
-    hr = pstg->CopyTo(0, NULL, NULL, m_pstgfile);
+    hr = pstg->CopyTo(0, nullptr, nullptr, m_pstgfile);
 
     if (SUCCEEDED(hr))
     {
@@ -385,15 +385,15 @@ STDMETHODIMP CDsoDocObject::CreateFromFile(LPWSTR pwszFile, REFCLSID rclsid, LPB
 
     CLSID           clsid;
     CLSID           clsidConv;
-    IOleObject      *pole    = NULL;
-    IBindCtx        *pbctx   = NULL;
-    IMoniker        *pmkfile = NULL;
-    IStorage        *pstg    = NULL;
+    IOleObject      *pole    = nullptr;
+    IBindCtx        *pbctx   = nullptr;
+    IMoniker        *pmkfile = nullptr;
+    IStorage        *pstg    = nullptr;
     
     BOOL fLoadFromAltCLSID   = (rclsid != GUID_NULL);
 
     // Sanity check of parameters...
-    if (!(pwszFile) || ((*pwszFile) == L'\0') || (pbndopts == NULL))
+    if (!(pwszFile) || ((*pwszFile) == L'\0') || (pbndopts == nullptr))
     {
         return E_INVALIDARG;
     }
@@ -444,12 +444,12 @@ STDMETHODIMP CDsoDocObject::CreateFromFile(LPWSTR pwszFile, REFCLSID rclsid, LPB
         {
 
             // Bind to the object moniker refers to...
-            hr = pmkfile->BindToObject(pbctx, NULL, IID_IOleObject, (void **)&pole);
+            hr = pmkfile->BindToObject(pbctx, nullptr, IID_IOleObject, (void **)&pole);
 
             // If that failed, try to bind direct to file in new server...
             if (FAILED(hr))
             {
-                IPersistFile *pipfile = NULL;
+                IPersistFile *pipfile = nullptr;
 
                 if (SUCCEEDED(hr = InstantiateDocObjectServer(clsid, &pole)) &&
                     SUCCEEDED(hr = pole->QueryInterface(IID_IPersistFile, (void **)&pipfile)))
@@ -488,7 +488,7 @@ STDMETHODIMP CDsoDocObject::CreateFromFile(LPWSTR pwszFile, REFCLSID rclsid, LPB
             }
             else
             {
-                pole->SetClientSite(NULL);
+                pole->SetClientSite(nullptr);
             }
 
             // This will release the moniker if above failed...
@@ -502,11 +502,11 @@ STDMETHODIMP CDsoDocObject::CreateFromFile(LPWSTR pwszFile, REFCLSID rclsid, LPB
     if (FAILED(hr))
     {
         // Try to open file as OLE storage (native OLE DocFile)...
-        if (SUCCEEDED(hr = StgOpenStorage(pwszFile, NULL, pbndopts->grfMode, NULL, 0, &pstg)))
+        if (SUCCEEDED(hr = StgOpenStorage(pwszFile, nullptr, pbndopts->grfMode, nullptr, 0, &pstg)))
         {
             // Create our substorage, and copy the data over to it...
             if (SUCCEEDED(hr = CreateObjectStorage(clsid)) &&
-                SUCCEEDED(hr = pstg->CopyTo(0, NULL, NULL, m_pstgfile)))
+                SUCCEEDED(hr = pstg->CopyTo(0, nullptr, nullptr, m_pstgfile)))
             {
                 m_pstgfile->Commit(STGC_OVERWRITE);
 
@@ -554,10 +554,10 @@ STDMETHODIMP CDsoDocObject::CreateFromURL(LPWSTR pwszUrlFile, REFCLSID rclsid, L
 
     BOOL       fReadOnly;
     LPWSTR     pwszTempFile;
-    IStream   *pstmWebResource = NULL;
+    IStream   *pstmWebResource = nullptr;
 
     // First, a sanity check on the parameters passed...
-    if ((pwszUrlFile == NULL) || (pbndopts == NULL))
+    if ((pwszUrlFile == nullptr) || (pbndopts == nullptr))
     {
         return E_INVALIDARG;
     }
@@ -686,7 +686,7 @@ STDMETHODIMP CDsoDocObject::CreateFromRunningObject(LPUNKNOWN punkObj, LPWSTR pw
             // state of the file in our storage (this is our private copy)...
             if (SUCCEEDED(hr = CreateObjectStorage(clsid)) &&
                 SUCCEEDED(hr = prststg->Save(m_pstgfile, FALSE)) &&
-                SUCCEEDED(hr = prststg->SaveCompleted(NULL)))
+                SUCCEEDED(hr = prststg->SaveCompleted(nullptr)))
             {
                 // At this point we have a read-only copy...
                 prststg->HandsOffStorage();
@@ -742,13 +742,13 @@ STDMETHODIMP CDsoDocObject::IPActivateView()
 
             // First call IOleObject::DoVerb with OLEIVERB_INPLACEACTIVATE
             // (or OLEIVERB_SHOW), and our view rect and IOleClientSite pointer...
-            hr = m_pole->DoVerb(OLEIVERB_INPLACEACTIVATE, NULL,
+            hr = m_pole->DoVerb(OLEIVERB_INPLACEACTIVATE, nullptr,
                         (IOleClientSite*)&m_xOleClientSite, (UINT)-1, m_hwnd, &rcView);
 
             // If the server doesn't recognize IP verb, try OLEIVERB_SHOW instead...
             if (hr == OLEOBJ_E_INVALIDVERB)
             {
-                hr = m_pole->DoVerb(OLEIVERB_SHOW, NULL,
+                hr = m_pole->DoVerb(OLEIVERB_SHOW, nullptr,
                                     (IOleClientSite*)&m_xOleClientSite, (UINT)-1, m_hwnd, &rcView);
             }
 
@@ -766,7 +766,7 @@ STDMETHODIMP CDsoDocObject::IPActivateView()
                 {
                     Sleep((200 * ++dwLoopCnt));
 
-                    hr = m_pole->DoVerb(OLEIVERB_SHOW, NULL,
+                    hr = m_pole->DoVerb(OLEIVERB_SHOW, nullptr,
                                         (IOleClientSite*)&m_xOleClientSite, (UINT)-1, m_hwnd, &rcView);
                 }
                 while ((hr == RPC_E_CALL_REJECTED) && (dwLoopCnt < 4));
@@ -817,7 +817,7 @@ STDMETHODIMP CDsoDocObject::IPDeactivateView()
     {
         hr = m_pdocv->CloseView(0);
 
-        m_pdocv->SetInPlaceSite(NULL);
+        m_pdocv->SetInPlaceSite(nullptr);
     }
 
     SAFE_RELEASE_INTERFACE(m_pcmdt);
@@ -845,13 +845,13 @@ STDMETHODIMP CDsoDocObject::UIActivateView()
     {
         hr = m_pdocv->UIActivate(TRUE);
     }
-    else if (m_pole) // We should never get here, but just in case pdocv is NULL, signal UI active the old way...
+    else if (m_pole) // We should never get here, but just in case pdocv is nullptr, signal UI active the old way...
     {
         RECT rcView;
 
         GetClientRect(m_hwnd, &rcView);
 
-        m_pole->DoVerb(OLEIVERB_UIACTIVATE, NULL, (IOleClientSite*)&m_xOleClientSite, (UINT)-1, m_hwnd, &rcView);
+        m_pole->DoVerb(OLEIVERB_UIACTIVATE, nullptr, (IOleClientSite*)&m_xOleClientSite, (UINT)-1, m_hwnd, &rcView);
     }
 
     // Forward focus to the IP object...
@@ -939,12 +939,12 @@ STDMETHODIMP CDsoDocObject::Save()
         // If we have a URL (write-access) resource, do MSDAIPP save...
         if (m_pstmWebResource)
         {
-            hr = SaveToURL(NULL, TRUE, NULL, NULL);
+            hr = SaveToURL(nullptr, TRUE, nullptr, nullptr);
         }
         // Else if it is local file, do a local save...
         else if (m_pwszSourceFile)
         {
-            hr = SaveToFile(NULL, TRUE);
+            hr = SaveToFile(nullptr, TRUE);
         }
     }
 
@@ -956,8 +956,8 @@ STDMETHODIMP CDsoDocObject::SaveToFile(LPWSTR pwszFile, BOOL fOverwriteFile)
     HRESULT       hr = E_UNEXPECTED;
 
     IStorage     *pstg;
-    LPWSTR        pwszFullName = NULL;
-    LPWSTR        pwszRename = NULL;
+    LPWSTR        pwszFullName = nullptr;
+    LPWSTR        pwszRename = nullptr;
 
     BOOL          fDoNormalSave = FALSE;
     BOOL          fDoOverwriteOps = FALSE;
@@ -968,7 +968,7 @@ STDMETHODIMP CDsoDocObject::SaveToFile(LPWSTR pwszFile, BOOL fOverwriteFile)
     CHECK_NULL_RETURN(m_pole, hr);
 
     // If they passed no file, use the default if current file is not read-only...
-    fDoNormalSave = pwszFile == NULL;
+    fDoNormalSave = pwszFile == nullptr;
 
     if (fDoNormalSave)
     {
@@ -979,14 +979,14 @@ STDMETHODIMP CDsoDocObject::SaveToFile(LPWSTR pwszFile, BOOL fOverwriteFile)
         }
 
         // If we are not moniker bound, we'll use the existing file path for ole save...
-        if (m_pwszSourceFile == NULL)
+        if (m_pwszSourceFile == nullptr)
         {
             return DSO_E_NOTBEENSAVED;
         }
 
         pwszFile = (pwszFullName = DsoCopyString(m_pwszSourceFile));
 
-        if (pwszFile == NULL)
+        if (pwszFile == nullptr)
         {
             return E_OUTOFMEMORY;
         }
@@ -1031,7 +1031,7 @@ STDMETHODIMP CDsoDocObject::SaveToFile(LPWSTR pwszFile, BOOL fOverwriteFile)
     else if (pwszFile)
     {
         // Create a new moniker for the save...
-        IMoniker *pnewmk = NULL;
+        IMoniker *pnewmk = nullptr;
 
         if (SUCCEEDED(hr = CreateFileMoniker(pwszFile, &pnewmk)))
         {
@@ -1047,7 +1047,7 @@ STDMETHODIMP CDsoDocObject::SaveToFile(LPWSTR pwszFile, BOOL fOverwriteFile)
                     hr = m_pbctxSourceFile->SetBindOptions(&bndopts);
                 }
             }
-            else if (m_pbctxSourceFile == NULL)
+            else if (m_pbctxSourceFile == nullptr)
             {
                 // May need to create a new bind context if we haven't already...
                 if (SUCCEEDED(hr = CreateBindCtx(0, &m_pbctxSourceFile)))
@@ -1094,7 +1094,7 @@ STDMETHODIMP CDsoDocObject::SaveToFile(LPWSTR pwszFile, BOOL fOverwriteFile)
             {
                 WriteClassStg(pstg, m_clsidObject);
 
-                if (SUCCEEDED(hr = m_pstgfile->CopyTo(0, NULL, NULL, pstg)))
+                if (SUCCEEDED(hr = m_pstgfile->CopyTo(0, nullptr, nullptr, pstg)))
                 {
                     hr = pstg->Commit(STGC_OVERWRITE);
                 }
@@ -1122,11 +1122,11 @@ STDMETHODIMP CDsoDocObject::SaveToFile(LPWSTR pwszFile, BOOL fOverwriteFile)
     if ((m_pstgfile) && !(m_pmkSourceFile) && (m_pwszSourceFile) &&
         ((fDoNormalSave) || (FAILED(hr))))
     {
-        StgOpenStorage(m_pwszSourceFile, NULL,
+        StgOpenStorage(m_pwszSourceFile, nullptr,
             ((m_pwszWebResource) ?
                 (STGM_READ | STGM_SHARE_DENY_WRITE) :
                 (STGM_TRANSACTED | STGM_SHARE_DENY_WRITE | STGM_READWRITE)),
-                NULL, 0, &m_pstgSourceFile);
+                nullptr, 0, &m_pstgSourceFile);
     }
     else if (SUCCEEDED(hr))
     {
@@ -1146,8 +1146,8 @@ STDMETHODIMP CDsoDocObject::SaveToFile(LPWSTR pwszFile, BOOL fOverwriteFile)
 
             if (!(m_pmkSourceFile) && (m_pstgfile))
             {
-                StgOpenStorage(m_pwszSourceFile, NULL,
-                    (STGM_TRANSACTED | STGM_SHARE_DENY_WRITE | STGM_READWRITE), NULL, 0, &m_pstgSourceFile);
+                StgOpenStorage(m_pwszSourceFile, nullptr,
+                    (STGM_TRANSACTED | STGM_SHARE_DENY_WRITE | STGM_READWRITE), nullptr, 0, &m_pstgSourceFile);
             }
         }
     }
@@ -1190,13 +1190,13 @@ STDMETHODIMP CDsoDocObject::SaveToURL(LPWSTR pwszURL, BOOL fOverwriteFile, LPWST
     if ((pwszURL) && (m_pwszWebResource) &&
         (DsoCompareStringsEx(pwszURL, -1, m_pwszWebResource, -1) == CSTR_EQUAL))
     {
-        pwszURL = NULL;
+        pwszURL = nullptr;
     }
 
     if (pwszURL)
     {
-        IStream  *pstmT = NULL;
-        LPWSTR    pwszFullUrl = NULL;
+        IStream  *pstmT = nullptr;
+        LPWSTR    pwszFullUrl = nullptr;
         LPWSTR    pwszTempFile;
 
         IStream  *pstmBkupStm;
@@ -1222,10 +1222,10 @@ STDMETHODIMP CDsoDocObject::SaveToURL(LPWSTR pwszURL, BOOL fOverwriteFile, LPWST
         pstgBkupStg  = m_pstgSourceFile;
         idxBkup      = m_idxSourceName;
 
-        m_pstmWebResource  = NULL;
-        m_pwszWebResource  = NULL;
-        m_pwszSourceFile   = NULL;
-        m_pstgSourceFile   = NULL;
+        m_pstmWebResource  = nullptr;
+        m_pwszWebResource  = nullptr;
+        m_pwszSourceFile   = nullptr;
+        m_pstgSourceFile   = nullptr;
         m_idxSourceName    = 0;
 
         // Save the object to a new (temp) file on the local drive...
@@ -1243,7 +1243,7 @@ STDMETHODIMP CDsoDocObject::SaveToURL(LPWSTR pwszURL, BOOL fOverwriteFile, LPWST
 
             if ((pstmBkupStm) && (pwszBkupFile))
             {
-                FPerformShellOp(FO_DELETE, pwszBkupFile, NULL);
+                FPerformShellOp(FO_DELETE, pwszBkupFile, nullptr);
             }
 
             SAFE_RELEASE_INTERFACE(pstmBkupStm);
@@ -1265,7 +1265,7 @@ STDMETHODIMP CDsoDocObject::SaveToURL(LPWSTR pwszURL, BOOL fOverwriteFile, LPWST
 
             if (m_pwszSourceFile)
             {
-                FPerformShellOp(FO_DELETE, m_pwszSourceFile, NULL);
+                FPerformShellOp(FO_DELETE, m_pwszSourceFile, nullptr);
                 DsoMemFree(m_pwszSourceFile);
             }
 
@@ -1286,9 +1286,9 @@ STDMETHODIMP CDsoDocObject::SaveToURL(LPWSTR pwszURL, BOOL fOverwriteFile, LPWST
     }
     else if ((m_pstmWebResource) && (m_pwszSourceFile))
     {
-        if (SUCCEEDED(hr = SaveToFile(NULL, TRUE)))
+        if (SUCCEEDED(hr = SaveToFile(nullptr, TRUE)))
         {
-            hr = IPPUploadWebResource(m_pwszSourceFile, &m_pstmWebResource, NULL, TRUE);
+            hr = IPPUploadWebResource(m_pwszSourceFile, &m_pstmWebResource, nullptr, TRUE);
         }
     }
 
@@ -1317,13 +1317,13 @@ STDMETHODIMP CDsoDocObject::DoOleCommand(DWORD dwOleCmdId, DWORD dwOptions, VARI
 
     // The server must support IOleCommandTarget, the CmdID being requested, and
     // the command should be enabled. If this is the case, do the command...
-    if ((m_pcmdt) && SUCCEEDED(m_pcmdt->QueryStatus(NULL, 1, &cmd, NULL)) &&
+    if ((m_pcmdt) && SUCCEEDED(m_pcmdt->QueryStatus(nullptr, 1, &cmd, nullptr)) &&
         ((cmd.cmdf & OLECMDF_SUPPORTED) && (cmd.cmdf & OLECMDF_ENABLED)))
     {
         TRACE1(_T("QueryStatus say supported = 0x%X\n"), cmd.cmdf);
 
         // Do the command asked by caller on default command group...
-        hr = m_pcmdt->Exec(NULL, cmd.cmdID, dwOptions, vInParam, vInOutParam);
+        hr = m_pcmdt->Exec(nullptr, cmd.cmdID, dwOptions, vInParam, vInOutParam);
 
         TRACE1(_T("DocObj_IOleCommandTarget::Exec() = 0x%X\n"), hr);
 
@@ -1334,7 +1334,7 @@ STDMETHODIMP CDsoDocObject::DoOleCommand(DWORD dwOleCmdId, DWORD dwOptions, VARI
             {
                 ODS(_T("Retry command for PPT\n"));
 
-                hr = m_pcmdt->Exec(NULL, cmd.cmdID, OLECMDEXECOPT_DODEFAULT, vInParam, vInOutParam);
+                hr = m_pcmdt->Exec(nullptr, cmd.cmdID, OLECMDEXECOPT_DODEFAULT, vInParam, vInOutParam);
                 
                 TRACE1(_T("DocObj_IOleCommandTarget::Exec() = 0x%X\n"), hr);
             }
@@ -1391,7 +1391,7 @@ STDMETHODIMP CDsoDocObject::Close()
         FreeRunningLock();
 
         // Tell server to release our client site...
-        m_pole->SetClientSite(NULL);
+        m_pole->SetClientSite(nullptr);
 
         // Finally, close the object and release the pointer...
         hr = m_pole->Close(OLECLOSE_NOSAVE);
@@ -1411,7 +1411,7 @@ STDMETHODIMP CDsoDocObject::Close()
     // Free any temp file we might have...
     if ((m_pstmWebResource) && (m_pwszSourceFile))
     {
-        FPerformShellOp(FO_DELETE, m_pwszSourceFile, NULL);
+        FPerformShellOp(FO_DELETE, m_pwszSourceFile, nullptr);
     }
 
     SAFE_RELEASE_INTERFACE(m_pstmWebResource);
@@ -1474,7 +1474,7 @@ STDMETHODIMP_(void) CDsoDocObject::OnNotifySizeChange(LPRECT prc)
     {
         m_rcViewRect = *prc;
 
-        SetWindowPos(m_hwnd, NULL, m_rcViewRect.left, m_rcViewRect.top,
+        SetWindowPos(m_hwnd, nullptr, m_rcViewRect.left, m_rcViewRect.top,
             rc.right, rc.bottom, SWP_NOACTIVATE | SWP_NOZORDER);
 
         UpdateWindow(m_hwnd);
@@ -1590,13 +1590,13 @@ STDMETHODIMP_(void) CDsoDocObject::OnNotifyChangeToolState(BOOL fShowTools)
         // Use IOleCommandTarget(OLECMDID_HIDETOOLBARS) to toggle on/off. We have
         // to check that server supports it and if its state matches our own so
         // when toggle, we do the correct thing by the user...
-        if ((m_pcmdt) && SUCCEEDED(m_pcmdt->QueryStatus(NULL, 1, &cmd, NULL)) &&
+        if ((m_pcmdt) && SUCCEEDED(m_pcmdt->QueryStatus(nullptr, 1, &cmd, nullptr)) &&
             ((cmd.cmdf & OLECMDF_SUPPORTED) || (cmd.cmdf & OLECMDF_ENABLED)))
         {
             if (((m_fDisplayTools) && ((cmd.cmdf & OLECMDF_LATCHED) == OLECMDF_LATCHED)) ||
                 (!(m_fDisplayTools) && !((cmd.cmdf & OLECMDF_LATCHED) == OLECMDF_LATCHED)))
             {
-                m_pcmdt->Exec(NULL, OLECMDID_HIDETOOLBARS, OLECMDEXECOPT_PROMPTUSER, NULL, NULL);
+                m_pcmdt->Exec(nullptr, OLECMDID_HIDETOOLBARS, OLECMDEXECOPT_PROMPTUSER, nullptr, nullptr);
             }
             else if (m_fDisplayTools && (IsWordObject() || IsPPTObject()))
             {
@@ -1604,7 +1604,7 @@ STDMETHODIMP_(void) CDsoDocObject::OnNotifyChangeToolState(BOOL fShowTools)
                 // so if we are trying to show the tools after hiding them, they will say they are already
                 // visible when the ribbon is not. This is an apparant trick they are using to force the
                 // ribbon visible in IE embed cases, but it is causing us problems.
-                m_pcmdt->Exec(NULL, OLECMDID_HIDETOOLBARS, OLECMDEXECOPT_PROMPTUSER, NULL, NULL);
+                m_pcmdt->Exec(nullptr, OLECMDID_HIDETOOLBARS, OLECMDEXECOPT_PROMPTUSER, nullptr, nullptr);
             }
 
             // There can be focus issues when turning them off, so make sure
@@ -1657,13 +1657,13 @@ STDMETHODIMP CDsoDocObject::InstantiateDocObjectServer(REFCLSID rclsid, IOleObje
 {
     HRESULT hr;
 
-    IUnknown *punk = NULL;
+    IUnknown *punk = nullptr;
 
     ODS(_T("CDsoDocObject::InstantiateDocObjectServer()\n"));
 
     // We perform custom create in order of local server then inproc server...
-    if (SUCCEEDED(hr = CoCreateInstance(rclsid, NULL, CLSCTX_LOCAL_SERVER,  IID_IUnknown, (void **)&punk)) ||
-        SUCCEEDED(hr = CoCreateInstance(rclsid, NULL, CLSCTX_INPROC_SERVER, IID_IUnknown, (void **)&punk)))
+    if (SUCCEEDED(hr = CoCreateInstance(rclsid, nullptr, CLSCTX_LOCAL_SERVER,  IID_IUnknown, (void **)&punk)) ||
+        SUCCEEDED(hr = CoCreateInstance(rclsid, nullptr, CLSCTX_INPROC_SERVER, IID_IUnknown, (void **)&punk)))
     {
         // Ask for IOleObject interface...
         if (SUCCEEDED(hr = punk->QueryInterface(IID_IOleObject, (void **)ppole)))
@@ -1749,7 +1749,7 @@ STDMETHODIMP CDsoDocObject::SaveObjectStorage()
 {
     HRESULT hr = S_FALSE;
 
-    IPersistStorage *pipstg = NULL;
+    IPersistStorage *pipstg = nullptr;
 
     // Got to have object to save state...
     if (!m_pole)
@@ -1763,7 +1763,7 @@ STDMETHODIMP CDsoDocObject::SaveObjectStorage()
     {
         if (SUCCEEDED(hr = pipstg->Save(m_pstgfile, TRUE)))
         {
-            hr = pipstg->SaveCompleted(NULL);
+            hr = pipstg->SaveCompleted(nullptr);
         }
 
         hr = m_pstgfile->Commit(STGC_DEFAULT);
@@ -1793,7 +1793,7 @@ STDMETHODIMP CDsoDocObject::SaveDocToMoniker(IMoniker *pmk, IBindCtx *pbc, BOOL 
     HRESULT hr = E_FAIL;
 
     IPersistMoniker *prstmk;
-    LPOLESTR pwszFullName = NULL;
+    LPOLESTR pwszFullName = nullptr;
 
     CHECK_NULL_RETURN(m_pole, E_UNEXPECTED);
     CHECK_NULL_RETURN(pmk, E_POINTER);
@@ -1807,7 +1807,7 @@ STDMETHODIMP CDsoDocObject::SaveDocToMoniker(IMoniker *pmk, IBindCtx *pbc, BOOL 
     }
 
     // If that failed to work, switch to IPersistFile and use full path to the new file...
-    if (FAILED(hr) && SUCCEEDED(hr = pmk->GetDisplayName(pbc, NULL, &pwszFullName)))
+    if (FAILED(hr) && SUCCEEDED(hr = pmk->GetDisplayName(pbc, nullptr, &pwszFullName)))
     {
         hr = SaveDocToFile(pwszFullName, fKeepLock);
 
@@ -1827,7 +1827,7 @@ STDMETHODIMP CDsoDocObject::SaveDocToFile(LPWSTR pwszFullName, BOOL fKeepLock)
 {
     HRESULT hr = E_FAIL;
 
-    IPersistFile *pipfile = NULL;
+    IPersistFile *pipfile = nullptr;
 
     BOOL fSameAsOpen = ((m_pwszSourceFile) &&
                         DsoCompareStringsEx(pwszFullName, lstrlenW(pwszFullName),
@@ -1837,7 +1837,7 @@ STDMETHODIMP CDsoDocObject::SaveDocToFile(LPWSTR pwszFullName, BOOL fKeepLock)
     {
 #ifdef DSO_WORD12_PERSIST_BUG
 
-        LPOLESTR pwszWordCurFile = NULL;
+        LPOLESTR pwszWordCurFile = nullptr;
 
         // HACK: Word 2007 RTM has a bug in its IPersistFile::Save method which will cause it to save
         // to the old file location and not the new one, so if the document being saved is a Word
@@ -1858,14 +1858,14 @@ STDMETHODIMP CDsoDocObject::SaveDocToFile(LPWSTR pwszFullName, BOOL fKeepLock)
                     // If it is the same file after all, we don't need to do the hack...
                     CoTaskMemFree(pwszWordCurFile);
 
-                    pwszWordCurFile = NULL;
+                    pwszWordCurFile = nullptr;
                 }
             }
         }
 #endif
 
-        // Do the save using file path or NULL if we are saving to current file...
-        hr = pipfile->Save((fSameAsOpen ? NULL : pwszFullName), fKeepLock);
+        // Do the save using file path or nullptr if we are saving to current file...
+        hr = pipfile->Save((fSameAsOpen ? nullptr : pwszFullName), fKeepLock);
 
 #ifdef DSO_WORD12_PERSIST_BUG
         // HACK: If we have the pwszWordCurFile, we'll assume Word 12 RTM might have saved this, and we
@@ -1953,15 +1953,15 @@ STDMETHODIMP CDsoDocObject::ValidateDocObjectServer(REFCLSID rclsid)
 STDMETHODIMP_(BOOL) CDsoDocObject::GetDocumentTypeAndFileExtension(WCHAR **ppwszFileType, WCHAR **ppwszFileExt)
 {
     DWORD dwType, dwSize;
-    LPWSTR pwszExt = NULL;
-    LPWSTR pwszType = NULL;
-    LPSTR pszType = NULL;
+    LPWSTR pwszExt = nullptr;
+    LPWSTR pwszType = nullptr;
+    LPSTR pszType = nullptr;
     LPSTR pszClsid;
     CHAR szkey[255];
     CHAR szbuf[255];
     HKEY hk;
 
-    if ((ppwszFileType == NULL) && (ppwszFileExt == NULL))
+    if ((ppwszFileType == nullptr) && (ppwszFileExt == nullptr))
     {
         return FALSE;
     }
@@ -1983,7 +1983,7 @@ STDMETHODIMP_(BOOL) CDsoDocObject::GetDocumentTypeAndFileExtension(WCHAR **ppwsz
         szbuf[0] = _T('\0');
         dwSize = 255;
 
-        if (RegQueryValueEx(hk, NULL, 0, &dwType, (BYTE*)pszT, &dwSize) == ERROR_SUCCESS)
+        if (RegQueryValueEx(hk, nullptr, 0, &dwType, (BYTE*)pszT, &dwSize) == ERROR_SUCCESS)
         {
             while (*(pszT++) && (*pszT != _T(',')))
             {
@@ -2061,7 +2061,7 @@ STDMETHODIMP_(BOOL) CDsoDocObject::GetDocumentTypeAndFileExtension(WCHAR **ppwsz
         *ppwszFileType = ((pwszCombined) ? pwszCombined : pwszType);
     }
 
-    if ((ppwszFileExt == NULL) && (pwszExt))
+    if ((ppwszFileExt == nullptr) && (pwszExt))
     {
         DsoMemFree(pwszExt);
     }
@@ -2083,12 +2083,12 @@ STDMETHODIMP_(BOOL) CDsoDocObject::ValidateFileExtension(WCHAR *pwszFile, WCHAR 
     BOOL   fHasExt = FALSE;
     BOOL   fChangedExt = FALSE;
     LPWSTR pwszT;
-    LPWSTR pwszExt = NULL;
+    LPWSTR pwszExt = nullptr;
     DWORD  dw;
 
     if ((pwszFile) && (dw = lstrlenW(pwszFile)) && (ppwszOut))
     {
-        *ppwszOut = NULL;
+        *ppwszOut = nullptr;
 
         pwszT = (pwszFile + dw);
 
@@ -2101,11 +2101,11 @@ STDMETHODIMP_(BOOL) CDsoDocObject::ValidateFileExtension(WCHAR *pwszFile, WCHAR 
             }
         }
 
-        if (!(fHasExt) && GetDocumentTypeAndFileExtension(NULL, &pwszExt))
+        if (!(fHasExt) && GetDocumentTypeAndFileExtension(nullptr, &pwszExt))
         {
             *ppwszOut = DsoCopyStringCat(pwszFile, pwszExt);
 
-            fChangedExt = ((*ppwszOut) != NULL);
+            fChangedExt = ((*ppwszOut) != nullptr);
         }
     }
 
@@ -2130,7 +2130,7 @@ STDMETHODIMP CDsoDocObject::EnsureOleServerRunning(BOOL fLockRunning)
 
     TRACE1(_T("CDsoDocObject::EnsureOleServerRunning(%d)\n"), (DWORD)fLockRunning);
 
-    if (m_pole == NULL)
+    if (m_pole == nullptr)
     {
         return E_FAIL;
     }
@@ -2250,14 +2250,14 @@ STDMETHODIMP CDsoDocObject::SetRunningServerLock(BOOL fLock)
     // lock the server for mail, so we'll use that in the Word case...
     if (IsWordObject())
     {
-        IClassFactory *pcf = NULL;
-        IFoo *pi = NULL;
+        IClassFactory *pcf = nullptr;
+        IFoo *pi = nullptr;
 
         const GUID IID_IFoo = { 0x0006729A, 0x0000, 0x0000, {0xC0, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x46} };
 
         SEH_TRY
 
-            hr = CoGetClassObject(CLSID_WORD_DOCUMENT_DOC, CLSCTX_LOCAL_SERVER, NULL, IID_IClassFactory, (void **)&pcf);
+            hr = CoGetClassObject(CLSID_WORD_DOCUMENT_DOC, CLSCTX_LOCAL_SERVER, nullptr, IID_IClassFactory, (void **)&pcf);
 
             if (SUCCEEDED(hr) && (pcf))
             {
@@ -2302,21 +2302,21 @@ STDMETHODIMP_(IUnknown *) CDsoDocObject::CreateIPPBindResource()
 {
     HRESULT           hr;
 
-    IDBProperties*    pdbprops = NULL;
-    IBindResource*    pres    = NULL;
+    IDBProperties*    pdbprops = nullptr;
+    IBindResource*    pres    = nullptr;
     DBPROPSET         rdbpset;
     DBPROP            rdbp[4];
     BSTR              bstrLock;
     DWORD             dw = 256;
     CHAR              szUserName[256];
 
-    if (FAILED(CoCreateInstance(CLSID_MSDAIPP_BINDER, NULL,
+    if (FAILED(CoCreateInstance(CLSID_MSDAIPP_BINDER, nullptr,
                 CLSCTX_INPROC, IID_IDBProperties, (void **)&pdbprops)))
     {
-        return NULL;
+        return nullptr;
     }
 
-    bstrLock = (GetUserName(szUserName, &dw) ? DsoConvertToBSTR(szUserName) : NULL);
+    bstrLock = (GetUserName(szUserName, &dw) ? DsoConvertToBSTR(szUserName) : nullptr);
 
     memset(rdbp, 0, sizeof(4 * sizeof(DBPROP)));
 
@@ -2383,15 +2383,15 @@ STDMETHODIMP CDsoDocObject::IPPDownloadWebResource(LPWSTR pwszURL, LPWSTR pwszFi
 {
     HRESULT        hr    = E_UNEXPECTED;
 
-    IStream       *pstm  = NULL;
-    IBindResource *pres  = NULL;
+    IStream       *pstm  = nullptr;
+    IBindResource *pres  = nullptr;
     BYTE          *rgbBuf;
     DWORD   dwStatus, dwBindFlags;
     ULONG   cbRead, cbWritten;
     HANDLE  hFile;
 
     // Sanity check...
-    if ((pwszURL == NULL) || (pwszFile == NULL) || (ppstmKeepForSave == NULL))
+    if ((pwszURL == nullptr) || (pwszFile == nullptr) || (ppstmKeepForSave == nullptr))
     {
         return E_INVALIDARG;
     }
@@ -2416,14 +2416,14 @@ STDMETHODIMP CDsoDocObject::IPPDownloadWebResource(LPWSTR pwszURL, LPWSTR pwszFi
         dwBindFlags = (DBBINDURLFLAG_READ | DBBINDURLFLAG_WRITE | DBBINDURLFLAG_OUTPUT | DBBINDURLFLAG_SHARE_DENY_WRITE);
 
 callagain:
-        if (SUCCEEDED(hr = pres->Bind(NULL, pwszURL, dwBindFlags, DBGUIDX_STREAM,
-                        IID_IStream, (IAuthenticate *)&m_xAuthenticate, NULL, &dwStatus, (IUnknown **)&pstm)))
+        if (SUCCEEDED(hr = pres->Bind(nullptr, pwszURL, dwBindFlags, DBGUIDX_STREAM,
+                        IID_IStream, (IAuthenticate *)&m_xAuthenticate, nullptr, &dwStatus, (IUnknown **)&pstm)))
         {
             LARGE_INTEGER lintStart;
 
             lintStart.QuadPart = 0;
             
-            hr = pstm->Seek(lintStart, STREAM_SEEK_SET, NULL);
+            hr = pstm->Seek(lintStart, STREAM_SEEK_SET, nullptr);
 
             if (FOpenLocalFile(pwszFile, GENERIC_WRITE, 0, CREATE_ALWAYS, &hFile))
             {
@@ -2433,7 +2433,7 @@ callagain:
                         (cbRead == 0))
                         break;
 
-                    if (FALSE == WriteFile(hFile, rgbBuf, cbRead, &cbWritten, NULL))
+                    if (FALSE == WriteFile(hFile, rgbBuf, cbRead, &cbWritten, nullptr))
                     {
                         hr = E_WIN32_LASTERROR;
                         break;
@@ -2495,7 +2495,7 @@ callagain:
 //      just upload to the existing stream. This allows for normal "Save"
 //      on an open web resource.
 //
-//  2.) If ppstmSave is NULL (or contains a NULL IStream*), we create a new
+//  2.) If ppstmSave is nullptr (or contains a nullptr IStream*), we create a new
 //      web resource at the location given by pwszURLSaveTo and save to its
 //      stream. If ppstmSave is passed, we return the new IStream* to the
 //      caller who can then use it to do the other type of save next time.
@@ -2504,8 +2504,8 @@ STDMETHODIMP CDsoDocObject::IPPUploadWebResource(LPWSTR pwszFile, IStream** ppst
 {
     HRESULT     hr     = E_UNEXPECTED;
 
-    ICreateRow *pcrow  = NULL;
-    IStream    *pstm   = NULL;
+    ICreateRow *pcrow  = nullptr;
+    IStream    *pstm   = nullptr;
     BYTE       *rgbBuf;
     HANDLE      hFile;
     BOOL        fstmIn = FALSE;
@@ -2536,8 +2536,8 @@ STDMETHODIMP CDsoDocObject::IPPUploadWebResource(LPWSTR pwszFile, IStream** ppst
                     DBBINDURLFLAG_SHARE_DENY_WRITE |
                     (fOverwriteFile ? DBBINDURLFLAG_OVERWRITE : 0) );
 
-    if (SUCCEEDED(hr = pcrow->CreateRow(NULL, pwszURLSaveTo, dwBindFlags, DBGUIDX_STREAM,
-            IID_IStream, (IAuthenticate *)&m_xAuthenticate, NULL, &dwStatus, NULL, (IUnknown **)&pstm)))
+    if (SUCCEEDED(hr = pcrow->CreateRow(nullptr, pwszURLSaveTo, dwBindFlags, DBGUIDX_STREAM,
+            IID_IStream, (IAuthenticate *)&m_xAuthenticate, nullptr, &dwStatus, nullptr, (IUnknown **)&pstm)))
     {
         // Once we are here, we have a stream (either handed in or opened from above).
         // We just loop through and read from the file to the stream...
@@ -2551,11 +2551,11 @@ STDMETHODIMP CDsoDocObject::IPPUploadWebResource(LPWSTR pwszFile, IStream** ppst
             {
                 LARGE_INTEGER lintStart; lintStart.QuadPart = 0;
 
-                hr = pstm->Seek(lintStart, STREAM_SEEK_SET, NULL);
+                hr = pstm->Seek(lintStart, STREAM_SEEK_SET, nullptr);
 
                 while (SUCCEEDED(hr))
                 {
-                    if (FALSE == ReadFile(hFile, rgbBuf, 10240, &cbRead, NULL))
+                    if (FALSE == ReadFile(hFile, rgbBuf, 10240, &cbRead, nullptr))
                     {
                         hr = E_WIN32_LASTERROR;
 
@@ -2664,7 +2664,7 @@ STDMETHODIMP_(void) CDsoDocObject::TurnOffWebToolbar(BOOL fTurnedOff)
     {
         // Get the commandbars on the document object....
         if (SUCCEEDED(DsoDispatchInvoke(pdisp,
-                L"CommandBars", 0, DISPATCH_PROPERTYGET, 0, NULL, &vtT[0])))
+                L"CommandBars", 0, DISPATCH_PROPERTYGET, 0, nullptr, &vtT[0])))
         {
             // Turn off Web toolbar...
             ASSERT(vtT[0].vt == VT_DISPATCH);
@@ -2844,12 +2844,12 @@ STDMETHODIMP CDsoDocObject::QueryInterface(REFIID riid, void ** ppv)
     }
     else
     {
-        *ppv = NULL;
+        *ppv = nullptr;
 
         hr = E_NOINTERFACE;
     }
 
-    if (NULL != *ppv)
+    if (nullptr != *ppv)
     {
         ((IUnknown*)(*ppv))->AddRef();
     }
@@ -2901,7 +2901,7 @@ STDMETHODIMP CDsoDocObject::XOleClientSite::GetMoniker(DWORD dwAssign, DWORD dwW
     
     CHECK_NULL_RETURN(ppmk, E_POINTER);
     
-    *ppmk = NULL;
+    *ppmk = nullptr;
 
     // Provide moniker for object opened by moniker...
     switch(dwWhichMoniker)
@@ -2938,7 +2938,7 @@ STDMETHODIMP CDsoDocObject::XOleClientSite::GetContainer(IOleContainer** ppConta
 
     if (ppContainer)
     {
-        *ppContainer = NULL;
+        *ppContainer = nullptr;
     }
     
     return E_NOINTERFACE;
@@ -3055,7 +3055,7 @@ STDMETHODIMP CDsoDocObject::XOleInPlaceSite::GetWindowContext(IOleInPlaceFrame**
 
     if (ppDoc)
     {
-        *ppDoc = NULL;
+        *ppDoc = nullptr;
     }
 
     if (lprcPosRect)
@@ -3090,7 +3090,7 @@ STDMETHODIMP CDsoDocObject::XOleInPlaceSite::OnUIDeactivate(BOOL fUndoable)
     ODS(_T("CDsoDocObject::XOleInPlaceSite::OnUIDeactivate\n"));
 
     pThis->m_fObjectUIActive = FALSE;
-    pThis->m_xOleInPlaceFrame.SetMenu(NULL, NULL, NULL);
+    pThis->m_xOleInPlaceFrame.SetMenu(nullptr, nullptr, nullptr);
 
     SetFocus(pThis->m_hwnd);
 
@@ -3104,7 +3104,7 @@ STDMETHODIMP CDsoDocObject::XOleInPlaceSite::OnInPlaceDeactivate(void)
     ODS(_T("CDsoDocObject::XOleInPlaceSite::OnInPlaceDeactivate\n"));
 
     pThis->m_fObjectIPActive = FALSE;
-    pThis->m_hwndIPObject = NULL;
+    pThis->m_hwndIPObject = nullptr;
     
     SAFE_RELEASE_INTERFACE((pThis->m_pipobj));
 
@@ -3159,7 +3159,7 @@ STDMETHODIMP CDsoDocObject::XOleDocumentSite::ActivateMe(IOleDocumentView* pView
     HRESULT             hr = E_FAIL;
     IOleDocument*       pmsodoc;
 
-    // If we're passed a NULL view pointer, then try to get one from
+    // If we're passed a nullptr view pointer, then try to get one from
     // the document object (the object within us).
     if (pView)
     {
@@ -3348,7 +3348,7 @@ STDMETHODIMP CDsoDocObject::XOleInPlaceFrame::SetActiveObject(LPOLEINPLACEACTIVE
 
     SAFE_RELEASE_INTERFACE((pThis->m_pipactive));
     
-    pThis->m_hwndUIActiveObj = NULL;
+    pThis->m_hwndUIActiveObj = nullptr;
     pThis->m_dwObjectThreadID = 0;
 
     if (pIIPActiveObj)
@@ -3357,7 +3357,7 @@ STDMETHODIMP CDsoDocObject::XOleInPlaceFrame::SetActiveObject(LPOLEINPLACEACTIVE
 
         pIIPActiveObj->GetWindow(&(pThis->m_hwndUIActiveObj));
         
-        pThis->m_dwObjectThreadID = GetWindowThreadProcessId(pThis->m_hwndUIActiveObj, NULL);
+        pThis->m_dwObjectThreadID = GetWindowThreadProcessId(pThis->m_hwndUIActiveObj, nullptr);
     }
 
     return S_OK;
@@ -3392,14 +3392,14 @@ STDMETHODIMP CDsoDocObject::XOleInPlaceFrame::SetMenu(HMENU hMenu, HOLEMENU hOLE
         // are in so new menu changes are visible as soon as possible...
         if ((!(pThis->m_fInClose)) && (pThis->m_hwndCtl))
         {
-            InvalidateRect(pThis->m_hwndCtl, NULL, FALSE);
+            InvalidateRect(pThis->m_hwndCtl, nullptr, FALSE);
         }
     }
     else
     {
-        pThis->m_hMenuActive = NULL;
-        pThis->m_holeMenu = NULL;
-        pThis->m_hwndMenuObj = NULL;
+        pThis->m_hMenuActive = nullptr;
+        pThis->m_holeMenu = nullptr;
+        pThis->m_hwndMenuObj = nullptr;
     }
 
     // Regardless of call, make sure to cleanup a merged menu if
@@ -3608,7 +3608,7 @@ STDMETHODIMP CDsoDocObject::HrGetDataFromObject(VARIANT *pvtType, VARIANT *pvtOu
 {
     HRESULT hr;
 
-    IDataObject *pdo = NULL;
+    IDataObject *pdo = nullptr;
     LPWSTR pwszTypeName;
     LPSTR pszFormatName;
     SAFEARRAY *psa;
@@ -3619,8 +3619,8 @@ STDMETHODIMP CDsoDocObject::HrGetDataFromObject(VARIANT *pvtType, VARIANT *pvtOu
     STGMEDIUM stgm;
     LONG cfType;
 
-    if ((pvtType == NULL) || PARAM_IS_MISSING(pvtType) ||
-        (pvtOutput == NULL) || PARAM_IS_MISSING(pvtOutput))
+    if ((pvtType == nullptr) || PARAM_IS_MISSING(pvtType) ||
+        (pvtOutput == nullptr) || PARAM_IS_MISSING(pvtOutput))
     {
         return E_INVALIDARG;
     }
@@ -3644,7 +3644,7 @@ STDMETHODIMP CDsoDocObject::HrGetDataFromObject(VARIANT *pvtType, VARIANT *pvtOu
     CHECK_NULL_RETURN(cfType, E_INVALIDARG);
 
     // We must be able to get IDataObject for the transfer to work...
-    if ((m_pole == NULL) ||
+    if ((m_pole == nullptr) ||
         (FAILED(m_pole->GetClipboardData(0, &pdo)) &&
          FAILED(m_pole->QueryInterface(IID_IDataObject, (void **)&pdo))))
     {
@@ -3689,7 +3689,7 @@ STDMETHODIMP CDsoDocObject::HrGetDataFromObject(VARIANT *pvtType, VARIANT *pvtOu
                     pvtOutput->vt = VT_ARRAY|VT_UI1;
                     pvtOutput->parray = psa;
 
-                    prawdata = NULL;
+                    prawdata = nullptr;
 
                     if (SUCCEEDED(SafeArrayAccessData(psa, &prawdata)))
                     {
@@ -3744,7 +3744,7 @@ STDMETHODIMP CDsoDocObject::HrSetDataInObject(VARIANT *pvtType, VARIANT *pvtInpu
 {
     HRESULT hr;
 
-    IDataObject *pdo = NULL;
+    IDataObject *pdo = nullptr;
     LPWSTR pwszTypeName;
     LPSTR pszFormatName;
     SAFEARRAY *psa;
@@ -3758,8 +3758,8 @@ STDMETHODIMP CDsoDocObject::HrSetDataInObject(VARIANT *pvtType, VARIANT *pvtInpu
     BOOL fIsArrayData = FALSE;
     BOOL fCleanupString = FALSE;
 
-    if ((pvtType == NULL) || PARAM_IS_MISSING(pvtType) ||
-        (pvtInput == NULL) || PARAM_IS_MISSING(pvtInput))
+    if ((pvtType == nullptr) || PARAM_IS_MISSING(pvtType) ||
+        (pvtInput == nullptr) || PARAM_IS_MISSING(pvtInput))
     {
         return E_INVALIDARG;
     }
@@ -3916,7 +3916,7 @@ STDMETHODIMP_(LRESULT) CDsoDocObject::FrameWindowProc(HWND hwnd, UINT msg, WPARA
                 
                 BeginPaint(hwnd, &ps);
                 
-                pbndr->OnDraw(DVASPECT_CONTENT, ps.hdc, (RECT*)&rc, NULL, NULL, TRUE);
+                pbndr->OnDraw(DVASPECT_CONTENT, ps.hdc, (RECT*)&rc, nullptr, nullptr, TRUE);
                 
                 EndPaint(hwnd, &ps);
             }
@@ -3924,7 +3924,7 @@ STDMETHODIMP_(LRESULT) CDsoDocObject::FrameWindowProc(HWND hwnd, UINT msg, WPARA
 
         case WM_NCDESTROY:
             SetWindowLong(hwnd, GWL_USERDATA, 0);
-            pbndr->m_hwnd = NULL;
+            pbndr->m_hwnd = nullptr;
             break;
 
         case WM_SETFOCUS:

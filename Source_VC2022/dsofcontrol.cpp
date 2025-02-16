@@ -55,7 +55,7 @@ CDsoFramerControl::~CDsoFramerControl(void)
 // CDsoFramerControl::InitializeNewInstance
 //
 //  Sets up the inital state for the control. Any other member variable
-//  not set here will be NULL/FALSE thanks to zero-init in MemAlloc.
+//  not set here will be nullptr/FALSE thanks to zero-init in MemAlloc.
 //
 STDMETHODIMP CDsoFramerControl::InitializeNewInstance()
 {
@@ -99,7 +99,7 @@ STDMETHODIMP CDsoFramerControl::InPlaceActivate(LONG lVerb)
     }
 
     // get an InPlace site pointer.
-    if (NULL == m_pInPlaceSite)
+    if (nullptr == m_pInPlaceSite)
     {
         hr = m_pClientSite->QueryInterface(IID_IOleInPlaceSite, (void**)&m_pInPlaceSite);
 
@@ -174,17 +174,17 @@ STDMETHODIMP CDsoFramerControl::InPlaceActivate(LONG lVerb)
                 wndclass.style = CS_VREDRAW | CS_HREDRAW | CS_DBLCLKS;
                 wndclass.lpfnWndProc = CDsoFramerControl::ControlWindowProc;
                 wndclass.hInstance = v_hModule;
-                wndclass.hCursor = LoadCursor(NULL, IDC_ARROW);
+                wndclass.hCursor = LoadCursor(nullptr, IDC_ARROW);
                 wndclass.lpszClassName = _T("DSOFramerOCXWnd");
                 
                 RegisterClass(&wndclass);
             }
 
             // create the window with the extent size and position...
-            m_hwnd = CreateWindowEx(0, _T("DSOFramerOCXWnd"), NULL,
+            m_hwnd = CreateWindowEx(0, _T("DSOFramerOCXWnd"), nullptr,
                 WS_CHILD | WS_CLIPSIBLINGS | WS_VISIBLE,
                 rcPos.left, rcPos.top, m_Size.cx, m_Size.cy,
-                m_hwndParent, NULL, v_hModule, NULL);
+                m_hwndParent, nullptr, v_hModule, nullptr);
 
             if (m_hwnd)
             {
@@ -226,7 +226,7 @@ STDMETHODIMP CDsoFramerControl::InPlaceActivate(LONG lVerb)
         // if we don't have it already, hook top-level parent window when we go
         // ui active; this is needed to track WM_ACTIVATEAPP and other critical messages
         // needed by ole docobjs....
-        if ((m_pHookManager == NULL) && FUseFrameHook() && !FDelayFrameHookSet())
+        if ((m_pHookManager == nullptr) && FUseFrameHook() && !FDelayFrameHookSet())
         {
             m_pHookManager = CDsoFrameHookManager::RegisterFramerControl(m_hwndParent, m_hwnd);
 
@@ -244,7 +244,7 @@ STDMETHODIMP CDsoFramerControl::InPlaceActivate(LONG lVerb)
     }
 
     // Setup drop file support (but only when there is no current embedding)...
-    if (m_pDocObjFrame == NULL)
+    if (m_pDocObjFrame == nullptr)
     {
         EnableDropFile(TRUE);
     }
@@ -294,23 +294,23 @@ STDMETHODIMP CDsoFramerControl::UIActivate(BOOL fForceUIActive)
             // Set ourselves up in the host.
             if (m_pInPlaceFrame)
             {
-                m_pInPlaceFrame->SetActiveObject((IOleInPlaceActiveObject*)&m_xOleInplaceActiveObject, NULL);
+                m_pInPlaceFrame->SetActiveObject((IOleInPlaceActiveObject*)&m_xOleInplaceActiveObject, nullptr);
             }
 
             if (m_pInPlaceUIWindow)
             {
-                m_pInPlaceUIWindow->SetActiveObject((IOleInPlaceActiveObject*)&m_xOleInplaceActiveObject, NULL);
+                m_pInPlaceUIWindow->SetActiveObject((IOleInPlaceActiveObject*)&m_xOleInplaceActiveObject, nullptr);
             }
 
             // We have to explicitly say we don't wany any border space.
             if (m_pInPlaceFrame)
             {
-                m_pInPlaceFrame->SetBorderSpace(NULL);
+                m_pInPlaceFrame->SetBorderSpace(nullptr);
             }
 
             if (m_pInPlaceUIWindow)
             {
-                m_pInPlaceUIWindow->SetBorderSpace(NULL);
+                m_pInPlaceUIWindow->SetBorderSpace(nullptr);
             }
 
             // Ensure docobj component state is active as well...
@@ -392,7 +392,7 @@ STDMETHODIMP_(void) CDsoFramerControl::OnDraw(DWORD dvAspect, HDC hdcDraw, LPREC
     }
     else
     {
-        hpal = NULL;
+        hpal = nullptr;
     }
 
     // Translate the OLE_COLOR values to a matching COLORREF in palette...
@@ -441,8 +441,8 @@ STDMETHODIMP_(void) CDsoFramerControl::OnDraw(DWORD dvAspect, HDC hdcDraw, LPREC
     {
         COLORREF clrTitlebar, clrTitlebarText;
         HBRUSH   hbshTitlebar, hbshT;
-        LPWSTR   pwszDCaption = NULL;
-        LPWSTR   pwszROCaption = NULL;
+        LPWSTR   pwszDCaption = nullptr;
+        LPWSTR   pwszROCaption = nullptr;
         LPWSTR   pwszCaption = ((m_bstrCustomCaption) ?
                                 m_bstrCustomCaption : L"KB311765: Office Framer Control Sample");
 
@@ -457,7 +457,7 @@ STDMETHODIMP_(void) CDsoFramerControl::OnDraw(DWORD dvAspect, HDC hdcDraw, LPREC
 
         FillRect(hdcDraw, &rcT, hbshTitlebar);
 
-        DrawIconEx(hdcDraw, rcT.left+2, rcT.top+2, v_icoOffDocIcon, 16, 16, 0, NULL, DI_NORMAL);
+        DrawIconEx(hdcDraw, rcT.left+2, rcT.top+2, v_icoOffDocIcon, 16, 16, 0, nullptr, DI_NORMAL);
 
         clrT = SetTextColor(hdcDraw, clrTitlebarText);
         rcT.left += 22;
@@ -467,7 +467,7 @@ STDMETHODIMP_(void) CDsoFramerControl::OnDraw(DWORD dvAspect, HDC hdcDraw, LPREC
         // was open in read-only mode.
         if (m_pDocObjFrame)
         {
-            if ((pwszDCaption = (LPWSTR)m_pDocObjFrame->GetSourceDocName()) != NULL)
+            if ((pwszDCaption = (LPWSTR)m_pDocObjFrame->GetSourceDocName()) != nullptr)
             {
                 LPCWSTR pwszCat[2] = { L" - ", pwszDCaption };
 
@@ -748,10 +748,10 @@ STDMETHODIMP_(void) CDsoFramerControl::OnDestroyWindow()
     if (m_pHookManager)
     {
         m_pHookManager->DetachComponent(m_hwnd);
-        m_pHookManager = NULL;
+        m_pHookManager = nullptr;
     }
 
-    m_hwnd = NULL;
+    m_hwnd = nullptr;
 
     if (m_pServerLock)
     {
@@ -762,14 +762,14 @@ STDMETHODIMP_(void) CDsoFramerControl::OnDestroyWindow()
     {
         DeleteObject(m_hbmDeactive);
 
-        m_hbmDeactive = NULL;
+        m_hbmDeactive = nullptr;
     }
 
     if (m_hmenuFilePopup)
     {
         DestroyMenu(m_hmenuFilePopup);
         
-        m_hmenuFilePopup = NULL;
+        m_hmenuFilePopup = nullptr;
     }
 }
 
@@ -791,7 +791,7 @@ STDMETHODIMP_(void) CDsoFramerControl::OnResize()
             UIActivate(FALSE);
         }
 
-        GetSizeRectForDocument(NULL, &rcPlace);
+        GetSizeRectForDocument(nullptr, &rcPlace);
 
         m_pDocObjFrame->OnNotifySizeChange(&rcPlace);
     }
@@ -900,9 +900,9 @@ STDMETHODIMP_(void) CDsoFramerControl::OnButtonDown(UINT x, UINT y)
                     AppendMenu(hCurMenu, MF_STRING,  MNU_PRINTPV, _T("E&xit Preview"));
 
                     // Display the menu...
-                    GetSizeRectAfterTitlebar(NULL, &rc);
+                    GetSizeRectAfterTitlebar(nullptr, &rc);
                     MapWindowPoints(m_hwnd, HWND_DESKTOP, (POINT *)&rc, 2);
-                    TrackPopupMenu(hCurMenu, 0, rc.left, rc.top - 1, 0, m_hwnd, NULL);
+                    TrackPopupMenu(hCurMenu, 0, rc.left, rc.top - 1, 0, m_hwnd, nullptr);
                     
                     // Cleanup...
                     DestroyMenu(hCurMenu);
@@ -938,11 +938,11 @@ STDMETHODIMP_(void) CDsoFramerControl::OnButtonDown(UINT x, UINT y)
         if (hCurMenu)
         {
             // We'll place it right below the titlebar just like sys menu...
-            GetSizeRectAfterTitlebar(NULL, &rc);
+            GetSizeRectAfterTitlebar(nullptr, &rc);
 
             MapWindowPoints(m_hwnd, HWND_DESKTOP, (POINT *)&rc, 2);
             
-            TrackPopupMenu(hCurMenu, 0, rc.left, rc.top - 1, 0, m_hwnd, NULL);
+            TrackPopupMenu(hCurMenu, 0, rc.left, rc.top - 1, 0, m_hwnd, nullptr);
         }
     }
     else if ((m_fShowMenuBar) && (m_wSelMenuItem))
@@ -984,7 +984,7 @@ STDMETHODIMP_(void) CDsoFramerControl::OnButtonDown(UINT x, UINT y)
         // Display the menu...
         if (hCurMenu)
         {
-            TrackPopupMenu(hCurMenu, 0, pt.x, pt.y, 0, m_hwnd, NULL);
+            TrackPopupMenu(hCurMenu, 0, pt.x, pt.y, 0, m_hwnd, nullptr);
         }
 
         if (hwndCurFocus && (hwndCurFocus != m_hwnd))
@@ -1000,7 +1000,7 @@ STDMETHODIMP_(void) CDsoFramerControl::OnButtonDown(UINT x, UINT y)
         {
             RECT rcMenu;
             
-            GetSizeRectForMenuBar(NULL, &rcMenu);
+            GetSizeRectForMenuBar(nullptr, &rcMenu);
             
             MapWindowPoints(HWND_DESKTOP, m_hwnd, (POINT *)&pt, 1);
 
@@ -1035,9 +1035,9 @@ STDMETHODIMP_(void) CDsoFramerControl::OnButtonDown(UINT x, UINT y)
 //
 STDMETHODIMP_(void) CDsoFramerControl::OnMenuMessage(UINT msg, WPARAM wParam, LPARAM lParam)
 {
-    HMENU hmenu, hmenuMerged = NULL;
+    HMENU hmenu, hmenuMerged = nullptr;
     BOOL  fAlwaysSendMessage = FALSE;
-    HWND  hwndObjectMenu = NULL;
+    HWND  hwndObjectMenu = nullptr;
 
     if (m_pDocObjFrame)
     {
@@ -1227,7 +1227,7 @@ STDMETHODIMP_(void) CDsoFramerControl::OnToolbarAction(DWORD cmd)
         // Display error information to user if we failed...
         if (FAILED(hr) && (hr != E_ABORT))
         {
-            FAlertUser(hr, NULL);
+            FAlertUser(hr, nullptr);
         }
     }
 
@@ -1241,8 +1241,8 @@ STDMETHODIMP_(void) CDsoFramerControl::OnToolbarAction(DWORD cmd)
 //
 STDMETHODIMP_(BOOL) CDsoFramerControl::FAlertUser(HRESULT hr, LPWSTR pwsFileName)
 {
-    LPSTR pszError = NULL;
-    LPSTR pszTitle = NULL;
+    LPSTR pszError = nullptr;
+    LPSTR pszTitle = nullptr;
     DWORD dwFlags  = MB_ICONINFORMATION|MB_SETFOREGROUND;
 
     switch (hr)
@@ -1333,7 +1333,7 @@ STDMETHODIMP_(void) CDsoFramerControl::OnDropFile(HDROP hdrpFile)
 
     ODS(_T("CDsoFramerControl::OnDropFile()\n"));
 
-    cbItems = DragQueryFile(hdrpFile, 0xFFFFFFFF, NULL, 0);
+    cbItems = DragQueryFile(hdrpFile, 0xFFFFFFFF, nullptr, 0);
 
     if (cbItems == 0)
     {
@@ -1342,7 +1342,7 @@ STDMETHODIMP_(void) CDsoFramerControl::OnDropFile(HDROP hdrpFile)
 
     if (cbItems > 1)
     {
-        FAlertUser(STG_E_TOOMANYOPENFILES, NULL);
+        FAlertUser(STG_E_TOOMANYOPENFILES, nullptr);
 
         return;
     }
@@ -1414,7 +1414,7 @@ STDMETHODIMP_(void) CDsoFramerControl::OnSyncPaint()
 
     if ((!m_fSyncPaintTimer) && (!m_fAppActive))
     {
-        SetTimer(m_hwnd, SYNCPAINT_TIMER_ID, 50, NULL);
+        SetTimer(m_hwnd, SYNCPAINT_TIMER_ID, 50, nullptr);
 
         m_fSyncPaintTimer = TRUE;
     }
@@ -1446,9 +1446,9 @@ STDMETHODIMP_(void) CDsoFramerControl::OnForegroundCompChange(BOOL fCompActive)
                 DeleteObject(m_hbmDeactive);
             }
 
-            m_hbmDeactive = NULL;
+            m_hbmDeactive = nullptr;
         }
-        else if ((FDrawBitmapOnAppDeactive() || FIPDeactivateOnCompChange()) && (m_hbmDeactive == NULL))
+        else if ((FDrawBitmapOnAppDeactive() || FIPDeactivateOnCompChange()) && (m_hbmDeactive == nullptr))
         {
             // The default behavior on app deactive is to grap bitmap of active object before
             // telling it we lost app activation. This allows us to draw the last state of the
@@ -1676,7 +1676,7 @@ STDMETHODIMP_(void) CDsoFramerControl::OnUIFocusChange(BOOL fUIActive)
         {
             RECT rc;
 
-            GetSizeRectForMenuBar(NULL, &rc);
+            GetSizeRectForMenuBar(nullptr, &rc);
 
             InvalidateRect(m_hwnd, &rc, TRUE);
         }
@@ -1749,7 +1749,7 @@ STDMETHODIMP_(void) CDsoFramerControl::UpdateInteractiveState(BOOL fActive)
         }
 
         // Notify control host that preview mode has ended...
-        RaiseAutomationEvent(DSOF_DISPID_ENDPREVIEW, 0, NULL);
+        RaiseAutomationEvent(DSOF_DISPID_ENDPREVIEW, 0, nullptr);
     }
     else
     {
@@ -1936,8 +1936,8 @@ STDMETHODIMP_(BOOL) CDsoFramerControl::FRunningInDesignMode()
 
         m_fDesignMode = FALSE; // assume run mode
 
-        if (SUCCEEDED(DsoDispatchInvoke(pdisp, NULL,
-            DISPID_AMBIENT_USERMODE, DISPATCH_PROPERTYGET, 0, NULL, &vtUserMode)))
+        if (SUCCEEDED(DsoDispatchInvoke(pdisp, nullptr,
+            DISPID_AMBIENT_USERMODE, DISPATCH_PROPERTYGET, 0, nullptr, &vtUserMode)))
         {
             // UserMode is True when control is in Run mode, False when in design.
             // We assume run mode, so we only care to set the flag if in design.
@@ -1994,7 +1994,7 @@ STDMETHODIMP CDsoFramerControl::RaiseAutomationEvent(DISPID did, ULONG cargs, VA
     {
         m_fFreezeEvents = TRUE;
 
-        hr = DsoDispatchInvoke(m_dispEvents, NULL, did, 0, cargs, pvtargs, NULL);
+        hr = DsoDispatchInvoke(m_dispEvents, nullptr, did, 0, cargs, pvtargs, nullptr);
 
         m_fFreezeEvents = FALSE;
     }
@@ -2031,8 +2031,8 @@ STDMETHODIMP CDsoFramerControl::DoDialogAction(dsoShowDialogType item)
     switch (item)
     {
     case dsoDialogOpen: // Get file from user and call Open...
-        if (SUCCEEDED(DsoGetFileFromUser(m_hwnd, NULL, (OFN_FILEMUSTEXIST|OFN_EXPLORER),
-            v_wszFileFilter, 1, NULL, NULL, FALSE, &bstr, &fReadOnly)))
+        if (SUCCEEDED(DsoGetFileFromUser(m_hwnd, nullptr, (OFN_FILEMUSTEXIST|OFN_EXPLORER),
+            v_wszFileFilter, 1, nullptr, nullptr, FALSE, &bstr, &fReadOnly)))
         {
             vT[0].vt = VT_BSTR;  vT[0].bstrVal = bstr;
             vT[1].vt = VT_BOOL;  vT[1].boolVal = (fReadOnly ? VARIANT_TRUE : VARIANT_FALSE);
@@ -2046,16 +2046,16 @@ STDMETHODIMP CDsoFramerControl::DoDialogAction(dsoShowDialogType item)
 
     case dsoDialogSave: // Get file from user and call Save...
         {
-            LPWSTR pwszSaveType = NULL;
-            LPWSTR pwszDefExt = NULL;
+            LPWSTR pwszSaveType = nullptr;
+            LPWSTR pwszDefExt = nullptr;
 
             if (m_pDocObjFrame)
             {
                 m_pDocObjFrame->GetDocumentTypeAndFileExtension(&pwszSaveType, &pwszDefExt);
             }
 
-            if (SUCCEEDED(DsoGetFileFromUser(m_hwnd, NULL, (OFN_HIDEREADONLY|OFN_OVERWRITEPROMPT|OFN_EXPLORER),
-                ((pwszSaveType) ? pwszSaveType : v_wszFileFilter), 1, pwszDefExt, NULL, TRUE, &bstr, NULL)))
+            if (SUCCEEDED(DsoGetFileFromUser(m_hwnd, nullptr, (OFN_HIDEREADONLY|OFN_OVERWRITEPROMPT|OFN_EXPLORER),
+                ((pwszSaveType) ? pwszSaveType : v_wszFileFilter), 1, pwszDefExt, nullptr, TRUE, &bstr, nullptr)))
             {
                 vT[0].vt = VT_BSTR;  vT[0].bstrVal = bstr;
                 vT[1].vt = VT_BOOL;  vT[1].boolVal = VARIANT_TRUE;
@@ -2080,7 +2080,7 @@ STDMETHODIMP CDsoFramerControl::DoDialogAction(dsoShowDialogType item)
     case dsoDialogNew: // Get either ProgID or File to create new object from...
         if (SUCCEEDED(DsoGetOleInsertObjectFromUser(m_hwnd, L"Insert New Document Object",
             (IOF_SELECTCREATENEW | IOF_DISABLELINK | IOF_DISABLEDISPLAYASICON | IOF_HIDECHANGEICON),
-            TRUE, FALSE, &bstr, NULL)))
+            TRUE, FALSE, &bstr, nullptr)))
         {
             hr = CreateNew(bstr);
 
@@ -2149,7 +2149,7 @@ STDMETHODIMP CDsoFramerControl::SetTempServerLock(BOOL fLock)
         {
             delete m_pServerLock;
 
-            m_pServerLock = NULL;
+            m_pServerLock = nullptr;
         }
 
     }
@@ -2167,7 +2167,7 @@ STDMETHODIMP CDsoFramerControl::SetTempServerLock(BOOL fLock)
 
         delete m_pServerLock;
 
-        m_pServerLock = NULL;
+        m_pServerLock = nullptr;
     }
 
     return hr;
@@ -2199,8 +2199,8 @@ STDMETHODIMP CDsoFramerControl::ResetFrameHook(HWND hwndFrameWindow)
     }
 
     // We must have a window already created for this to work...
-    if ((m_hwnd == NULL) || !IsWindow(m_hwnd) ||
-        (m_hwndParent == NULL) || !IsWindow(m_hwndParent))
+    if ((m_hwnd == nullptr) || !IsWindow(m_hwnd) ||
+        (m_hwndParent == nullptr) || !IsWindow(m_hwndParent))
     {
         return E_ACCESSDENIED;
     }
@@ -2215,13 +2215,13 @@ STDMETHODIMP CDsoFramerControl::ResetFrameHook(HWND hwndFrameWindow)
             return hr;
         }
 
-        m_pHookManager = NULL;
+        m_pHookManager = nullptr;
     }
 
     // Now attach to the new parent window (or reattach based on the parent from our window)...
     m_pHookManager = CDsoFrameHookManager::RegisterFramerControl((hwndFrameWindow ? hwndFrameWindow : m_hwndParent), m_hwnd);
 
-    if (m_pHookManager == NULL)
+    if (m_pHookManager == nullptr)
     {
         return E_FAIL;
     }
@@ -2271,7 +2271,7 @@ STDMETHODIMP_(LRESULT) CDsoFramerControl::ControlWindowProc(HWND hwnd, UINT msg,
 
                 GetClientRect(hwnd, &rc);
 
-                pCtl->OnDraw(DVASPECT_CONTENT, hdc, (RECT*)&rc, NULL, NULL, TRUE);
+                pCtl->OnDraw(DVASPECT_CONTENT, hdc, (RECT*)&rc, nullptr, nullptr, TRUE);
 
                 EndPaint(hwnd, &ps);
             }
@@ -2506,13 +2506,13 @@ STDMETHODIMP CDsoFramerControl::XInternalUnknown::QueryInterface(REFIID riid, vo
     }
     else
     {
-        *ppv = NULL;
+        *ppv = nullptr;
 
         hr = E_NOINTERFACE;
     }
 
     // AddRef those interfaces we will return...
-    if (NULL != *ppv)
+    if (nullptr != *ppv)
     {
         ((IUnknown*)(*ppv))->AddRef();
     }
@@ -2596,7 +2596,7 @@ STDMETHODIMP CDsoFramerControl::XPersistStreamInit::Load(LPSTREAM pStm)
     ODS(_T("CDsoFramerControl::XPersistStreamInit::Load\n"));
 
     // look for our header structure, so we can verify stream validity.
-    hr = pStm->Read(&dwSig, sizeof(DWORD), NULL);
+    hr = pStm->Read(&dwSig, sizeof(DWORD), nullptr);
 
     RETURN_ON_FAILURE(hr);
 
@@ -2607,33 +2607,33 @@ STDMETHODIMP CDsoFramerControl::XPersistStreamInit::Load(LPSTREAM pStm)
     }
 
     // we like the stream.  let's go load in our two properties.
-    hr = pStm->Read(&(pThis->m_Size), sizeof(SIZEL), NULL);
+    hr = pStm->Read(&(pThis->m_Size), sizeof(SIZEL), nullptr);
 
     RETURN_ON_FAILURE(hr);
 
     DsoHimetricToPixels(&(pThis->m_Size.cx), &(pThis->m_Size.cy));
 
-    hr = pStm->Read(&(pThis->m_clrBorderColor), sizeof(OLE_COLOR), NULL);
+    hr = pStm->Read(&(pThis->m_clrBorderColor), sizeof(OLE_COLOR), nullptr);
 
     RETURN_ON_FAILURE(hr);
 
-    hr = pStm->Read(&(pThis->m_clrBackColor), sizeof(OLE_COLOR), NULL);
+    hr = pStm->Read(&(pThis->m_clrBackColor), sizeof(OLE_COLOR), nullptr);
 
     RETURN_ON_FAILURE(hr);
 
-    hr = pStm->Read(&(pThis->m_clrForeColor), sizeof(OLE_COLOR), NULL);
+    hr = pStm->Read(&(pThis->m_clrForeColor), sizeof(OLE_COLOR), nullptr);
 
     RETURN_ON_FAILURE(hr);
 
-    hr = pStm->Read(&(pThis->m_clrTBarColor), sizeof(OLE_COLOR), NULL);
+    hr = pStm->Read(&(pThis->m_clrTBarColor), sizeof(OLE_COLOR), nullptr);
 
     RETURN_ON_FAILURE(hr);
 
-    hr = pStm->Read(&(pThis->m_clrTBarTextColor), sizeof(OLE_COLOR), NULL);
+    hr = pStm->Read(&(pThis->m_clrTBarTextColor), sizeof(OLE_COLOR), nullptr);
 
     RETURN_ON_FAILURE(hr);
 
-    hr = pStm->Read(&dwT, sizeof(DWORD), NULL);
+    hr = pStm->Read(&dwT, sizeof(DWORD), nullptr);
 
     RETURN_ON_FAILURE(hr);
 
@@ -2642,7 +2642,7 @@ STDMETHODIMP CDsoFramerControl::XPersistStreamInit::Load(LPSTREAM pStm)
     pThis->m_fShowToolbars = LOBYTE(HIWORD(dwT));
     pThis->m_fShowTitlebar = HIBYTE(HIWORD(dwT));
 
-    hr = pStm->Read(&dwT, sizeof(DWORD), NULL);
+    hr = pStm->Read(&dwT, sizeof(DWORD), nullptr);
 
     RETURN_ON_FAILURE(hr);
 
@@ -2652,7 +2652,7 @@ STDMETHODIMP CDsoFramerControl::XPersistStreamInit::Load(LPSTREAM pStm)
 
         if (pwsz)
         {
-            hr = pStm->Read(pwsz, dwT, NULL);
+            hr = pStm->Read(pwsz, dwT, nullptr);
 
             if (SUCCEEDED(hr))
             {
@@ -2668,14 +2668,14 @@ STDMETHODIMP CDsoFramerControl::XPersistStreamInit::Load(LPSTREAM pStm)
     {
         DWORD dwValue;
 
-        hr = pStm->Read(&dwValue, sizeof(DWORD), NULL);
+        hr = pStm->Read(&dwValue, sizeof(DWORD), nullptr);
 
         RETURN_ON_FAILURE(hr);
 
         pThis->m_lActivationPolicy  = LOWORD(dwValue);
         pThis->m_lHookPolicy        = HIWORD(dwValue);
 
-        hr = pStm->Read(&dwValue, sizeof(DWORD), NULL);
+        hr = pStm->Read(&dwValue, sizeof(DWORD), nullptr);
 
         RETURN_ON_FAILURE(hr);
 
@@ -2696,7 +2696,7 @@ STDMETHODIMP CDsoFramerControl::XPersistStreamInit::Save(LPSTREAM pStm, BOOL fCl
     ODS(_T("CDsoFramerControl::XPersistStreamInit::Save\n"));
 
     // first thing to do is write out our stream sig...
-    hr = pStm->Write(&dwSig, sizeof(DWORD), NULL);
+    hr = pStm->Write(&dwSig, sizeof(DWORD), nullptr);
 
     RETURN_ON_FAILURE(hr);
 
@@ -2706,27 +2706,27 @@ STDMETHODIMP CDsoFramerControl::XPersistStreamInit::Save(LPSTREAM pStm, BOOL fCl
 
     DsoPixelsToHimetric(&(slSize.cx), &(slSize.cy));
 
-    hr = pStm->Write(&slSize, sizeof(SIZEL), NULL);
+    hr = pStm->Write(&slSize, sizeof(SIZEL), nullptr);
 
     RETURN_ON_FAILURE(hr);
 
-    hr = pStm->Write(&(pThis->m_clrBorderColor), sizeof(OLE_COLOR), NULL);
+    hr = pStm->Write(&(pThis->m_clrBorderColor), sizeof(OLE_COLOR), nullptr);
 
     RETURN_ON_FAILURE(hr);
 
-    hr = pStm->Write(&(pThis->m_clrBackColor), sizeof(OLE_COLOR), NULL);
+    hr = pStm->Write(&(pThis->m_clrBackColor), sizeof(OLE_COLOR), nullptr);
 
     RETURN_ON_FAILURE(hr);
 
-    hr = pStm->Write(&(pThis->m_clrForeColor), sizeof(OLE_COLOR), NULL);
+    hr = pStm->Write(&(pThis->m_clrForeColor), sizeof(OLE_COLOR), nullptr);
 
     RETURN_ON_FAILURE(hr);
 
-    hr = pStm->Write(&(pThis->m_clrTBarColor), sizeof(OLE_COLOR), NULL);
+    hr = pStm->Write(&(pThis->m_clrTBarColor), sizeof(OLE_COLOR), nullptr);
 
     RETURN_ON_FAILURE(hr);
 
-    hr = pStm->Write(&(pThis->m_clrTBarTextColor), sizeof(OLE_COLOR), NULL);
+    hr = pStm->Write(&(pThis->m_clrTBarTextColor), sizeof(OLE_COLOR), nullptr);
 
     RETURN_ON_FAILURE(hr);
 
@@ -2735,7 +2735,7 @@ STDMETHODIMP CDsoFramerControl::XPersistStreamInit::Save(LPSTREAM pStm, BOOL fCl
         MAKEWORD((BYTE)(pThis->m_fShowToolbars), (BYTE)(pThis->m_fShowTitlebar))
     );
 
-    hr = pStm->Write(&dwT, sizeof(DWORD), NULL);
+    hr = pStm->Write(&dwT, sizeof(DWORD), nullptr);
 
     RETURN_ON_FAILURE(hr);
 
@@ -2746,25 +2746,25 @@ STDMETHODIMP CDsoFramerControl::XPersistStreamInit::Save(LPSTREAM pStm, BOOL fCl
         dwT = SysStringByteLen(pThis->m_bstrCustomCaption);
     }
 
-    hr = pStm->Write(&dwT, sizeof(DWORD), NULL);
+    hr = pStm->Write(&dwT, sizeof(DWORD), nullptr);
 
     RETURN_ON_FAILURE(hr);
 
     if (dwT)
     {
-        hr = pStm->Write(pThis->m_bstrCustomCaption, dwT, NULL);
+        hr = pStm->Write(pThis->m_bstrCustomCaption, dwT, nullptr);
 
         RETURN_ON_FAILURE(hr);
     }
 
     // Version 1.3 added properties...
     dwT = (DWORD)MAKELONG((WORD)(pThis->m_lActivationPolicy), (WORD)(pThis->m_lHookPolicy));
-    hr = pStm->Write(&dwT, sizeof(DWORD), NULL);
+    hr = pStm->Write(&dwT, sizeof(DWORD), nullptr);
 
     RETURN_ON_FAILURE(hr);
 
     dwT = (DWORD)MAKELONG(MAKEWORD((BYTE)(pThis->m_fDisableMenuAccel), 0), 0);
-    hr = pStm->Write(&dwT, sizeof(DWORD), NULL);
+    hr = pStm->Write(&dwT, sizeof(DWORD), nullptr);
 
     RETURN_ON_FAILURE(hr);
 
@@ -3204,7 +3204,7 @@ STDMETHODIMP CDsoFramerControl::XPersistStorage::Save(LPSTORAGE pStg, BOOL fSame
 
     if (fSameAsLoad)
     {
-        if ((pThis->m_pOleStorage == NULL) ||
+        if ((pThis->m_pOleStorage == nullptr) ||
             ((pStg) && (pStg != pThis->m_pOleStorage)))
         {
             SAFE_RELEASE_INTERFACE(pThis->m_pOleStorage);
@@ -3377,7 +3377,7 @@ STDMETHODIMP CDsoFramerControl::XOleObject::GetMoniker(DWORD dwAssign, DWORD dwW
 
     if (ppmk)
     {
-        *ppmk = NULL;
+        *ppmk = nullptr;
     }
 
     return E_NOTIMPL;
@@ -3396,7 +3396,7 @@ STDMETHODIMP CDsoFramerControl::XOleObject::GetClipboardData(DWORD /*dwReserved*
 
     if (ppDataObject)
     {
-        *ppDataObject = NULL;
+        *ppDataObject = nullptr;
     }
     
     return E_NOTIMPL;
@@ -3505,7 +3505,7 @@ STDMETHODIMP CDsoFramerControl::XOleObject::SetExtent(DWORD dwDrawAspect, SIZEL 
             // Use OnPosRectChange for older OCX containters and Access
             // who just refuses to get with the times (like me <g>)...
             GetWindowRect(pThis->m_hwnd, &rect);
-            MapWindowPoints(NULL, pThis->m_hwndParent, (LPPOINT)&rect, 2);
+            MapWindowPoints(nullptr, pThis->m_hwndParent, (LPPOINT)&rect, 2);
 
             rect.right = rect.left + sl.cx;
             rect.bottom = rect.top + sl.cy;
@@ -3513,7 +3513,7 @@ STDMETHODIMP CDsoFramerControl::XOleObject::SetExtent(DWORD dwDrawAspect, SIZEL 
             pThis->m_pInPlaceSite->OnPosRectChange(&rect);
 
             // Resize the window based on the new size...
-            SetWindowPos(pThis->m_hwnd, NULL, 0, 0, sl.cx, sl.cy,
+            SetWindowPos(pThis->m_hwnd, nullptr, 0, 0, sl.cx, sl.cy,
                          SWP_NOMOVE | SWP_NOZORDER | SWP_NOACTIVATE);
         }
         else
@@ -3580,7 +3580,7 @@ STDMETHODIMP CDsoFramerControl::XOleObject::EnumAdvise(IEnumSTATDATA **ppenumAdv
     ODS(_T("CDsoFramerControl::XOleObject::EnumAdvise\n"));
 
     CHECK_NULL_RETURN(ppenumAdvise, E_POINTER);
-    *ppenumAdvise = NULL;
+    *ppenumAdvise = nullptr;
 
     CHECK_NULL_RETURN(pThis->m_pOleAdviseHolder, E_FAIL);
     
@@ -3632,7 +3632,7 @@ STDMETHODIMP CDsoFramerControl::XOleControl::GetControlInfo(CONTROLINFO* pCI)
 
     CHECK_NULL_RETURN(pCI, E_POINTER);
     
-    pCI->hAccel = NULL; pCI->cAccel = 0; pCI->dwFlags = 0;
+    pCI->hAccel = nullptr; pCI->cAccel = 0; pCI->dwFlags = 0;
     
     return S_OK;
 }
@@ -3740,7 +3740,7 @@ STDMETHODIMP CDsoFramerControl::XOleInplaceObject::InPlaceDeactivate()
     {
         DestroyWindow(pThis->m_hwnd);
 
-        pThis->m_hwnd = NULL;
+        pThis->m_hwnd = nullptr;
     }
 
     SAFE_RELEASE_INTERFACE(pThis->m_pInPlaceFrame);
@@ -3766,12 +3766,12 @@ STDMETHODIMP CDsoFramerControl::XOleInplaceObject::UIDeactivate()
     // notify frame windows, if appropriate, that we're no longer ui-active.
     if (pThis->m_pInPlaceUIWindow)
     {
-        pThis->m_pInPlaceUIWindow->SetActiveObject(NULL, NULL);
+        pThis->m_pInPlaceUIWindow->SetActiveObject(nullptr, nullptr);
     }
 
     if (pThis->m_pInPlaceFrame)
     {
-        pThis->m_pInPlaceFrame->SetActiveObject(NULL, NULL);
+        pThis->m_pInPlaceFrame->SetActiveObject(nullptr, nullptr);
     }
 
     pThis->OnUIFocusChange(FALSE);
@@ -3806,14 +3806,14 @@ STDMETHODIMP CDsoFramerControl::XOleInplaceObject::SetObjectRects(LPCRECT lprcPo
         }
         else if (pThis->m_fUsingWindowRgn)
         {
-            SetWindowRgn(pThis->m_hwnd, NULL, TRUE);
+            SetWindowRgn(pThis->m_hwnd, nullptr, TRUE);
 
             pThis->m_fUsingWindowRgn = FALSE;
         }
 
         // set our control's location, but don't change it's size at all
         // [people for whom zooming is important should set that up here]
-        SetWindowPos(pThis->m_hwnd, NULL, lprcPosRect->left, lprcPosRect->top,
+        SetWindowPos(pThis->m_hwnd, nullptr, lprcPosRect->left, lprcPosRect->top,
                      0, 0, SWP_NOSIZE | SWP_NOZORDER | SWP_NOACTIVATE);
     }
 
@@ -3957,7 +3957,7 @@ STDMETHODIMP CDsoFramerControl::XOleInplaceActiveObject::OnDocWindowActivate(BOO
 
     if (pThis->m_fUIActive && fActivate && pThis->m_pInPlaceFrame)
     {
-        pThis->m_pInPlaceFrame->SetBorderSpace(NULL);
+        pThis->m_pInPlaceFrame->SetBorderSpace(nullptr);
     }
 
     return S_OK;
@@ -4046,15 +4046,15 @@ STDMETHODIMP CDsoFramerControl::XViewObjectEx::Draw(DWORD dwDrawAspect, LONG lIn
         iMode = SetMapMode(hdcDraw, MM_TEXT);
     }
 
-    // prcWBounds is NULL and not used if we are not dealing with a metafile.
+    // prcWBounds is nullptr and not used if we are not dealing with a metafile.
     // For metafiles, we pass on rc as *prcBounds, we should also include prcWBounds
     pThis->OnDraw(dwDrawAspect, hdcDraw, &rc, (RECT*)prcWBounds, hicTargetDevice, fOptimize);
 
     // clean up the DC when we're done with it, if appropriate.
     if (!fMetafile)
     {
-        SetViewportOrgEx(hdcDraw, pVp.x, pVp.y, NULL);
-        SetWindowOrgEx(hdcDraw, pW.x, pW.y, NULL);
+        SetViewportOrgEx(hdcDraw, pVp.x, pVp.y, nullptr);
+        SetWindowOrgEx(hdcDraw, pW.x, pW.y, nullptr);
         SetMapMode(hdcDraw, iMode);
     }
 
@@ -4271,7 +4271,7 @@ STDMETHODIMP CDsoFramerControl::XDataObject::GetData(FORMATETC *pfmtc,  STGMEDIU
     }
 
     // If caller wants a metafile of the current object, draw it...
-    hdc = CreateMetaFileW(NULL);
+    hdc = CreateMetaFileW(nullptr);
 
     sizeMetric.cx = pThis->m_Size.cx;
     sizeMetric.cy = pThis->m_Size.cy;
@@ -4282,15 +4282,15 @@ STDMETHODIMP CDsoFramerControl::XDataObject::GetData(FORMATETC *pfmtc,  STGMEDIU
     sizeMetric.cy = -(sizeMetric.cy);
 
     SetMapMode(hdc, MM_ANISOTROPIC);
-    SetWindowOrgEx(hdc, 0, 0, NULL);
-    SetWindowExtEx(hdc, rc.right, rc.bottom, NULL);
+    SetWindowOrgEx(hdc, 0, 0, nullptr);
+    SetWindowExtEx(hdc, rc.right, rc.bottom, nullptr);
 
     // Delegate to same IViewObject::Draw used by most containers for metafile...
-    hr = pThis->m_xViewObjectEx.Draw(DVASPECT_CONTENT, -1, NULL, NULL, NULL, hdc, (RECTL*)&rc, NULL, NULL, 0);
+    hr = pThis->m_xViewObjectEx.Draw(DVASPECT_CONTENT, -1, nullptr, nullptr, nullptr, hdc, (RECTL*)&rc, nullptr, nullptr, 0);
 
     ASSERT(SUCCEEDED(hr));
 
-    if ((hwmf = CloseMetaFile(hdc)) == NULL)
+    if ((hwmf = CloseMetaFile(hdc)) == nullptr)
     {
         return E_UNEXPECTED;
     }
@@ -4298,7 +4298,7 @@ STDMETHODIMP CDsoFramerControl::XDataObject::GetData(FORMATETC *pfmtc,  STGMEDIU
     // Now allocate the transfer medium and set the metafile...
     hmem = GlobalAlloc((GMEM_SHARE|GMEM_MOVEABLE), sizeof(METAFILEPICT));
 
-    if (hmem == NULL)
+    if (hmem == nullptr)
     {
         DeleteMetaFile(hwmf);
 
@@ -4319,7 +4319,7 @@ STDMETHODIMP CDsoFramerControl::XDataObject::GetData(FORMATETC *pfmtc,  STGMEDIU
 
     pstgm->tymed = TYMED_MFPICT;
     pstgm->hGlobal = hmem;
-    pstgm->pUnkForRelease = NULL;
+    pstgm->pUnkForRelease = nullptr;
 
     return S_OK;
 }
@@ -4383,7 +4383,7 @@ STDMETHODIMP CDsoFramerControl::XDataObject::DAdvise(FORMATETC *pfmtc, DWORD adv
     ODS(_T("CDsoFramerControl::XDataObject::DAdvise\n"));
 
     // Create OLE Data advise holder to keep sink for us...
-    if ((NULL == pThis->m_pDataAdviseHolder) &&
+    if ((nullptr == pThis->m_pDataAdviseHolder) &&
         FAILED(CreateDataAdviseHolder(&(pThis->m_pDataAdviseHolder))))
     {
         return E_FAIL;
@@ -4495,7 +4495,7 @@ STDMETHODIMP CDsoFramerControl::XEnumConnectionPoints::Next(ULONG cConnections, 
 
     CHECK_NULL_RETURN(rgpcn, E_POINTER);
 
-    *rgpcn = NULL;
+    *rgpcn = nullptr;
 
     CHECK_NULL_RETURN(pcFetched, E_POINTER);
 
@@ -4619,14 +4619,14 @@ STDMETHODIMP CDsoFramerControl::XConnectionPoint::Unadvise(DWORD dwCookie)
         SAFE_RELEASE_INTERFACE(pThis->m_dispEvents);
     }
     
-    return (pThis->m_dispEvents == NULL) ? S_OK : CONNECT_E_NOCONNECTION;
+    return (pThis->m_dispEvents == nullptr) ? S_OK : CONNECT_E_NOCONNECTION;
 }
 
 STDMETHODIMP CDsoFramerControl::XConnectionPoint::EnumConnections(IEnumConnections **ppEnum)
 {
     if (ppEnum)
     {
-        *ppEnum = NULL;
+        *ppEnum = nullptr;
     }
     
     return E_NOTIMPL;
@@ -4647,12 +4647,12 @@ STDMETHODIMP CDsoFramerControl::XOleCommandTarget::QueryStatus(const GUID *pguid
     
     //ODS("CDsoFramerControl::XOleCommandTarget::QueryStatus\n");
     
-    if (pguidCmdGroup != NULL)
+    if (pguidCmdGroup != nullptr)
     {
         return OLECMDERR_E_UNKNOWNGROUP;
     }
 
-    if (prgCmds == NULL)
+    if (prgCmds == nullptr)
     {
         return E_INVALIDARG;
     }
@@ -4689,7 +4689,7 @@ STDMETHODIMP CDsoFramerControl::XOleCommandTarget::Exec(const GUID *pguidCmdGrou
 
     ODS(_T("CDsoFramerControl::XOleCommandTarget::Exec\n"));
 
-    if ((pguidCmdGroup != NULL) && (*pguidCmdGroup != GUID_NULL))
+    if ((pguidCmdGroup != nullptr) && (*pguidCmdGroup != GUID_NULL))
     {
         return OLECMDERR_E_UNKNOWNGROUP;
     }
@@ -4803,7 +4803,7 @@ STDMETHODIMP CDsoFramerControl::XDsoDocObjectSite::QueryService(REFGUID guidServ
     // if the top-level host offers the service requested (like hyperlinking to new web page)...
     if (FAILED(hr) && (pThis->m_pClientSite))
     {
-        IServiceProvider *pprov = NULL;
+        IServiceProvider *pprov = nullptr;
 
         if (SUCCEEDED(pThis->m_pClientSite->QueryInterface(IID_IServiceProvider, (void**)&pprov)) && (pprov))
         {
@@ -4839,7 +4839,7 @@ STDMETHODIMP CDsoFramerControl::XDsoDocObjectSite::GetBorder(LPRECT prcBorder)
 
     ODS(_T("CDsoFramerControl::XDsoDocObjectSite::GetBorder\n"));
     
-    pThis->GetSizeRectForDocument(NULL, prcBorder);
+    pThis->GetSizeRectForDocument(nullptr, prcBorder);
     
     return S_OK;
 }
@@ -4926,7 +4926,7 @@ STDMETHODIMP CDsoFramerControl::XDsoDocObjectSite::SetStatusText(LPCOLESTR pszTe
 ////////////////////////////////////////////////////////////////////////
 // CDsoFrameHookManager
 //
-CDsoFrameHookManager *vgGlobalManager = NULL;
+CDsoFrameHookManager *vgGlobalManager = nullptr;
 
 ////////////////////////////////////////////////////////////////////////
 // CDsoFrameHookManager::RegisterFramerControl
@@ -4937,17 +4937,17 @@ CDsoFrameHookManager *vgGlobalManager = NULL;
 //
 STDMETHODIMP_(CDsoFrameHookManager*) CDsoFrameHookManager::RegisterFramerControl(HWND hwndParent, HWND hwndControl)
 {
-    CDsoFrameHookManager *pManager = NULL;
+    CDsoFrameHookManager *pManager = nullptr;
     
     ODS(_T("CDsoFrameHookManager::RegisterFramerControl\n"));
 
-    CHECK_NULL_RETURN(hwndControl, NULL);
+    CHECK_NULL_RETURN(hwndControl, nullptr);
 
     EnterCriticalSection(&v_csecThreadSynch);
 
     pManager = vgGlobalManager;
     
-    if (pManager == NULL)
+    if (pManager == nullptr)
     {
         pManager = (vgGlobalManager = new CDsoFrameHookManager());
     }
@@ -4956,14 +4956,14 @@ STDMETHODIMP_(CDsoFrameHookManager*) CDsoFrameHookManager::RegisterFramerControl
 
     if (pManager)
     {
-        if (hwndParent == NULL)
+        if (hwndParent == nullptr)
         {
             hwndParent = hwndControl;
         }
 
         if (FAILED(pManager->AddComponent(hwndParent, hwndControl)))
         {
-            return NULL;
+            return nullptr;
         }
     }
 
@@ -5054,7 +5054,7 @@ STDMETHODIMP CDsoFrameHookManager::DetachComponent(HWND hwndControl)
     // items down the list. Change active index as needed...
     EnterCriticalSection(&v_csecThreadSynch);
 
-    m_pComponents[dwIndex].hwndControl = NULL;
+    m_pComponents[dwIndex].hwndControl = nullptr;
     m_pComponents[dwIndex].phookFrame->Detach();
 
     // Compact the list...
@@ -5062,7 +5062,7 @@ STDMETHODIMP CDsoFrameHookManager::DetachComponent(HWND hwndControl)
     {
         m_pComponents[dwIndex - 1].hwndControl = m_pComponents[dwIndex].hwndControl;
         m_pComponents[dwIndex - 1].phookFrame = m_pComponents[dwIndex].phookFrame;
-        m_pComponents[dwIndex].hwndControl = NULL;
+        m_pComponents[dwIndex].hwndControl = nullptr;
     }
 
     // Decrement the count. If count still exists, forward activation
@@ -5083,7 +5083,7 @@ STDMETHODIMP CDsoFrameHookManager::DetachComponent(HWND hwndControl)
     }
     else
     {
-        vgGlobalManager = NULL;
+        vgGlobalManager = nullptr;
 
         // If this is the last control, we can remove the manger!
         delete this;
@@ -5173,7 +5173,7 @@ STDMETHODIMP_(BOOL) CDsoFrameHookManager::SendNotifyMessage(HWND hwnd, DWORD msg
     // Check if the caller is on the same thread as the active component. If so we can
     // forward the message directly for processing. If not, we have to post and wait for
     // that thread to process message at a later time...
-    if (GetWindowThreadProcessId(hwnd, NULL) == GetCurrentThreadId())
+    if (GetWindowThreadProcessId(hwnd, nullptr) == GetCurrentThreadId())
     {
         // Notify now...
         fResult = (BOOL)SendMessage(hwnd, msg, wParam, lParam);
@@ -5199,13 +5199,13 @@ STDMETHODIMP_(BOOL) CDsoFrameHookManager::SendNotifyMessage(HWND hwnd, DWORD msg
 //
 STDMETHODIMP_(CDsoFrameWindowHook*) CDsoFrameWindowHook::AttachToFrameWindow(HWND hwndParent)
 {
-    CDsoFrameWindowHook *phook = NULL;
+    CDsoFrameWindowHook *phook = nullptr;
     BOOL fHookSuccess = FALSE;
 
     // We have to get valid window ...
     if (!IsWindow(hwndParent))
     {
-        return NULL;
+        return nullptr;
     }
 
     EnterCriticalSection(&v_csecThreadSynch);
@@ -5235,7 +5235,7 @@ STDMETHODIMP_(CDsoFrameWindowHook*) CDsoFrameWindowHook::AttachToFrameWindow(HWN
                 {
                     phook->m_pfnOrigWndProc = (WNDPROC)SetWindowLongW(hwndParent, GWL_WNDPROC, (LONG)(WNDPROC)HostWindowProcHook);
 
-                    fHookSuccess = (phook->m_pfnOrigWndProc != NULL);
+                    fHookSuccess = (phook->m_pfnOrigWndProc != nullptr);
                 }
             }
             else
@@ -5246,7 +5246,7 @@ STDMETHODIMP_(CDsoFrameWindowHook*) CDsoFrameWindowHook::AttachToFrameWindow(HWN
                 {
                     phook->m_pfnOrigWndProc = (WNDPROC)SetWindowLongA(hwndParent, GWL_WNDPROC, (LONG)(WNDPROC)HostWindowProcHook);
 
-                    fHookSuccess = (phook->m_pfnOrigWndProc != NULL);
+                    fHookSuccess = (phook->m_pfnOrigWndProc != nullptr);
                 }
             }
 
@@ -5255,7 +5255,7 @@ STDMETHODIMP_(CDsoFrameWindowHook*) CDsoFrameWindowHook::AttachToFrameWindow(HWN
             {
                 delete phook;
 
-                phook = NULL;
+                phook = nullptr;
             }
             else
             {
@@ -5296,7 +5296,7 @@ STDMETHODIMP CDsoFrameWindowHook::Detach()
                 RemovePropA(m_hwndTopLevelHost, "DSOFramerWndHook");
             }
 
-            m_hwndTopLevelHost = NULL;
+            m_hwndTopLevelHost = nullptr;
 
             // we can kill this object now...
             delete this;
@@ -5317,7 +5317,7 @@ STDMETHODIMP_(CDsoFrameWindowHook*) CDsoFrameWindowHook::GetHookFromWindow(HWND 
 {
     CDsoFrameWindowHook *phook = (CDsoFrameWindowHook*)GetPropW(hwnd, L"DSOFramerWndHook");
 
-    if (phook == NULL)
+    if (phook == nullptr)
     {
         phook = (CDsoFrameWindowHook*)GetPropA(hwnd, "DSOFramerWndHook");
     }

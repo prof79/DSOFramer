@@ -224,15 +224,15 @@ public:
     inline HWND                     GetDocWindow()      { return m_hwnd; }
     inline HWND                     GetActiveWindow()   { return m_hwndUIActiveObj; }
     inline BOOL                     IsReadOnly()        { return m_fOpenReadOnly; }
-    inline BOOL                     InPrintPreview()    { return ((m_pprtprv != NULL) || (m_fInPptSlideShow)); }
+    inline BOOL                     InPrintPreview()    { return ((m_pprtprv != nullptr) || (m_fInPptSlideShow)); }
     inline HWND                     GetMenuHWND()       { return m_hwndMenuObj; }
     inline HMENU                    GetActiveMenu()     { return m_hMenuActive; }
     inline HMENU                    GetMergedMenu()     { return m_hMenuMerged; }
     inline void                     SetMergedMenu(HMENU h) { m_hMenuMerged = h; }
     inline LPCWSTR                  GetSourceName()     { return ((m_pwszWebResource) ? m_pwszWebResource : m_pwszSourceFile); }
-    inline LPCWSTR                  GetSourceDocName()  { return ((m_pwszSourceFile) ? &m_pwszSourceFile[m_idxSourceName] : NULL); }
+    inline LPCWSTR                  GetSourceDocName()  { return ((m_pwszSourceFile) ? &m_pwszSourceFile[m_idxSourceName] : nullptr); }
     inline CLSID*                   GetServerCLSID()    { return &m_clsidObject; }
-    inline BOOL                     IsIPActive()        { return (m_pipobj != NULL); }
+    inline BOOL                     IsIPActive()        { return (m_pipobj != nullptr); }
 
     BOOL IsWordObject()
     {

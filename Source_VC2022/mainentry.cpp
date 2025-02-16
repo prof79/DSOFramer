@@ -22,10 +22,10 @@
 
 #include "dsoframer.h"
 
-HINSTANCE        v_hModule        = NULL;   // DLL module handle
-HANDLE           v_hPrivateHeap   = NULL;   // Private Memory Heap
+HINSTANCE        v_hModule        = nullptr;   // DLL module handle
+HANDLE           v_hPrivateHeap   = nullptr;   // Private Memory Heap
 ULONG            v_cLocks         = 0;      // Count of server locks
-HICON            v_icoOffDocIcon  = NULL;   // Small office icon (for caption bar)
+HICON            v_icoOffDocIcon  = nullptr;   // Small office icon (for caption bar)
 BOOL             v_fUnicodeAPI    = FALSE;  // Flag to determine if we should us Unicode API
 BOOL             v_fWindows2KPlus = FALSE;
 
@@ -108,7 +108,7 @@ STDAPI DllGetClassObject(_In_ REFCLSID rclsid, _In_ REFIID riid, _Outptr_ LPVOID
 
     CHECK_NULL_RETURN(ppv, E_POINTER);
 
-    *ppv = NULL;
+    *ppv = nullptr;
 
     // The only component we can create is the BinderControl...
     if (rclsid != CLSID_FramerControl)
@@ -124,7 +124,7 @@ STDAPI DllGetClassObject(_In_ REFCLSID rclsid, _In_ REFIID riid, _Outptr_ LPVOID
     // Get requested interface.
     if (FAILED(hr = pcf->QueryInterface(riid, ppv)))
     {
-        *ppv = NULL;
+        *ppv = nullptr;
 
         delete pcf;
     }
@@ -165,7 +165,7 @@ STDAPI DllRegisterServer()
 
     if ((dwret = RegCreateKeyEx(
                     HKEY_CLASSES_ROOT,
-                    szbuffer, 0, NULL, 0, KEY_WRITE, NULL, &hk, NULL)) != ERROR_SUCCESS)
+                    szbuffer, 0, nullptr, 0, KEY_WRITE, nullptr, &hk, nullptr)) != ERROR_SUCCESS)
     {
         DsoMemFree(pwszModule);
 
@@ -175,10 +175,10 @@ STDAPI DllRegisterServer()
     // TODO: Unicode
     lstrcpy(szbuffer, DSOFRAMERCTL_SHORTNAME);
 
-    RegSetValueEx(hk, NULL, 0, REG_SZ, (BYTE *)szbuffer, lstrlen(szbuffer));
+    RegSetValueEx(hk, nullptr, 0, REG_SZ, (BYTE *)szbuffer, lstrlen(szbuffer));
 
     // Setup the InprocServer32 key...
-    dwret = RegCreateKeyEx(hk, _T("InprocServer32"), 0, NULL, 0, KEY_WRITE, NULL, &hk2, NULL);
+    dwret = RegCreateKeyEx(hk, _T("InprocServer32"), 0, nullptr, 0, KEY_WRITE, nullptr, &hk2, nullptr);
 
     if (dwret == ERROR_SUCCESS)
     {
@@ -199,14 +199,14 @@ STDAPI DllRegisterServer()
 
         RegCloseKey(hk2);
 
-        dwret = RegCreateKeyEx(hk, _T("ProgID"), 0, NULL, 0, KEY_WRITE, NULL, &hk2, NULL);
+        dwret = RegCreateKeyEx(hk, _T("ProgID"), 0, nullptr, 0, KEY_WRITE, nullptr, &hk2, nullptr);
 
         if (dwret == ERROR_SUCCESS)
         {
             // TODO: Unicode
             lstrcpy(szbuffer, DSOFRAMERCTL_PROGID);
 
-            RegSetValueEx(hk2, NULL, 0, REG_SZ, (BYTE *)szbuffer, lstrlen(szbuffer));
+            RegSetValueEx(hk2, nullptr, 0, REG_SZ, (BYTE *)szbuffer, lstrlen(szbuffer));
 
             RegCloseKey(hk2);
         }
@@ -218,7 +218,7 @@ STDAPI DllRegisterServer()
 
     if (SUCCEEDED(hr))
     {
-        dwret = RegCreateKeyEx(hk, _T("Control"), 0, NULL, 0, KEY_WRITE, NULL, &hk2, NULL);
+        dwret = RegCreateKeyEx(hk, _T("Control"), 0, nullptr, 0, KEY_WRITE, nullptr, &hk2, nullptr);
 
         if (dwret == ERROR_SUCCESS)
         {
@@ -233,7 +233,7 @@ STDAPI DllRegisterServer()
     // If we succeeded so far, andle the remaining (non-critical) reg keys...
     if (SUCCEEDED(hr))
     {
-        dwret = RegCreateKeyEx(hk, _T("ToolboxBitmap32"), 0, NULL, 0, KEY_WRITE, NULL, &hk2, NULL);
+        dwret = RegCreateKeyEx(hk, _T("ToolboxBitmap32"), 0, nullptr, 0, KEY_WRITE, nullptr, &hk2, nullptr);
 
         if (dwret == ERROR_SUCCESS)
         {
@@ -249,7 +249,7 @@ STDAPI DllRegisterServer()
             RegCloseKey(hk2);
         }
 
-        dwret = RegCreateKeyEx(hk, _T("TypeLib"), 0, NULL, 0, KEY_WRITE, NULL, &hk2, NULL);
+        dwret = RegCreateKeyEx(hk, _T("TypeLib"), 0, nullptr, 0, KEY_WRITE, nullptr, &hk2, nullptr);
 
         if (dwret == ERROR_SUCCESS)
         {
@@ -257,36 +257,36 @@ STDAPI DllRegisterServer()
             lstrcpy(szbuffer, DSOFRAMERCTL_TLIBSTR);
 
             // TODO: Unicode/BYTE!!!, lstrlen
-            RegSetValueEx(hk2, NULL, 0, REG_SZ, (BYTE *)szbuffer, lstrlen(szbuffer));
+            RegSetValueEx(hk2, nullptr, 0, REG_SZ, (BYTE *)szbuffer, lstrlen(szbuffer));
             
             RegCloseKey(hk2);
         }
 
-        dwret = RegCreateKeyEx(hk, _T("Version"), 0, NULL, 0, KEY_WRITE, NULL, &hk2, NULL);
+        dwret = RegCreateKeyEx(hk, _T("Version"), 0, nullptr, 0, KEY_WRITE, nullptr, &hk2, nullptr);
 
         if (dwret == ERROR_SUCCESS)
         {
             // TODO: Unicode
             lstrcpy(szbuffer, DSOFRAMERCTL_VERSIONSTR);
 
-            RegSetValueEx(hk2, NULL, 0, REG_SZ, (BYTE *)szbuffer, lstrlen(szbuffer));
+            RegSetValueEx(hk2, nullptr, 0, REG_SZ, (BYTE *)szbuffer, lstrlen(szbuffer));
             
             RegCloseKey(hk2);
         }
 
-        dwret = RegCreateKeyEx(hk, _T("MiscStatus"), 0, NULL, 0, KEY_WRITE, NULL, &hk2, NULL);
+        dwret = RegCreateKeyEx(hk, _T("MiscStatus"), 0, nullptr, 0, KEY_WRITE, nullptr, &hk2, nullptr);
 
         if (dwret == ERROR_SUCCESS)
         {
             // TODO: Unicode
             lstrcpy(szbuffer, _T("131473"));
 
-            RegSetValueEx(hk2, NULL, 0, REG_SZ, (BYTE *)szbuffer, lstrlen(szbuffer));
+            RegSetValueEx(hk2, nullptr, 0, REG_SZ, (BYTE *)szbuffer, lstrlen(szbuffer));
             
             RegCloseKey(hk2);
         }
 
-        dwret = RegCreateKeyEx(hk, _T("DataFormats\\GetSet\\0"), 0, NULL, 0, KEY_WRITE, NULL, &hk2, NULL);
+        dwret = RegCreateKeyEx(hk, _T("DataFormats\\GetSet\\0"), 0, nullptr, 0, KEY_WRITE, nullptr, &hk2, nullptr);
 
         if (dwret == ERROR_SUCCESS)
         {
@@ -294,7 +294,7 @@ STDAPI DllRegisterServer()
             lstrcpy(szbuffer, _T("3,1,32,1"));
 
             // TODO: Unicode
-            RegSetValueEx(hk2, NULL, 0, REG_SZ, (BYTE *)szbuffer, lstrlen(szbuffer));
+            RegSetValueEx(hk2, nullptr, 0, REG_SZ, (BYTE *)szbuffer, lstrlen(szbuffer));
 
             RegCloseKey(hk2);
         }
@@ -309,21 +309,21 @@ STDAPI DllRegisterServer()
 
     // Setup the ProgID (non-critical)...
     if (RegCreateKeyEx(HKEY_CLASSES_ROOT, DSOFRAMERCTL_PROGID, 0,
-            NULL, 0, KEY_WRITE, NULL, &hk, NULL) == ERROR_SUCCESS)
+            nullptr, 0, KEY_WRITE, nullptr, &hk, nullptr) == ERROR_SUCCESS)
     {
         // TODO: Unicode
         lstrcpy(szbuffer, DSOFRAMERCTL_FULLNAME);
 
-        RegSetValueEx(hk, NULL, 0, REG_SZ, (BYTE *)szbuffer, lstrlen(szbuffer));
+        RegSetValueEx(hk, nullptr, 0, REG_SZ, (BYTE *)szbuffer, lstrlen(szbuffer));
 
         if (RegCreateKeyEx(hk, _T("CLSID"), 0,
-                NULL, 0, KEY_WRITE, NULL, &hk2, NULL) == ERROR_SUCCESS)
+                nullptr, 0, KEY_WRITE, nullptr, &hk2, nullptr) == ERROR_SUCCESS)
         {
             // TODO: Unicode
             lstrcpy(szbuffer, DSOFRAMERCTL_CLSIDSTR);
 
             // TODO: Unicode
-            RegSetValueEx(hk2, NULL, 0, REG_SZ, (BYTE *)szbuffer, lstrlen(szbuffer));
+            RegSetValueEx(hk2, nullptr, 0, REG_SZ, (BYTE *)szbuffer, lstrlen(szbuffer));
             
             RegCloseKey(hk2);
         }
@@ -369,7 +369,7 @@ static HRESULT RegRecursiveDeleteKey(HKEY hkParent, LPCSTR pszSubKey)
     // Enumerate all of the decendents of this child...
     dwsize = 510;
 
-    while (RegEnumKeyEx(hk, 0, szbuffer, &dwsize, NULL, NULL, NULL, &time) == ERROR_SUCCESS)
+    while (RegEnumKeyEx(hk, 0, szbuffer, &dwsize, nullptr, nullptr, nullptr, &time) == ERROR_SUCCESS)
     {
         // If there are any sub-folders, delete them first (to make NT happy)...
         hr = RegRecursiveDeleteKey(hk, szbuffer);
