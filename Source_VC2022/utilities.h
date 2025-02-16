@@ -122,7 +122,7 @@ STDAPI DsoGetOleInsertObjectFromUser(HWND hwndOwner, LPCWSTR pwzTitle, DWORD dwF
 
 #define RETURN_ON_FAILURE(x)    if (FAILED(x)) return (x)
 #define GOTO_ON_FAILURE(x, lbl) if (FAILED(x)) goto lbl
-#define CHECK_NULL_RETURN(v, e) if ((v) == reinterpret_cast<DWORD>(nullptr)) return (e)
+#define CHECK_NULL_RETURN(v, e) if ((v) == NULL) return (e)
 
 #define SAFE_ADDREF_INTERFACE     if (x) { (x)->AddRef(); }
 #define SAFE_RELEASE_INTERFACE(x) if (x) { (x)->Release(); (x) = nullptr; }
@@ -159,22 +159,23 @@ BOOL       __fastcall DsoPVarBoolFromPVar(VARIANT* px, BOOL fdef);
 
 #define TRACE1(sz, arg1) { \
     TCHAR ach[1024]; \
-    wsprintf(ach, (sz), (arg1)); \
+    StringCchPrintf(ach, ARRAYSIZE(ach), (sz), (arg1)); \
     ODS(ach); }
 
 #define TRACE2(sz, arg1, arg2) { \
     TCHAR ach[1024]; \
-    wsprintf(ach, (sz), (arg1), (arg2)); \
+    StringCchPrintf(ach, ARRAYSIZE(ach), (sz), (arg1), (arg2)); \
     ODS(ach); }
 
 #define TRACE3(sz, arg1, arg2, arg3) { \
     TCHAR ach[1024]; \
-    wsprintf(ach, (sz), (arg1), (arg2), (arg3)); \
+    StringCchPrintf(ach, ARRAYSIZE(ach), (sz), (arg1), (arg2), (arg3)); \
     ODS(ach); }
 
 #define TRACE_LPRECT(sz, lprc) { \
     TCHAR ach[1024]; \
-    wsprintf(ach, _T("RECT %s - left=%d, top=%d, right=%d, bottom=%d\n"), \
+    StringCchPrintf(ach, ARRAYSIZE(ach), \
+        _T("RECT %s - left=%d, top=%d, right=%d, bottom=%d\n"), \
         (sz), (lprc)->left, (lprc)->top, (lprc)->right, (lprc)->bottom); \
     ODS(ach); }
 
@@ -238,3 +239,10 @@ friend class X##localClass;
         METHOD_PROLOGUE(theClass, localClass) \
         return pThis->QueryInterface(iid, ppvObj); \
     }
+
+////////////////////////////////////////////////////////////////////////
+// CUSTOM BY PROF79
+//
+size_t MyStringCchLength(LPCTSTR pctsz);
+size_t MyStringCchLengthA(LPCSTR pctsz);
+size_t MyStringCchLengthW(LPCWSTR pcwsz);

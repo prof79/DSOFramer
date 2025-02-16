@@ -1702,7 +1702,7 @@ STDMETHODIMP CDsoDocObject::CreateObjectStorage(REFCLSID rclsid)
     // We make a fake object storage name...
     ulid = ((rclsid.Data1) | GetTickCount64());
 
-    StringCbPrintf(szbuf, 256 * sizeof(TCHAR), _T("OLEDocument%llX"), ulid);
+    StringCchPrintf(szbuf, ARRAYSIZE(szbuf), _T("OLEDocument%llX"), ulid);
 
     if (!(pwszName = DsoConvertToLPWSTR(szbuf)))
     {
@@ -1829,9 +1829,16 @@ STDMETHODIMP CDsoDocObject::SaveDocToFile(LPWSTR pwszFullName, BOOL fKeepLock)
 
     IPersistFile *pipfile = nullptr;
 
+    size_t cchwszFullName = 0;
+    size_t cchwszSourceFile = 0;
+
+    cchwszFullName = MyStringCchLengthW(pwszFullName);
+    cchwszSourceFile = MyStringCchLengthW(m_pwszSourceFile);
+
     BOOL fSameAsOpen = ((m_pwszSourceFile) &&
-                        DsoCompareStringsEx(pwszFullName, lstrlenW(pwszFullName),
-                        m_pwszSourceFile, lstrlenW(m_pwszSourceFile)) == CSTR_EQUAL);
+                            DsoCompareStringsEx(pwszFullName, cchwszFullName,
+                                m_pwszSourceFile, cchwszSourceFile)
+                            == CSTR_EQUAL);
 
     if (SUCCEEDED(hr = m_pole->QueryInterface(IID_IPersistFile, (void **)&pipfile)))
     {
@@ -1849,9 +1856,14 @@ STDMETHODIMP CDsoDocObject::SaveDocToFile(LPWSTR pwszFullName, BOOL fKeepLock)
 
             if ((fSameAsOpen) && (pwszWordCurFile))
             {
+                size_t cchwszWordCurFile = 0;
+
+                cchwszFullName = MyStringCchLengthW(pwszFullName);
+                cchwszWordCurFile = MyStringCchLengthW(pwszWordCurFile);
+                
                 // Check again if Word thinks the file is the same as we do...
-                fSameAsOpen = (DsoCompareStringsEx(pwszFullName, lstrlenW(pwszFullName),
-                                pwszWordCurFile, lstrlenW(pwszWordCurFile)) == CSTR_EQUAL);
+                fSameAsOpen = (DsoCompareStringsEx(pwszFullName, cchwszFullName,
+                                pwszWordCurFile, cchwszWordCurFile) == CSTR_EQUAL);
 
                 if (fSameAsOpen)
                 {
@@ -1909,7 +1921,7 @@ STDMETHODIMP CDsoDocObject::ValidateDocObjectServer(REFCLSID rclsid)
 {
     HRESULT hr = DSO_E_INVALIDSERVER;
 
-    CHAR  szKeyCheck[256];
+    TCHAR szKeyCheck[256];
     LPSTR pszClsid;
     HKEY  hkey;
 
@@ -1925,8 +1937,12 @@ STDMETHODIMP CDsoDocObject::ValidateDocObjectServer(REFCLSID rclsid)
 
     if (pszClsid)
     {
-        // TODO: wsprintf
-        wsprintf(szKeyCheck, _T("CLSID\\%s\\DocObject"), pszClsid);
+        StringCchPrintf(
+            szKeyCheck,
+            ARRAYSIZE(szKeyCheck),
+            _T("CLSID\\%s\\DocObject"),
+            pszClsid
+        );
 
         if (RegOpenKeyEx(HKEY_CLASSES_ROOT, szKeyCheck, 0, KEY_READ, &hkey) == ERROR_SUCCESS)
         {
@@ -1957,8 +1973,8 @@ STDMETHODIMP_(BOOL) CDsoDocObject::GetDocumentTypeAndFileExtension(WCHAR **ppwsz
     LPWSTR pwszType = nullptr;
     LPSTR pszType = nullptr;
     LPSTR pszClsid;
-    CHAR szkey[255];
-    CHAR szbuf[255];
+    TCHAR szkey[255];
+    TCHAR szbuf[255];
     HKEY hk;
 
     if ((ppwszFileType == nullptr) && (ppwszFileExt == nullptr))
@@ -1973,8 +1989,12 @@ STDMETHODIMP_(BOOL) CDsoDocObject::GetDocumentTypeAndFileExtension(WCHAR **ppwsz
         return FALSE;
     }
 
-    // TODO: wsprintf
-    wsprintf(szkey, _T("CLSID\\%s\\DefaultExtension"), pszClsid);
+    StringCchPrintf(
+        szkey,
+        ARRAYSIZE(szkey),
+        _T("CLSID\\%s\\DefaultExtension"),
+        pszClsid
+    );
 
     if (RegOpenKeyEx(HKEY_CLASSES_ROOT, szkey, 0, KEY_READ, &hk) == ERROR_SUCCESS)
     {
@@ -1999,16 +2019,14 @@ STDMETHODIMP_(BOOL) CDsoDocObject::GetDocumentTypeAndFileExtension(WCHAR **ppwsz
         }
         else
         {
-            // TODO: Unicode
-            lstrcpy(szbuf, _T(".ole"));
+            StringCchCopy(szbuf, ARRAYSIZE(szbuf), _T(".ole"));
         }
 
         RegCloseKey(hk);
     }
     else
     {
-        // TODO: Unicode
-        lstrcpy(szbuf, _T(".ole"));
+        StringCchCopy(szbuf, ARRAYSIZE(szbuf), _T(".ole"));
     }
 
     pwszExt = DsoConvertToLPWSTR(szbuf);
@@ -2020,25 +2038,31 @@ STDMETHODIMP_(BOOL) CDsoDocObject::GetDocumentTypeAndFileExtension(WCHAR **ppwsz
 
     if (ppwszFileType)
     {
-        ULONG cb1, cb2;
+        size_t cb1 = 0;
+        size_t cb2 = 0;
+
         LPWSTR pwszCombined;
-        CHAR szUnknownType[255];
+        TCHAR szUnknownType[255];
 
         // TODO: How/what?
         if (!(*pszType))
         {
             szUnknownType[0] = _T('\0');
 
-            // TODO: wsprintf
-            wsprintf(szUnknownType, _T("Native Document (*%s)"), szbuf);
-            
+            StringCchPrintf(
+                szUnknownType,
+                ARRAYSIZE(szUnknownType),
+                _T("Native Document (*%s)"),
+                szbuf
+            );
+
             pszType = szUnknownType;
         }
 
         pwszType = DsoConvertToLPWSTR(pszType);
 
-        cb1 = lstrlenW(pwszExt);
-        cb2 = lstrlenW(pwszType);
+        cb1 = MyStringCchLengthW(pwszExt);
+        cb2 = MyStringCchLengthW(pwszType);
 
         pwszCombined = (LPWSTR)DsoMemAlloc(((cb1 + cb2 + 4) * sizeof(WCHAR)));
 
@@ -2086,7 +2110,11 @@ STDMETHODIMP_(BOOL) CDsoDocObject::ValidateFileExtension(WCHAR *pwszFile, WCHAR 
     LPWSTR pwszExt = nullptr;
     DWORD  dw;
 
-    if ((pwszFile) && (dw = lstrlenW(pwszFile)) && (ppwszOut))
+    size_t cchwszFile = 0;
+
+    cchwszFile = MyStringCchLengthW(pwszFile);
+
+    if ((pwszFile) && (dw = cchwszFile) && (ppwszOut))
     {
         *ppwszOut = nullptr;
 
@@ -2308,7 +2336,7 @@ STDMETHODIMP_(IUnknown *) CDsoDocObject::CreateIPPBindResource()
     DBPROP            rdbp[4];
     BSTR              bstrLock;
     DWORD             dw = 256;
-    CHAR              szUserName[256];
+    TCHAR             szUserName[256];
 
     if (FAILED(CoCreateInstance(CLSID_MSDAIPP_BINDER, nullptr,
                 CLSCTX_INPROC, IID_IDBProperties, (void **)&pdbprops)))
@@ -2749,7 +2777,11 @@ STDMETHODIMP_(DWORD) CDsoDocObject::CalcDocNameIndex(LPCWSTR pwszPath)
 {
     DWORD cblen, idx = 0;
 
-    if ((pwszPath) && ((cblen = lstrlenW(pwszPath)) > 1))
+    size_t cchwszPath = 0;
+
+    cchwszPath = MyStringCchLengthW(pwszPath);
+
+    if ((pwszPath) && ((cblen = cchwszPath) > 1))
     {
         for (idx = cblen; idx > 0; --idx)
         {
@@ -3754,7 +3786,7 @@ STDMETHODIMP CDsoDocObject::HrSetDataInObject(VARIANT *pvtType, VARIANT *pvtInpu
     FORMATETC ftc;
     STGMEDIUM stgm;
     LONG cfType;
-    ULONG ulSize;
+    size_t ulSize;
     BOOL fIsArrayData = FALSE;
     BOOL fCleanupString = FALSE;
 
@@ -3795,7 +3827,7 @@ STDMETHODIMP CDsoDocObject::HrSetDataInObject(VARIANT *pvtType, VARIANT *pvtInpu
             
             fCleanupString = TRUE;
             
-            ulSize = lstrlen((LPSTR)prawdata);
+            ulSize = MyStringCchLengthA((LPSTR)prawdata);
         }
         else
         {

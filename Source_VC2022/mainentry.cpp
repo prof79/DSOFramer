@@ -161,7 +161,12 @@ STDAPI DllRegisterServer()
 
     // Setup the CLSID. This is the most important. If there is a critical failure,
     // we will set HR = GetLastError and return...
-    StringCbPrintf(szbuffer, sizeof(szbuffer) / sizeof(TCHAR), _T("CLSID\\%s"), DSOFRAMERCTL_CLSIDSTR);
+    StringCchPrintf(
+        szbuffer,
+        ARRAYSIZE(szbuffer),
+        _T("CLSID\\%s"),
+        DSOFRAMERCTL_CLSIDSTR
+    );
 
     if ((dwret = RegCreateKeyEx(
                     HKEY_CLASSES_ROOT,
@@ -172,20 +177,18 @@ STDAPI DllRegisterServer()
         return HRESULT_FROM_WIN32(dwret);
     }
 
-    // TODO: Unicode
-    lstrcpy(szbuffer, DSOFRAMERCTL_SHORTNAME);
+    StringCchCopy(szbuffer, ARRAYSIZE(szbuffer), DSOFRAMERCTL_SHORTNAME);
 
-    RegSetValueEx(hk, nullptr, 0, REG_SZ, (BYTE *)szbuffer, lstrlen(szbuffer));
+    RegSetValueEx(hk, nullptr, 0, REG_SZ, (BYTE *)szbuffer, MyStringCchLength(szbuffer));
 
     // Setup the InprocServer32 key...
     dwret = RegCreateKeyEx(hk, _T("InprocServer32"), 0, nullptr, 0, KEY_WRITE, nullptr, &hk2, nullptr);
 
     if (dwret == ERROR_SUCCESS)
     {
-        // TODO: Unicode
-        lstrcpy(szbuffer, _T("Apartment"));
+        StringCchCopy(szbuffer, ARRAYSIZE(szbuffer), _T("Apartment"));
 
-        RegSetValueEx(hk2, _T("ThreadingModel"), 0, REG_SZ, (BYTE *)szbuffer, lstrlen(szbuffer));
+        RegSetValueEx(hk2, _T("ThreadingModel"), 0, REG_SZ, (BYTE *)szbuffer, MyStringCchLength(szbuffer));
 
         // We call a wrapper function for this setting since the path should be
         // stored in Unicode to handle non-ANSI file path names on some systems.
@@ -203,10 +206,9 @@ STDAPI DllRegisterServer()
 
         if (dwret == ERROR_SUCCESS)
         {
-            // TODO: Unicode
-            lstrcpy(szbuffer, DSOFRAMERCTL_PROGID);
+            StringCchCopy(szbuffer, ARRAYSIZE(szbuffer), DSOFRAMERCTL_PROGID);
 
-            RegSetValueEx(hk2, nullptr, 0, REG_SZ, (BYTE *)szbuffer, lstrlen(szbuffer));
+            RegSetValueEx(hk2, nullptr, 0, REG_SZ, (BYTE *)szbuffer, MyStringCchLength(szbuffer));
 
             RegCloseKey(hk2);
         }
@@ -253,11 +255,10 @@ STDAPI DllRegisterServer()
 
         if (dwret == ERROR_SUCCESS)
         {
-            // TODO: Unicode
-            lstrcpy(szbuffer, DSOFRAMERCTL_TLIBSTR);
+            StringCchCopy(szbuffer, ARRAYSIZE(szbuffer), DSOFRAMERCTL_TLIBSTR);
 
-            // TODO: Unicode/BYTE!!!, lstrlen
-            RegSetValueEx(hk2, nullptr, 0, REG_SZ, (BYTE *)szbuffer, lstrlen(szbuffer));
+            // TODO: Unicode/BYTE!!!
+            RegSetValueEx(hk2, nullptr, 0, REG_SZ, (BYTE *)szbuffer, MyStringCchLength(szbuffer));
             
             RegCloseKey(hk2);
         }
@@ -266,10 +267,10 @@ STDAPI DllRegisterServer()
 
         if (dwret == ERROR_SUCCESS)
         {
-            // TODO: Unicode
-            lstrcpy(szbuffer, DSOFRAMERCTL_VERSIONSTR);
+            StringCchCopy(szbuffer, ARRAYSIZE(szbuffer), DSOFRAMERCTL_VERSIONSTR);
 
-            RegSetValueEx(hk2, nullptr, 0, REG_SZ, (BYTE *)szbuffer, lstrlen(szbuffer));
+            // TODO: Unicode/BYTE!!!
+            RegSetValueEx(hk2, nullptr, 0, REG_SZ, (BYTE *)szbuffer, MyStringCchLength(szbuffer));
             
             RegCloseKey(hk2);
         }
@@ -278,10 +279,10 @@ STDAPI DllRegisterServer()
 
         if (dwret == ERROR_SUCCESS)
         {
-            // TODO: Unicode
-            lstrcpy(szbuffer, _T("131473"));
+            StringCchCopy(szbuffer, ARRAYSIZE(szbuffer), _T("131473"));
 
-            RegSetValueEx(hk2, nullptr, 0, REG_SZ, (BYTE *)szbuffer, lstrlen(szbuffer));
+            // TODO: Unicode/BYTE!!!
+            RegSetValueEx(hk2, nullptr, 0, REG_SZ, (BYTE *)szbuffer, MyStringCchLength(szbuffer));
             
             RegCloseKey(hk2);
         }
@@ -290,11 +291,10 @@ STDAPI DllRegisterServer()
 
         if (dwret == ERROR_SUCCESS)
         {
-            // TODO: Unicode
-            lstrcpy(szbuffer, _T("3,1,32,1"));
+            StringCchCopy(szbuffer, ARRAYSIZE(szbuffer), _T("3,1,32,1"));
 
-            // TODO: Unicode
-            RegSetValueEx(hk2, nullptr, 0, REG_SZ, (BYTE *)szbuffer, lstrlen(szbuffer));
+            // TODO: Unicode/BYTE!!!
+            RegSetValueEx(hk2, nullptr, 0, REG_SZ, (BYTE *)szbuffer, MyStringCchLength(szbuffer));
 
             RegCloseKey(hk2);
         }
@@ -311,19 +311,18 @@ STDAPI DllRegisterServer()
     if (RegCreateKeyEx(HKEY_CLASSES_ROOT, DSOFRAMERCTL_PROGID, 0,
             nullptr, 0, KEY_WRITE, nullptr, &hk, nullptr) == ERROR_SUCCESS)
     {
-        // TODO: Unicode
-        lstrcpy(szbuffer, DSOFRAMERCTL_FULLNAME);
+        StringCchCopy(szbuffer, ARRAYSIZE(szbuffer), DSOFRAMERCTL_FULLNAME);
 
-        RegSetValueEx(hk, nullptr, 0, REG_SZ, (BYTE *)szbuffer, lstrlen(szbuffer));
+        // TODO: Unicode/BYTE!!!
+        RegSetValueEx(hk, nullptr, 0, REG_SZ, (BYTE *)szbuffer, MyStringCchLength(szbuffer));
 
         if (RegCreateKeyEx(hk, _T("CLSID"), 0,
                 nullptr, 0, KEY_WRITE, nullptr, &hk2, nullptr) == ERROR_SUCCESS)
         {
-            // TODO: Unicode
-            lstrcpy(szbuffer, DSOFRAMERCTL_CLSIDSTR);
+            StringCchCopy(szbuffer, ARRAYSIZE(szbuffer), DSOFRAMERCTL_CLSIDSTR);
 
-            // TODO: Unicode
-            RegSetValueEx(hk2, nullptr, 0, REG_SZ, (BYTE *)szbuffer, lstrlen(szbuffer));
+            // TODO: Unicode/BYTE!!!
+            RegSetValueEx(hk2, nullptr, 0, REG_SZ, (BYTE *)szbuffer, MyStringCchLength(szbuffer));
             
             RegCloseKey(hk2);
         }
@@ -413,8 +412,18 @@ STDAPI DllUnregisterServer()
     TCHAR dsoframerctl_clsidstr_path[bufsize];
     TCHAR dsoframerctl_tlibstr_path[bufsize];
 
-    StringCbPrintf(dsoframerctl_clsidstr_path, bufsize * sizeof(TCHAR), _T("CLSID\\%s"), DSOFRAMERCTL_CLSIDSTR);
-    StringCbPrintf(dsoframerctl_tlibstr_path, bufsize * sizeof(TCHAR), _T("TypeLib\\%s"), DSOFRAMERCTL_TLIBSTR);
+    StringCchPrintf(
+        dsoframerctl_clsidstr_path,
+        ARRAYSIZE(dsoframerctl_clsidstr_path),
+        _T("CLSID\\%s"),
+        DSOFRAMERCTL_CLSIDSTR
+    );
+    StringCchPrintf(
+        dsoframerctl_tlibstr_path,
+        ARRAYSIZE(dsoframerctl_tlibstr_path),
+        _T("TypeLib\\%s"),
+        DSOFRAMERCTL_TLIBSTR
+    );
 
     hr = RegRecursiveDeleteKey(HKEY_CLASSES_ROOT, dsoframerctl_clsidstr_path);
     

@@ -443,7 +443,7 @@ public:
     STDMETHODIMP_(void)    OnPaletteChanged(HWND hwndPalChg);
     STDMETHODIMP_(void)    OnSyncPaint();
     STDMETHODIMP_(void)    OnWindowEnable(BOOL fEnable){TRACE1(_T("CDsoFramerControl::OnWindowEnable(%d)\n"), fEnable);}
-    STDMETHODIMP_(BOOL)    OnSysCommandMenu(CHAR ch);
+    STDMETHODIMP_(BOOL)    OnSysCommandMenu(TCHAR ch);
 
     STDMETHODIMP_(HMENU)   GetActivePopupMenu();
     STDMETHODIMP_(BOOL)    FAlertUser(HRESULT hr, LPWSTR pwsFileName);
@@ -606,7 +606,7 @@ private:
     WORD                    m_wSelMenuItem = (WORD) - 1u;            // Which item (if any) is selected
     WORD                    m_cMenuItems = (WORD) 0u;                // Count of items on menu bar
     RECT                    m_rgrcMenuItems[DSO_MAX_MENUITEMS]{};   // Menu bar items
-    CHAR                    m_rgchMenuAccel[DSO_MAX_MENUITEMS]{};   // Menu bar accelerators
+    TCHAR                   m_rgchMenuAccel[DSO_MAX_MENUITEMS]{};   // Menu bar accelerators
     LPWSTR                  m_pwszHostName = nullptr;               // Custom name for SetHostNames
 
     class CDsoFrameHookManager*  m_pHookManager = nullptr;          // Frame Window Hook Manager Class

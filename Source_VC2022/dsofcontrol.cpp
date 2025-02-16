@@ -530,7 +530,7 @@ STDMETHODIMP_(void) CDsoFramerControl::OnDraw(DWORD dvAspect, HDC hdcDraw, LPREC
         else
         {
             HMENU hCurMenu;
-            CHAR szbuf[DSO_MAX_MENUNAME_LENGTH];
+            TCHAR szbuf[DSO_MAX_MENUNAME_LENGTH];
             UINT i, yTop, yBottom, xLast, xNext;
             SIZE ptMItem; RECT rcMDraw;
             BOOL fSelected;
@@ -570,18 +570,22 @@ STDMETHODIMP_(void) CDsoFramerControl::OnDraw(DWORD dvAspect, HDC hdcDraw, LPREC
                 // determine which menu item the user is over...
                 for (i = 0; i < m_cMenuItems; ++i)
                 {
+                    size_t cchszbuf = 0;
+
                     szbuf[0] = _T('\0');
 
                     if (i == 0)
                     {
-                        lstrcpy(szbuf, _T("&File"));
+                        StringCchCopy(szbuf, ARRAYSIZE(szbuf), _T("&File"));
                     }
                     else
                     {
                         GetMenuString(hCurMenu, i, szbuf, DSO_MAX_MENUNAME_LENGTH, MF_BYPOSITION);
                     }
 
-                    GetTextExtentPoint32(hdcDraw, szbuf, lstrlen(szbuf), &ptMItem);
+                    cchszbuf = MyStringCchLength(szbuf);
+
+                    GetTextExtentPoint32(hdcDraw, szbuf, cchszbuf, &ptMItem);
 
                     xNext = (xLast + ptMItem.cx + 2);
 
@@ -611,7 +615,9 @@ STDMETHODIMP_(void) CDsoFramerControl::OnDraw(DWORD dvAspect, HDC hdcDraw, LPREC
 
                     rcMDraw.left += 4;
                     
-                    DrawText(hdcDraw, szbuf, lstrlen(szbuf), &rcMDraw, dwDTFlags);
+                    cchszbuf = MyStringCchLength(szbuf);
+
+                    DrawText(hdcDraw, szbuf, cchszbuf, &rcMDraw, dwDTFlags);
 
                     if (fSelected)
                     {
@@ -1328,7 +1334,7 @@ STDMETHODIMP_(void) CDsoFramerControl::EnableDropFile(BOOL fEnable)
 STDMETHODIMP_(void) CDsoFramerControl::OnDropFile(HDROP hdrpFile)
 {
     DWORD cbItems;
-    CHAR szFileDrop[MAX_PATH];
+    TCHAR szFileDrop[MAX_PATH];
     VARIANT vtFile;
 
     ODS(_T("CDsoFramerControl::OnDropFile()\n"));
@@ -1792,7 +1798,7 @@ STDMETHODIMP_(void) CDsoFramerControl::OnPaletteChanged(HWND hwndPalChg)
 //
 //  Checks for menu shortcut keys when ui active.
 //
-STDMETHODIMP_(BOOL) CDsoFramerControl::OnSysCommandMenu(CHAR ch)
+STDMETHODIMP_(BOOL) CDsoFramerControl::OnSysCommandMenu(TCHAR ch)
 {
     if (m_fUIActive)
     {
@@ -4869,7 +4875,7 @@ STDMETHODIMP CDsoFramerControl::XDsoDocObjectSite::SysMenuCommand(UINT uiCharCod
     if ((uiCharCode) && (pThis->m_fShowMenuBar) && !(pThis->m_fDisableMenuAccel))
     {
         UINT i;
-        CHAR *pch;
+        TCHAR *pch;
 
         // Loop all the menu items and check against their accelerators...
         for (i = 0; i < DSO_MAX_MENUITEMS; i++)
@@ -4878,6 +4884,7 @@ STDMETHODIMP CDsoFramerControl::XDsoDocObjectSite::SysMenuCommand(UINT uiCharCod
 
             if (*pch)
             {
+                // TODO: Potential Unicode troubles ahead
                 if ((*pch != 0xFF) && ((UINT)(*pch) == ASCII_LOWERCASE(uiCharCode)))
                 {
                     // Found one that match, so fake mouse move and button down/up to run click code...
