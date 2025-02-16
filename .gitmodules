@@ -1,0 +1,6 @@
+[submodule "Samples/DSOFramer.DemoAppWPF"]
+	path = Samples/DSOFramer.DemoAppWPF
+	url = https://github.com/prof79/DSOFramer.DemoAppWPF
+[submodule "Samples/DSOFramer.DemoAppForms"]
+	path = Samples/DSOFramer.DemoAppForms
+	url = https://github.com/prof79/DSOFramer.DemoAppForms
