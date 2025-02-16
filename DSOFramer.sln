@@ -3,7 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "dsoframer", "Source_VC2022\dsoframer.vcxproj", "{C0BF3C7E-1FAD-45D5-8F8C-0F75BCBFAC74}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "DSOFramer", "Source_VC2022\dsoframer.vcxproj", "{C0BF3C7E-1FAD-45D5-8F8C-0F75BCBFAC74}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DSOFramer.DemoAppForms", "Samples\DSOFramer.DemoAppForms\src\DSOFramer.DemoAppForms\DSOFramer.DemoAppForms.csproj", "{164122E5-2D51-482E-B1E0-2DD4EF67A0AB}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DSOFramer.DemoAppWPF", "Samples\DSOFramer.DemoAppWPF\DSOFramer.DemoAppWPF\DSOFramer.DemoAppWPF.csproj", "{B83C3A8B-2861-4180-9D38-E08B175D52A0}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,8 +25,27 @@ Global
 		{C0BF3C7E-1FAD-45D5-8F8C-0F75BCBFAC74}.Release|Any CPU.Build.0 = Release|Win32
 		{C0BF3C7E-1FAD-45D5-8F8C-0F75BCBFAC74}.Release|x86.ActiveCfg = Release|Win32
 		{C0BF3C7E-1FAD-45D5-8F8C-0F75BCBFAC74}.Release|x86.Build.0 = Release|Win32
+		{164122E5-2D51-482E-B1E0-2DD4EF67A0AB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{164122E5-2D51-482E-B1E0-2DD4EF67A0AB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{164122E5-2D51-482E-B1E0-2DD4EF67A0AB}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{164122E5-2D51-482E-B1E0-2DD4EF67A0AB}.Debug|x86.Build.0 = Debug|Any CPU
+		{164122E5-2D51-482E-B1E0-2DD4EF67A0AB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{164122E5-2D51-482E-B1E0-2DD4EF67A0AB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{164122E5-2D51-482E-B1E0-2DD4EF67A0AB}.Release|x86.ActiveCfg = Release|Any CPU
+		{164122E5-2D51-482E-B1E0-2DD4EF67A0AB}.Release|x86.Build.0 = Release|Any CPU
+		{B83C3A8B-2861-4180-9D38-E08B175D52A0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B83C3A8B-2861-4180-9D38-E08B175D52A0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B83C3A8B-2861-4180-9D38-E08B175D52A0}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{B83C3A8B-2861-4180-9D38-E08B175D52A0}.Debug|x86.Build.0 = Debug|Any CPU
+		{B83C3A8B-2861-4180-9D38-E08B175D52A0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B83C3A8B-2861-4180-9D38-E08B175D52A0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B83C3A8B-2861-4180-9D38-E08B175D52A0}.Release|x86.ActiveCfg = Release|Any CPU
+		{B83C3A8B-2861-4180-9D38-E08B175D52A0}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {03121D7B-D366-411F-9DB8-7EA17B613114}
 	EndGlobalSection
 EndGlobal

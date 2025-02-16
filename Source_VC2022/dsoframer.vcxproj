@@ -12,7 +12,7 @@
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>
-    <ProjectName>dsoframer</ProjectName>
+    <ProjectName>DSOFramer</ProjectName>
     <ProjectGuid>{C0BF3C7E-1FAD-45D5-8F8C-0F75BCBFAC74}</ProjectGuid>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
