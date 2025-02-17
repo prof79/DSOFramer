@@ -398,7 +398,7 @@ STDMETHODIMP CDsoDocObject::CreateFromFile(LPWSTR pwszFile, REFCLSID rclsid, LPB
         return E_INVALIDARG;
     }
 
-    TRACE2(_T("CDsoDocObject::CreateFromFile(%S, %x)\n"), pwszFile, pbndopts->grfMode);
+    TRACE2(_T("CDsoDocObject::CreateFromFile(%s, %x)\n"), pwszFile, pbndopts->grfMode);
 
     // First. we'll try to find the associated CLSID for the given file,
     // and then set it to the alternate if not found. If we don't have a
@@ -562,7 +562,7 @@ STDMETHODIMP CDsoDocObject::CreateFromURL(LPWSTR pwszUrlFile, REFCLSID rclsid, L
         return E_INVALIDARG;
     }
 
-    TRACE2(_T("CDsoDocObject::CreateFromURL(%S, %x)\n"), pwszUrlFile, pbndopts->grfMode);
+    TRACE2(_T("CDsoDocObject::CreateFromURL(%s, %x)\n"), pwszUrlFile, pbndopts->grfMode);
 
     // Get a temp path for the download...
     if (!GetTempPathForURLDownload(pwszUrlFile, &pwszTempFile))
@@ -963,7 +963,7 @@ STDMETHODIMP CDsoDocObject::SaveToFile(LPWSTR pwszFile, BOOL fOverwriteFile)
     BOOL          fDoOverwriteOps = FALSE;
     BOOL          fFileOpSuccess = FALSE;
 
-    TRACE2(_T("CDsoDocObject::SaveToFile(%S, %d)\n"), ((pwszFile) ? pwszFile : L"[Default]"), fOverwriteFile);
+    TRACE2(_T("CDsoDocObject::SaveToFile(%s, %d)\n"), ((pwszFile) ? pwszFile : L"[Default]"), fOverwriteFile);
 
     CHECK_NULL_RETURN(m_pole, hr);
 
@@ -1688,7 +1688,7 @@ STDMETHODIMP CDsoDocObject::CreateObjectStorage(REFCLSID rclsid)
 
     LPWSTR pwszName;
     ULONGLONG ulid;
-    TCHAR szbuf[256];
+    WCHAR szbuf[256];
 
     if ((!m_pstgroot))
     {
@@ -1704,16 +1704,25 @@ STDMETHODIMP CDsoDocObject::CreateObjectStorage(REFCLSID rclsid)
 
     StringCchPrintf(szbuf, ARRAYSIZE(szbuf), _T("OLEDocument%llX"), ulid);
 
+#ifndef UNICODE
     if (!(pwszName = DsoConvertToLPWSTR(szbuf)))
     {
         return E_OUTOFMEMORY;
     }
+#else
+    if (!(pwszName = szbuf))
+    {
+        return E_OUTOFMEMORY;
+    }
+#endif
 
     // Create the sub-storage...
     hr = m_pstgroot->CreateStorage(pwszName,
         STGM_TRANSACTED | STGM_READWRITE | STGM_SHARE_EXCLUSIVE, 0, 0, &m_pstgfile);
 
+#ifndef UNICODE
     DsoMemFree(pwszName);
+#endif
 
     if (FAILED(hr))
     {
@@ -1721,14 +1730,20 @@ STDMETHODIMP CDsoDocObject::CreateObjectStorage(REFCLSID rclsid)
     }
 
     // We'll also create a stream for OLE view settings (non-critical)...
+#ifndef UNICODE
     pwszName = DsoConvertToLPWSTR(szbuf);
+#else
+    pwszName = szbuf;
+#endif
 
     if (pwszName)
     {
         m_pstgroot->CreateStream(pwszName,
             STGM_DIRECT | STGM_READWRITE | STGM_SHARE_EXCLUSIVE, 0, 0, &m_pstmview);
 
+#ifndef UNICODE
         DsoMemFree(pwszName);
+#endif
     }
 
     // Finally, write out the CLSID for the new substorage...
@@ -1922,7 +1937,7 @@ STDMETHODIMP CDsoDocObject::ValidateDocObjectServer(REFCLSID rclsid)
     HRESULT hr = DSO_E_INVALIDSERVER;
 
     TCHAR szKeyCheck[256];
-    LPSTR pszClsid;
+    LPTSTR pszClsid;
     HKEY  hkey;
 
     // We don't handle MSHTML even though it is DocObject server. If you plan
@@ -1933,7 +1948,15 @@ STDMETHODIMP CDsoDocObject::ValidateDocObjectServer(REFCLSID rclsid)
     }
 
     // Convert the CLSID to a string and check for DocObject sub key...
+#ifdef UNICODE
+
+    StringFromCLSID(rclsid, &pszClsid);
+
+#else
+
     pszClsid = DsoCLSIDtoLPSTR(rclsid);
+
+#endif
 
     if (pszClsid)
     {
@@ -1951,7 +1974,9 @@ STDMETHODIMP CDsoDocObject::ValidateDocObjectServer(REFCLSID rclsid)
             RegCloseKey(hkey);
         }
 
+#ifndef UNICODE
         DsoMemFree(pszClsid);
+#endif
     }
     else
     {
@@ -1971,8 +1996,8 @@ STDMETHODIMP_(BOOL) CDsoDocObject::GetDocumentTypeAndFileExtension(WCHAR **ppwsz
     DWORD dwType, dwSize;
     LPWSTR pwszExt = nullptr;
     LPWSTR pwszType = nullptr;
-    LPSTR pszType = nullptr;
-    LPSTR pszClsid;
+    LPTSTR pszType = nullptr;
+    LPTSTR pszClsid = nullptr;
     TCHAR szkey[255];
     TCHAR szbuf[255];
     HKEY hk;
@@ -1982,7 +2007,15 @@ STDMETHODIMP_(BOOL) CDsoDocObject::GetDocumentTypeAndFileExtension(WCHAR **ppwsz
         return FALSE;
     }
 
+#ifdef UNICODE
+
+    StringFromCLSID(m_clsidObject, &pszClsid);
+
+#else
+
     pszClsid = DsoCLSIDtoLPSTR(m_clsidObject);
+
+#endif
 
     if (!pszClsid)
     {
@@ -2029,7 +2062,15 @@ STDMETHODIMP_(BOOL) CDsoDocObject::GetDocumentTypeAndFileExtension(WCHAR **ppwsz
         StringCchCopy(szbuf, ARRAYSIZE(szbuf), _T(".ole"));
     }
 
+#ifdef UNICODE
+
+    pwszExt = szbuf;
+
+#else
+
     pwszExt = DsoConvertToLPWSTR(szbuf);
+
+#endif
 
     if (ppwszFileExt)
     {
@@ -2059,7 +2100,11 @@ STDMETHODIMP_(BOOL) CDsoDocObject::GetDocumentTypeAndFileExtension(WCHAR **ppwsz
             pszType = szUnknownType;
         }
 
+#ifdef UNICODE
+        pwszType = pszType;
+#else
         pwszType = DsoConvertToLPWSTR(pszType);
+#endif
 
         cb1 = MyStringCchLengthW(pwszExt);
         cb2 = MyStringCchLengthW(pwszType);
@@ -2079,7 +2124,9 @@ STDMETHODIMP_(BOOL) CDsoDocObject::GetDocumentTypeAndFileExtension(WCHAR **ppwsz
             pwszCombined[cb2 + 2 + cb1] = L'\0';
             pwszCombined[cb2 + 3 + cb1] = L'\0';
 
+#ifndef UNICODE
             DsoMemFree(pwszType);
+#endif
         }
 
         *ppwszFileType = ((pwszCombined) ? pwszCombined : pwszType);
@@ -2344,7 +2391,11 @@ STDMETHODIMP_(IUnknown *) CDsoDocObject::CreateIPPBindResource()
         return nullptr;
     }
 
+#ifdef UNICODE
+    bstrLock = (GetUserName(szUserName, &dw) ? SysAllocString(szUserName) : nullptr);
+#else
     bstrLock = (GetUserName(szUserName, &dw) ? DsoConvertToBSTR(szUserName) : nullptr);
+#endif
 
     memset(rdbp, 0, sizeof(4 * sizeof(DBPROP)));
 
@@ -3642,7 +3693,6 @@ STDMETHODIMP CDsoDocObject::HrGetDataFromObject(VARIANT *pvtType, VARIANT *pvtOu
 
     IDataObject *pdo = nullptr;
     LPWSTR pwszTypeName;
-    LPSTR pszFormatName;
     SAFEARRAY *psa;
     
     VOID HUGEP *prawdata;
@@ -3662,11 +3712,24 @@ STDMETHODIMP CDsoDocObject::HrGetDataFromObject(VARIANT *pvtType, VARIANT *pvtOu
     // We take the name and find the right clipformat for the data type...
     pwszTypeName = LPWSTR_FROM_VARIANT(*pvtType);
 
-    if ((pwszTypeName) && (pszFormatName = DsoConvertToMBCS(pwszTypeName)))
+    if (pwszTypeName)
     {
-        cfType = RegisterClipboardFormat(pszFormatName);
+#ifdef UNICODE
 
-        DsoMemFree(pszFormatName);
+        cfType = RegisterClipboardFormat(pwszTypeName);
+
+#else
+        LPSTR pszFormatName;
+
+        pszFormatName = DsoConvertToMBCS(pwszTypeName);
+
+        if (pszFormatName)
+        {
+            cfType = RegisterClipboardFormat(pszFormatName);
+
+            DsoMemFree(pszFormatName);
+        }
+#endif
     }
     else
     {
@@ -3778,7 +3841,7 @@ STDMETHODIMP CDsoDocObject::HrSetDataInObject(VARIANT *pvtType, VARIANT *pvtInpu
 
     IDataObject *pdo = nullptr;
     LPWSTR pwszTypeName;
-    LPSTR pszFormatName;
+    LPTSTR pszFormatName;
     SAFEARRAY *psa;
     
     VOID HUGEP *prawdata;
@@ -3799,11 +3862,28 @@ STDMETHODIMP CDsoDocObject::HrSetDataInObject(VARIANT *pvtType, VARIANT *pvtInpu
     // Find the clipboard format for the given data type...
     pwszTypeName = LPWSTR_FROM_VARIANT(*pvtType);
 
-    if ((pwszTypeName) && (pszFormatName = DsoConvertToMBCS(pwszTypeName)))
+    if (pwszTypeName)
     {
+#ifdef UNICODE
+
+        pszFormatName = pwszTypeName;
+
         cfType = RegisterClipboardFormat(pszFormatName);
 
-        DsoMemFree(pszFormatName);
+#else
+        pszFormatName = DsoConvertToMBCS(pwszTypeName);
+
+        if (pszFormatName)
+        {
+            cfType = RegisterClipboardFormat(pszFormatName);
+
+            DsoMemFree(pszFormatName);
+        }
+        else
+        {
+            cfType = LONG_FROM_VARIANT(*pvtType, 0);
+        }
+#endif
     }
     else
     {

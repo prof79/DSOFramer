@@ -1247,8 +1247,8 @@ STDMETHODIMP_(void) CDsoFramerControl::OnToolbarAction(DWORD cmd)
 //
 STDMETHODIMP_(BOOL) CDsoFramerControl::FAlertUser(HRESULT hr, LPWSTR pwsFileName)
 {
-    LPSTR pszError = nullptr;
-    LPSTR pszTitle = nullptr;
+    LPTSTR pszError = nullptr;
+    LPTSTR pszTitle = nullptr;
     DWORD dwFlags  = MB_ICONINFORMATION|MB_SETFOREGROUND;
 
     switch (hr)
@@ -1334,7 +1334,7 @@ STDMETHODIMP_(void) CDsoFramerControl::EnableDropFile(BOOL fEnable)
 STDMETHODIMP_(void) CDsoFramerControl::OnDropFile(HDROP hdrpFile)
 {
     DWORD cbItems;
-    TCHAR szFileDrop[MAX_PATH];
+    WCHAR szFileDrop[MAX_PATH];
     VARIANT vtFile;
 
     ODS(_T("CDsoFramerControl::OnDropFile()\n"));
@@ -1355,9 +1355,10 @@ STDMETHODIMP_(void) CDsoFramerControl::OnDropFile(HDROP hdrpFile)
 
     szFileDrop[0] = 0;
     vtFile.vt = VT_BSTR;
+    vtFile.bstrVal = szFileDrop;
 
     if (DragQueryFile(hdrpFile, 0, szFileDrop, MAX_PATH) &&
-        (vtFile.bstrVal = DsoConvertToBSTR(szFileDrop)))
+        (vtFile.bstrVal))
     {
         HRESULT hr;
         VARIANT vtMissing;

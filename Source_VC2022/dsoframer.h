@@ -28,6 +28,12 @@
 #pragma once
 
 ////////////////////////////////////////////////////////////////////
+// UNICODE
+//
+#define UNICODE
+#define _UNICODE
+
+////////////////////////////////////////////////////////////////////
 // We compile at level 4 and disable some unnecessary warnings...
 //
 #pragma warning(push, 4) // Compile at level-4 warnings
@@ -126,6 +132,23 @@ constexpr auto DSO_MAX_MENUNAME_LENGTH = 32;
 #endif
 
 constexpr auto SYNCPAINT_TIMER_ID = 4;
+
+////////////////////////////////////////////////////////////////////
+// DLL Entry Points
+//
+extern "C" BOOL APIENTRY DllMain(HINSTANCE hDllHandle, DWORD dwReason, LPVOID /*lpReserved*/);
+
+#ifdef DSO_MIN_CRT_STARTUP
+extern "C" BOOL APIENTRY _DllMainCRTStartup(HINSTANCE hDllHandle, DWORD dwReason, LPVOID lpReserved);
+#endif
+
+STDAPI DllCanUnloadNow(void);
+STDAPI DllGetClassObject(_In_ REFCLSID rclsid, _In_ REFIID riid, _Outptr_ LPVOID FAR* ppv);
+STDAPI DllRegisterServer();
+STDAPI DllUnregisterServer();
+STDAPI DllInstall(BOOL bInstall, _In_opt_ LPCWSTR pszCmdLine);
+// DllUnregisterServer() utility - TODO: should be in utilities.cpp
+static HRESULT RegRecursiveDeleteKey(HKEY hkParent, LPCTSTR pszSubKey);
 
 ////////////////////////////////////////////////////////////////////
 // Control Class Factory

@@ -246,3 +246,5 @@ friend class X##localClass;
 size_t MyStringCchLength(LPCTSTR pctsz);
 size_t MyStringCchLengthA(LPCSTR pctsz);
 size_t MyStringCchLengthW(LPCWSTR pcwsz);
+HRESULT MyStringCchCatWA(STRSAFE_LPWSTR pszDest, size_t cchDest, STRSAFE_LPCSTR pszSrc);
+HRESULT MyStringCchCopyWA(STRSAFE_LPWSTR pszDest, size_t cchDest, STRSAFE_LPCSTR pszSrc);

@@ -546,7 +546,15 @@ STDAPI_(BOOL) GetTempPathForURLDownload(WCHAR* pwszURL, WCHAR** ppwszLocalFile)
         {
             StringCchCat(szTmpPath, ARRAYSIZE(szTmpPath), _T("\\"));
 
+#ifdef UNICODE
+
+            pwszTPath = szTmpPath;
+
+#else
+
             pwszTPath = DsoConvertToLPWSTR(szTmpPath);
+
+#endif
         }
     }
 
@@ -607,7 +615,7 @@ STDAPI URLDownloadFile(LPUNKNOWN punk, WCHAR* pwszURL, WCHAR* pwszLocalFile)
 
         if (hUrlmon)
         {
-            pfnURLDownloadToFileW = (PFN_URLDTFW)GetProcAddress(hUrlmon, _T("URLDownloadToFileW"));
+            pfnURLDownloadToFileW = (PFN_URLDTFW)GetProcAddress(hUrlmon, "URLDownloadToFileW");
         }
     }
 
@@ -852,7 +860,7 @@ STDAPI DsoReportError(HRESULT hr, LPWSTR pwszCustomMessage, EXCEPINFO* peiDispEx
     BSTR bstrSource, bstrDescription;
     ICreateErrorInfo* pcerrinfo;
     IErrorInfo* perrinfo;
-    TCHAR szError[MAX_PATH];
+    TCHAR szError[2048];
     UINT nID = 0;
 
     // Don't need to do anything unless this is an error.
@@ -878,7 +886,15 @@ STDAPI DsoReportError(HRESULT hr, LPWSTR pwszCustomMessage, EXCEPINFO* peiDispEx
     else if (((nID) && LoadString(v_hModule, nID, szError, sizeof(szError))) ||
              (FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM, nullptr, hr, 0, szError, sizeof(szError), nullptr)))
     {
+#ifdef UNICODE
+
+        bstrDescription = SysAllocString(szError);
+
+#else
+
         bstrDescription = DsoConvertToBSTR(szError);
+
+#endif
     }
     else
     {
@@ -1477,7 +1493,7 @@ STDAPI DsoGetFileFromUser(HWND hwndOwner, LPCWSTR pwzTitle, DWORD dwFlags,
 {
     BYTE buffer[MAX_PATH * sizeof(WCHAR)];
     BOOL fSuccess;
-    DWORD dw;
+    //DWORD dw;
 
     // Make sure they pass a *bstr...
     CHECK_NULL_RETURN(pbstrFile,  E_POINTER);
@@ -1634,7 +1650,17 @@ STDAPI DsoGetOleInsertObjectFromUser(HWND hwndOwner, LPCWSTR pwzTitle, DWORD dwF
                     if ((RegOpenKeyEx(hkItem, _T("DocObject"), 0, KEY_READ, &hkDocObject) != ERROR_SUCCESS))
                     {
                         CLSID clsid;
-                        LPWSTR pwszClsid = DsoConvertToLPWSTR(szName);
+                        LPWSTR pwszClsid;
+
+#ifdef UNICODE
+                        
+                        pwszClsid = szName;
+
+#else
+
+                        pwszClsid = DsoConvertToLPWSTR(szName);
+
+#endif
 
                         if ((pwszClsid) && SUCCEEDED(CLSIDFromString(pwszClsid, &clsid)))
                         {
@@ -1805,4 +1831,30 @@ size_t MyStringCchLengthW(LPCWSTR pcwsz)
     // TODO: Check hr
 
     return cch;
+}
+
+HRESULT MyStringCchCatWA(STRSAFE_LPWSTR pszDest, size_t cchDest, STRSAFE_LPCSTR pszSrc)
+{
+    LPWSTR lpwszTemp = nullptr;
+
+    lpwszTemp = DsoConvertToLPWSTR(pszSrc);
+
+    auto hr = StringCchCatW(pszDest, cchDest, lpwszTemp);
+
+    DsoMemFree(lpwszTemp);
+
+    return hr;
+}
+
+HRESULT MyStringCchCopyWA(STRSAFE_LPWSTR pszDest, size_t cchDest, STRSAFE_LPCSTR pszSrc)
+{
+    LPWSTR lpwszTemp = nullptr;
+
+    lpwszTemp = DsoConvertToLPWSTR(pszSrc);
+
+    auto hr = StringCchCopyW(pszDest, cchDest, lpwszTemp);
+
+    DsoMemFree(lpwszTemp);
+
+    return hr;
 }

@@ -46,8 +46,11 @@ extern "C" BOOL APIENTRY DllMain(HINSTANCE hDllHandle, DWORD dwReason, LPVOID /*
         {
             v_fWindows2KPlus = IsWindowsXPOrGreater();
 
-            // Default to Unicode
+#ifdef UNICODE
             v_fUnicodeAPI = TRUE;
+#else
+            v_fUnicodeAPI = FALSE;
+#endif
         }
         InitializeCriticalSection(&v_csecThreadSynch);
         DisableThreadLibraryCalls(hDllHandle);
@@ -148,10 +151,14 @@ STDAPI DllRegisterServer()
 
     HKEY    hk, hk2;
     DWORD   dwret;
-    TCHAR   szbuffer[256];
+    TCHAR   szbuffer[256]{};
     LPWSTR  pwszModule;
 
-    ITypeInfo *pti;
+    ITypeInfo* pti;
+
+    size_t cbBufferPlusTerm = 0;
+
+    szbuffer[0] = _T('\0');
 
     // If we can't find the path to the DLL, we can't register...
     if (!FGetModuleFileName(v_hModule, &pwszModule))
@@ -159,14 +166,20 @@ STDAPI DllRegisterServer()
         return E_FAIL;
     }
 
+    StringCchCat(szbuffer, ARRAYSIZE(szbuffer), _T("CLSID\\"));
+
+#ifdef UNICODE
+
+    MyStringCchCatWA(szbuffer, ARRAYSIZE(szbuffer), DSOFRAMERCTL_CLSIDSTR);
+
+#else
+
+    StringCchCatA(szbuffer, ARRAYSIZE(szbuffer), DSOFRAMERCTL_CLSIDSTR);
+
+#endif
+
     // Setup the CLSID. This is the most important. If there is a critical failure,
     // we will set HR = GetLastError and return...
-    StringCchPrintf(
-        szbuffer,
-        ARRAYSIZE(szbuffer),
-        _T("CLSID\\%s"),
-        DSOFRAMERCTL_CLSIDSTR
-    );
 
     if ((dwret = RegCreateKeyEx(
                     HKEY_CLASSES_ROOT,
@@ -177,9 +190,19 @@ STDAPI DllRegisterServer()
         return HRESULT_FROM_WIN32(dwret);
     }
 
+#ifdef UNICODE
+
+    MyStringCchCopyWA(szbuffer, ARRAYSIZE(szbuffer), DSOFRAMERCTL_SHORTNAME);
+
+#else
+
     StringCchCopy(szbuffer, ARRAYSIZE(szbuffer), DSOFRAMERCTL_SHORTNAME);
 
-    RegSetValueEx(hk, nullptr, 0, REG_SZ, (BYTE *)szbuffer, MyStringCchLength(szbuffer));
+#endif
+    
+    cbBufferPlusTerm = (MyStringCchLength(szbuffer) + 1) * sizeof(TCHAR);
+
+    RegSetValueEx(hk, nullptr, 0, REG_SZ, (BYTE *)szbuffer, cbBufferPlusTerm);
 
     // Setup the InprocServer32 key...
     dwret = RegCreateKeyEx(hk, _T("InprocServer32"), 0, nullptr, 0, KEY_WRITE, nullptr, &hk2, nullptr);
@@ -188,7 +211,9 @@ STDAPI DllRegisterServer()
     {
         StringCchCopy(szbuffer, ARRAYSIZE(szbuffer), _T("Apartment"));
 
-        RegSetValueEx(hk2, _T("ThreadingModel"), 0, REG_SZ, (BYTE *)szbuffer, MyStringCchLength(szbuffer));
+        cbBufferPlusTerm = (MyStringCchLength(szbuffer) + 1) * sizeof(TCHAR);
+
+        RegSetValueEx(hk2, _T("ThreadingModel"), 0, REG_SZ, (BYTE *)szbuffer, cbBufferPlusTerm);
 
         // We call a wrapper function for this setting since the path should be
         // stored in Unicode to handle non-ANSI file path names on some systems.
@@ -206,9 +231,15 @@ STDAPI DllRegisterServer()
 
         if (dwret == ERROR_SUCCESS)
         {
+#ifdef UNICODE
+            MyStringCchCopyWA(szbuffer, ARRAYSIZE(szbuffer), DSOFRAMERCTL_PROGID);
+#else
             StringCchCopy(szbuffer, ARRAYSIZE(szbuffer), DSOFRAMERCTL_PROGID);
+#endif
 
-            RegSetValueEx(hk2, nullptr, 0, REG_SZ, (BYTE *)szbuffer, MyStringCchLength(szbuffer));
+            cbBufferPlusTerm = (MyStringCchLength(szbuffer) + 1) * sizeof(TCHAR);
+
+            RegSetValueEx(hk2, nullptr, 0, REG_SZ, (BYTE *)szbuffer, cbBufferPlusTerm);
 
             RegCloseKey(hk2);
         }
@@ -255,10 +286,15 @@ STDAPI DllRegisterServer()
 
         if (dwret == ERROR_SUCCESS)
         {
+#ifdef UNICODE
+            MyStringCchCopyWA(szbuffer, ARRAYSIZE(szbuffer), DSOFRAMERCTL_TLIBSTR);
+#else
             StringCchCopy(szbuffer, ARRAYSIZE(szbuffer), DSOFRAMERCTL_TLIBSTR);
+#endif
 
-            // TODO: Unicode/BYTE!!!
-            RegSetValueEx(hk2, nullptr, 0, REG_SZ, (BYTE *)szbuffer, MyStringCchLength(szbuffer));
+            cbBufferPlusTerm = (MyStringCchLength(szbuffer) + 1) * sizeof(TCHAR);
+
+            RegSetValueEx(hk2, nullptr, 0, REG_SZ, (BYTE *)szbuffer, cbBufferPlusTerm);
             
             RegCloseKey(hk2);
         }
@@ -267,10 +303,15 @@ STDAPI DllRegisterServer()
 
         if (dwret == ERROR_SUCCESS)
         {
+#ifdef UNICODE
+            MyStringCchCopyWA(szbuffer, ARRAYSIZE(szbuffer), DSOFRAMERCTL_VERSIONSTR);
+#else
             StringCchCopy(szbuffer, ARRAYSIZE(szbuffer), DSOFRAMERCTL_VERSIONSTR);
+#endif
+            
+            cbBufferPlusTerm = (MyStringCchLength(szbuffer) + 1) * sizeof(TCHAR);
 
-            // TODO: Unicode/BYTE!!!
-            RegSetValueEx(hk2, nullptr, 0, REG_SZ, (BYTE *)szbuffer, MyStringCchLength(szbuffer));
+            RegSetValueEx(hk2, nullptr, 0, REG_SZ, (BYTE *)szbuffer, cbBufferPlusTerm);
             
             RegCloseKey(hk2);
         }
@@ -280,9 +321,10 @@ STDAPI DllRegisterServer()
         if (dwret == ERROR_SUCCESS)
         {
             StringCchCopy(szbuffer, ARRAYSIZE(szbuffer), _T("131473"));
+            
+            cbBufferPlusTerm = (MyStringCchLength(szbuffer) + 1) * sizeof(TCHAR);
 
-            // TODO: Unicode/BYTE!!!
-            RegSetValueEx(hk2, nullptr, 0, REG_SZ, (BYTE *)szbuffer, MyStringCchLength(szbuffer));
+            RegSetValueEx(hk2, nullptr, 0, REG_SZ, (BYTE *)szbuffer, cbBufferPlusTerm);
             
             RegCloseKey(hk2);
         }
@@ -292,9 +334,10 @@ STDAPI DllRegisterServer()
         if (dwret == ERROR_SUCCESS)
         {
             StringCchCopy(szbuffer, ARRAYSIZE(szbuffer), _T("3,1,32,1"));
+            
+            cbBufferPlusTerm = (MyStringCchLength(szbuffer) + 1) * sizeof(TCHAR);
 
-            // TODO: Unicode/BYTE!!!
-            RegSetValueEx(hk2, nullptr, 0, REG_SZ, (BYTE *)szbuffer, MyStringCchLength(szbuffer));
+            RegSetValueEx(hk2, nullptr, 0, REG_SZ, (BYTE *)szbuffer, cbBufferPlusTerm);
 
             RegCloseKey(hk2);
         }
@@ -307,22 +350,48 @@ STDAPI DllRegisterServer()
     // This should catch any critical failures during setup of CLSID...
     RETURN_ON_FAILURE(hr);
 
+    TCHAR tszProgId[256];
+
+#ifdef UNICODE
+
+    MyStringCchCopyWA(tszProgId, ARRAYSIZE(tszProgId), DSOFRAMERCTL_PROGID);
+
+#else
+    
+    StringCchCopy(tszProgId, ARRAYSIZE(tszProgId), DSOFRAMERCTL_PROGID);
+
+#endif
+
     // Setup the ProgID (non-critical)...
-    if (RegCreateKeyEx(HKEY_CLASSES_ROOT, DSOFRAMERCTL_PROGID, 0,
+    if (RegCreateKeyEx(HKEY_CLASSES_ROOT, tszProgId, 0,
             nullptr, 0, KEY_WRITE, nullptr, &hk, nullptr) == ERROR_SUCCESS)
     {
+#ifdef UNICODE
+
+        MyStringCchCopyWA(szbuffer, ARRAYSIZE(szbuffer), DSOFRAMERCTL_FULLNAME);
+
+#else
+
         StringCchCopy(szbuffer, ARRAYSIZE(szbuffer), DSOFRAMERCTL_FULLNAME);
 
-        // TODO: Unicode/BYTE!!!
-        RegSetValueEx(hk, nullptr, 0, REG_SZ, (BYTE *)szbuffer, MyStringCchLength(szbuffer));
+#endif
+
+        cbBufferPlusTerm = (MyStringCchLength(szbuffer) + 1) * sizeof(TCHAR);
+
+        RegSetValueEx(hk, nullptr, 0, REG_SZ, (BYTE *)szbuffer, cbBufferPlusTerm);
 
         if (RegCreateKeyEx(hk, _T("CLSID"), 0,
                 nullptr, 0, KEY_WRITE, nullptr, &hk2, nullptr) == ERROR_SUCCESS)
         {
+#ifdef UNICODE
+            MyStringCchCopyWA(szbuffer, ARRAYSIZE(szbuffer), DSOFRAMERCTL_CLSIDSTR);
+#else
             StringCchCopy(szbuffer, ARRAYSIZE(szbuffer), DSOFRAMERCTL_CLSIDSTR);
+#endif
+            
+            cbBufferPlusTerm = (MyStringCchLength(szbuffer) + 1) * sizeof(TCHAR);
 
-            // TODO: Unicode/BYTE!!!
-            RegSetValueEx(hk2, nullptr, 0, REG_SZ, (BYTE *)szbuffer, MyStringCchLength(szbuffer));
+            RegSetValueEx(hk2, nullptr, 0, REG_SZ, (BYTE *)szbuffer, cbBufferPlusTerm);
             
             RegCloseKey(hk2);
         }
@@ -331,8 +400,15 @@ STDAPI DllRegisterServer()
     }
 
     // Load the type info (this should register the lib once)...
-    hr = DsoGetTypeInfoEx(LIBID_DSOFramer, 0, DSOFRAMERCTL_VERSION_MAJOR, DSOFRAMERCTL_VERSION_MINOR,
-                          v_hModule, CLSID_FramerControl, &pti);
+    hr = DsoGetTypeInfoEx(
+        LIBID_DSOFramer,
+        0,
+        DSOFRAMERCTL_VERSION_MAJOR,
+        DSOFRAMERCTL_VERSION_MINOR,
+        v_hModule,
+        CLSID_FramerControl,
+        &pti
+    );
 
     if (SUCCEEDED(hr))
     {
@@ -348,7 +424,7 @@ STDAPI DllRegisterServer()
 //
 //  Helper function called by DllUnregisterServer for nested key removal.
 //
-static HRESULT RegRecursiveDeleteKey(HKEY hkParent, LPCSTR pszSubKey)
+static HRESULT RegRecursiveDeleteKey(HKEY hkParent, LPCTSTR pszSubKey)
 {
     HRESULT hr = S_OK;
 
@@ -408,28 +484,51 @@ STDAPI DllUnregisterServer()
     HRESULT hr;
 
     constexpr auto bufsize = 256;
-    
+
+    TCHAR dsoframerctl_clsidstr[bufsize];
+    TCHAR dsoframerctl_tlibstr[bufsize];
+
     TCHAR dsoframerctl_clsidstr_path[bufsize];
     TCHAR dsoframerctl_tlibstr_path[bufsize];
+
+#ifdef UNICODE
+
+    MyStringCchCopyWA(dsoframerctl_clsidstr, ARRAYSIZE(dsoframerctl_clsidstr), DSOFRAMERCTL_CLSIDSTR);
+    MyStringCchCopyWA(dsoframerctl_tlibstr, ARRAYSIZE(dsoframerctl_tlibstr), DSOFRAMERCTL_TLIBSTR);
+
+#else
+
+    StringCchCopyA(dsoframerctl_clsidstr, ARRAYSIZE(dsoframerctl_clsidstr), DSOFRAMERCTL_CLSIDSTR);
+    StringCchCopyA(dsoframerctl_tlibstr, ARRAYSIZE(dsoframerctl_tlibstr), DSOFRAMERCTL_TLIBSTR);
+
+#endif
 
     StringCchPrintf(
         dsoframerctl_clsidstr_path,
         ARRAYSIZE(dsoframerctl_clsidstr_path),
         _T("CLSID\\%s"),
-        DSOFRAMERCTL_CLSIDSTR
+        dsoframerctl_clsidstr
     );
     StringCchPrintf(
         dsoframerctl_tlibstr_path,
         ARRAYSIZE(dsoframerctl_tlibstr_path),
         _T("TypeLib\\%s"),
-        DSOFRAMERCTL_TLIBSTR
+        dsoframerctl_tlibstr
     );
 
     hr = RegRecursiveDeleteKey(HKEY_CLASSES_ROOT, dsoframerctl_clsidstr_path);
     
     if (SUCCEEDED(hr))
     {
-        RegRecursiveDeleteKey(HKEY_CLASSES_ROOT, DSOFRAMERCTL_PROGID);
+        TCHAR tszProgId[256];
+
+#ifdef UNICODE
+        MyStringCchCopyWA(tszProgId, ARRAYSIZE(tszProgId), DSOFRAMERCTL_PROGID);
+#else
+        StringCchCopy(tszProgId, ARRAYSIZE(tszProgId), DSOFRAMERCTL_PROGID);
+#endif
+
+        RegRecursiveDeleteKey(HKEY_CLASSES_ROOT, tszProgId);
         RegRecursiveDeleteKey(HKEY_CLASSES_ROOT, dsoframerctl_tlibstr_path);
     }
 
@@ -438,6 +537,42 @@ STDAPI DllUnregisterServer()
     if (hr == 0x80070002)
     {
         hr = S_OK;
+    }
+
+    return hr;
+}
+
+////////////////////////////////////////////////////////////////////////
+//
+// DllInstall -- Optional entry point for custom setup/cleanup
+//
+STDAPI DllInstall(BOOL bInstall, _In_opt_ LPCWSTR pszCmdLine)
+{
+    HRESULT hr = S_OK;
+
+    if (bInstall)
+    {
+        // Custom installation logic
+        ODS(_T("DllInstall: Installing\n"));
+
+        hr = DllRegisterServer();
+        
+        if (FAILED(hr))
+        {
+            TRACE1(_T("DllInstall: DllRegisterServer failed: %X\n"), hr);
+        }
+    }
+    else
+    {
+        // Custom uninstallation logic
+        ODS(_T("DllInstall: Uninstalling\n"));
+
+        hr = DllUnregisterServer();
+        
+        if (FAILED(hr))
+        {
+            TRACE1(_T("DllInstall: DllUnregisterServer failed: %X\n"), hr);
+        }
     }
 
     return hr;
