@@ -1688,7 +1688,7 @@ STDMETHODIMP CDsoDocObject::CreateObjectStorage(REFCLSID rclsid)
 
     LPWSTR pwszName;
     ULONGLONG ulid;
-    WCHAR szbuf[256];
+    TCHAR szbuf[256];
 
     if ((!m_pstgroot))
     {

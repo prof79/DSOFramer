@@ -1334,7 +1334,7 @@ STDMETHODIMP_(void) CDsoFramerControl::EnableDropFile(BOOL fEnable)
 STDMETHODIMP_(void) CDsoFramerControl::OnDropFile(HDROP hdrpFile)
 {
     DWORD cbItems;
-    WCHAR szFileDrop[MAX_PATH];
+    TCHAR szFileDrop[MAX_PATH];
     VARIANT vtFile;
 
     ODS(_T("CDsoFramerControl::OnDropFile()\n"));
@@ -1355,7 +1355,12 @@ STDMETHODIMP_(void) CDsoFramerControl::OnDropFile(HDROP hdrpFile)
 
     szFileDrop[0] = 0;
     vtFile.vt = VT_BSTR;
+
+#ifdef UNICODE
     vtFile.bstrVal = szFileDrop;
+#else
+    vtFile.bstrVal = DsoConvertToBSTR(szFileDrop);
+#endif
 
     if (DragQueryFile(hdrpFile, 0, szFileDrop, MAX_PATH) &&
         (vtFile.bstrVal))
